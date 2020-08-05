@@ -510,8 +510,8 @@ The following table lists the configurable parameters of the chart relative to t
 | waconsole.persistence.dataPVC.size                  | The minimum size of the Persistent Volume                                                                                                                                                                                                                              | no            | 5Gi                              | 5Gi                                                |
 | waconsole.console.exposeServiceType            | The network enablement configuration implemented. Valid values: LOAD BALANCER or INGRESS   | yes           |     INGRESS                          |                                                | 
 | waconsole.console.exposeServiceAnnotation      | Annotations of either the resource of the service or the resource of the ingress, customized in accordance with the cloud provider   | yes           |                               |                     | 	
-| waconsole.console.ingressHostName      | The DNS of the ingress that is resolved with the IP address of the ingress.   | yes, only if the network enablement implementation is INGRESS           |                               |                     | 
-| waconsole.console.ingressSecretName      | The name of the secret for the console   | yes, only if the network enablement implementation is INGRESS.     |      |  wa-console-ingress-secret | 	
+| waconsole.console.ingressHostName      | The virtual nostname defined in the DNS used to reach the Console.   | yes, only if the network enablement implementation is INGRESS           |                               |                     | 
+| waconsole.console.ingressSecretName      | The name of the secret to store certificates used by ingress. If not used, leave it empty.   | yes, only if the network enablement implementation is INGRESS.     |      |  wa-console-ingress-secret | 	
 
 
 - #### Server parameters
@@ -569,8 +569,8 @@ The following table lists the configurable parameters of the chart and an exampl
 | waserver.persistence.dataPVC.size                 | The minimum size of the Persistent Volume                                                                                                                                                                                                                                     | no            | 5Gi                              | 5Gi                                              |
 | waserver.server.exposeServiceType            | The network enablement configuration implemented. Valid values: LOAD BALANCER or INGRESS   | yes           |     INGRESS                          |                                                | 
 | waserver.server.exposeServiceAnnotation      | Annotations of either the resource of the service or the resource of the ingress, customized in accordance with the cloud provider   | yes           |                               |                     |	
-| waserver.server.ingressHostName      | The DNS of the ingress that is resolved with the IP address of the ingress.   | yes, only if the network enablement implementation is INGRESS            |                               |                     | 
-| waserver.server.ingressSecretName      | The name of the secret for the server   | yes, only if the network enablement implementation is INGRESS     |      |  wa-server-ingress-secret | 
+| waserver.server.ingressHostName      | The virtual hostname defined in the DNS used to reach the Server   | yes, only if the network enablement implementation is INGRESS            |                               |                     | 
+| waserver.server.ingressSecretName      | The name of the secret to store certificates used by the ingress. If not used, leave it empty   | yes, only if the network enablement implementation is INGRESS     |      |  wa-server-ingress-secret | 
 	
 
 ## Configuring
@@ -701,7 +701,87 @@ To configure an on-premises agent to communicate with components in the cloud:
 3. Replace the files on the on-premises agent in the same path.
 
 **On-premises console engine connection (connection between an on-premises console with a server in the cloud):**
-1. Copy the public CA root certificate from the. Refer to the IBM Workload Automation product documentation for details about creating custom certificates for communication between the server and the console: .
+1. Copy the public CA root certificate from the. Refer to the IBM Workload Automation product documentation for details about creating custom certificates for communication between the server and the console: [Customizing certificates](https://www.ibm.com/support/knowledgecenter/en/SSGSPN_9.5.0/com.ibm.tivoli.itws.doc_9.5/distr/src_ad/awsadMDMDWCcomm.htm).
+
+2. To enable the changes, restart the Console workstation.
+
+**On-premises engine connection (connection between a console in the AWS cloud and an on-premises engine or another engine in a different namespace):**
+
+Access the master (server or pod) and extract the CA root certificate and, to add it to the console trustkeystore, create a secret in the console namespace with the extracted key encoded in base64 as follows: 
+
+
+		kind: Secret
+		apiVersion: v1
+		metadata:
+		  name: <yourcert-server-crt>
+		  namespace: <worklaod_automation_namespace>
+		  labels:
+		    wa-import: 'true'
+		  annotations:
+		data:
+		  tls.crt: <base64_encoded_certificate>
+		type: Opaque
+
+
+
+### Scaling the product 
+
+By default a single server, console, and agent is installed. If you want to change the topology for IBM Workload Automation, then increase or decrease the values of the `replicaCount` parameter in the `values.yaml` file for each component and save the changes.
+
+#### Scaling up or down
+
+To scale one or more IBM Workload Automation components up or down:
+
+ Modify the values of the `replicaCount` parameter in the `values.yaml` file for each component accordingly, and save the changes.
+ 
+> **Note**: When you scale up a server, the additional server instances are installed with the Backup Master role, and the workstation definitions are automatically saved to the IBM Workload Automation relational database. To complete the scaling up of a server component, run `JnextPlan -for 0000 -noremove` from the server that has the role of master domain manager to add new backup master workstations to the current plan. The agent workstations installed on the new server instances are automatically saved in the database and linked to the Broker workstation with no further manual actions. 
+
+>**Note**:
+> -   When you scale down each type of component, the persistent volume (PV) that the storage class created for the pod instance is not deleted to avoid losing data should the scale down not be desired. When you need to perform a subsequent scaling up, new component instances are installed by using the old PVs.
+>-   When you scale down server or agent component, the workstation definitions are not removed from the database, so you can manually delete them or set them to ignore to avoid having a non-working workstation in the plan. If you need an immediate change to the plan, run the following command from the master workstation:
+
+        JnextPlan -for 0000 -remove
+
+#### Scaling to 0
+The IBM Workload Automation Helm chart does not support automatic scaling to zero. If you want to manually scale the Dynamic Workload Console component to zero, set the value of the `replicaCount` parameter to zero. To maintain the current IBM Workload Automation scheduling and topology, do not set the `replicaCount` value for the server and agent components to zero.
+
+#### Proportional scaling
+ The IBM Workload Automation Helm chart does not support proportional scaling.
+		  
+### Managing your custom certificates
+
+If you use customized certificates, `useCustomizedCert:true`, you must create a secret containing the customized files that will replace the Server default ones in the \<workload_automation_namespace>. Customized files must have the same name as the default ones.
+
+  * TWSClientKeyStoreJKS.sth
+  * TWSClientKeyStore.kdb
+  * TWSClientKeyStore.sth
+  * TWSClientKeyStoreJKS.jks
+  * TWSServerTrustFile.jks
+  * TWSServerTrustFile.jks.pwd
+  * TWSServerKeyFile.jks
+  * TWSServerKeyFile.jks.pwd
+  * ltpa.keys  (The ltpa.keys certificate is required only if you use Single Sign-On with LTPA)
+    
+  If you want to use custom certificates, set `useCustomizedCert:true` and use kubectl to apply the secret in the \<workload_automation_namespace>.
+ For the master domain manager, type the following command:
+ 
+ ```
+ kubectl create secret generic waconsole-cert-secret --from-file=TWSServerKeyFile.jks --from-file=TWSServerKeyFile.jks.pwd --from-file=TWSServerTrustFile.jks --from-file=TWSServerTrustFile.jks.pwd --from-file=ltpa.keys -n <workload_automation_namespace>   
+ ``` 
+For the Dynamic Workload Console, type the following command:
+
+ ```
+  kubectl create secret generic waconsole-cert-secret --from-file=TWSServerKeyFile.jks --from-file=TWSServerKeyFile.jks.pwd --from-file=TWSServerTrustFile.jks --from-file=TWSServerTrustFile.jks.pwd --from-file=ltpa.keys -n <workload_automation_namespace>   
+    
+  ``` 
+ For the dynamic agent, type the following command:
+ ```
+ kubectl create secret generic waagent-cert-secret --from-file=TWSClientKeyStore.kdb --from-file=TWSClientKeyStore.sth --from-file=TWSClientKeyStoreJKS.jks --from-file=TWSClientKeyStoreJKS.sth -n <workload_automation_namespace>    
+ ```   
+    
+   where, TWSClientKeyStoreJKS.sth, TWSClientKeyStore.kdb, TWSClientKeyStore.sth, TWSClientKeyStoreJKS.jks, TWSServerTrustFile.jks and TWSServerKeyFile.jks are the Container keystore and stash file containing your customized certificates.
+   
+   For details about custom certificates, see [Connection security overview](https://www.ibm.com/support/knowledgecenter/en/SSGSPN_9.5.0/com.ibm.tivoli.itws.doc_9.5/distr/src_ad/awsadconnsec.htm).
     
 
 > **Note**: Passwords for "TWSServerTrustFile.jks" and "TWSServerKeyFile.jks" files must be entered in the respective "TWSServerTrustFile.jks.pwd" and "TWSServerKeyFile.jks.pwd" files.
