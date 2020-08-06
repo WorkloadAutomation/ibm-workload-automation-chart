@@ -120,7 +120,7 @@ Installing and configuring IBM Workload Automation, involves the following high-
 
 To create the namespace, run the following command:
 
-        kubectl create <workload_automation_namespace>
+        kubectl create namespace <workload_automation_namespace>
 	
 
 ### Create the Secret 
