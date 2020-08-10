@@ -61,7 +61,7 @@ In addition to the product components, the following objects are installed:
 	
 ## Accessing the container images
 
-You can access the IBM Workload Automation chart and container images from the Entitled Registry. See [Create the secret](#createthesecret) for more information about accessing the registry. The images are as follows:
+You can access the IBM Workload Automation chart and container images from the Entitled Registry. See [Create the secret](#create-the-secret) for more information about accessing the registry. The images are as follows:
 
 
 * cp.icr.io/cp/ibm-workload-automation-agent-dynamic:9.5.0.02.20200727
