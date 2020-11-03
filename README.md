@@ -163,7 +163,7 @@ Cert-manager is a Kubernetes addon that automates the management and issuance of
 
    a.   `.\openssl.exe genrsa -out ca.key 2048`
     
-   b.   `.\openssl.exe req -x509 -new -nodes -key ca.key -subj "/CN=WA_ROOT_CA" -days 3650 -out ca.crt -config .\openssl.cnf`
+   b.   `.\openssl.exe req -x509 -new -nodes -key ca.key -subj "/CN=WA_ROOT_CA" -days 3650 -out ca.crt `
 	
 4.  Create the CA key pair secret by running the following command:
 
