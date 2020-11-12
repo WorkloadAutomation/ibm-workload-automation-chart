@@ -510,7 +510,7 @@ The following table lists the configurable parameters of the chart relative to t
 | waconsole.persistence.dataPVC.size                  | The minimum size of the Persistent Volume                                                                                                                                                                                                                              | no            | 5Gi                              | 5Gi                                                |
 | waconsole.console.exposeServiceType            | The network enablement configuration implemented. Valid values: LOAD BALANCER or INGRESS   | yes           |     INGRESS                          |                                                | 
 | waconsole.console.exposeServiceAnnotation      | Annotations of either the resource of the service or the resource of the ingress, customized in accordance with the cloud provider   | yes           |                               |                     | 	
-| waconsole.console.ingressHostName      | The virtual nostname defined in the DNS used to reach the Console.   | yes, only if the network enablement implementation is INGRESS           |                               |                     | 
+| waconsole.console.ingressHostName      | The virtual hostname defined in the DNS used to reach the Console.   | yes, only if the network enablement implementation is INGRESS           |                               |                     | 
 | waconsole.console.ingressSecretName      | The name of the secret to store certificates used by ingress. If not used, leave it empty.   | yes, only if the network enablement implementation is INGRESS.     |      |  wa-console-ingress-secret | 	
 
 
@@ -701,7 +701,7 @@ To configure an on-premises agent to communicate with components in the cloud:
 3. Replace the files on the on-premises agent in the same path.
 
 **On-premises console engine connection (connection between an on-premises console with a server in the cloud):**
-1. Copy the public CA root certificate from the. Refer to the IBM Workload Automation product documentation for details about creating custom certificates for communication between the server and the console: [Customizing certificates](https://www.ibm.com/support/knowledgecenter/en/SSGSPN_9.5.0/com.ibm.tivoli.itws.doc_9.5/distr/src_ad/awsadMDMDWCcomm.htm).
+1. Copy the public CA root certificate from the server. Refer to the IBM Workload Automation product documentation for details about creating custom certificates for communication between the server and the console: [Customizing certificates](https://www.ibm.com/support/knowledgecenter/en/SSGSPN_9.5.0/com.ibm.tivoli.itws.doc_9.5/distr/src_ad/awsadMDMDWCcomm.htm).
 
 2. To enable the changes, restart the Console workstation.
 
@@ -766,7 +766,7 @@ If you use customized certificates, `useCustomizedCert:true`, you must create a 
  For the master domain manager, type the following command:
  
  ```
- kubectl create secret generic waconsole-cert-secret --from-file=TWSServerKeyFile.jks --from-file=TWSServerKeyFile.jks.pwd --from-file=TWSServerTrustFile.jks --from-file=TWSServerTrustFile.jks.pwd --from-file=ltpa.keys -n <workload_automation_namespace>   
+ kubectl create secret generic waserver-cert-secret --from-file=TWSClientKeyStore.kdb --from-file=TWSClientKeyStore.sth --from-file=TWSClientKeyStoreJKS.jks --from-file=TWSClientKeyStoreJKS.sth --from-file=TWSServerKeyFile.jks --from-file=TWSServerKeyFile.jks.pwd --from-file=TWSServerTrustFile.jks --from-file=TWSServerTrustFile.jks.pwd -n <workload-automation-namespace>   
  ``` 
 For the Dynamic Workload Console, type the following command:
 
