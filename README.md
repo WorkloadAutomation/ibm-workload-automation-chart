@@ -838,7 +838,7 @@ You can extend IBM Workload Automation with a number of out-of-the-box integrati
 
 To download the plug-ins:
 
-1) Download the plug-ins from [Automation Hub](https://www.yourautomationhub.io/) and extract the contents to a folder on the local computer.
+1) Download the plug-ins from [Automation Hub](https://www.yourautomationhub.io/) to your <plug-ins_folder> folder on your machine. Ensure that this folder contains only .jar files related to plug-ins.
 
 2) From your local computer, go to the <plug-ins_folder> folder and run the following command:
 
@@ -863,7 +863,7 @@ where, <master_pod> is the workstation with the master role. The default is \<re
 
 **NOTE**:
 
-A Kubernetes job plug-in is available on Automation Hub. It enables you to automate the execution of Kubernetes jobs. [https://www.yourautomationhub.io/detail/kubernetes_9_5_0_02](https://www.yourautomationhub.io/detail/kubernetes_9_5_0_02). Follow the steps in the previous procedure to download and install the plug-in.
+A Kubernetes plug-in is available on Automation Hub. It enables you to run and automate Kubernetes jobs: [https://www.yourautomationhub.io/detail/kubernetes_9_5_0_02](https://www.yourautomationhub.io/detail/kubernetes_9_5_0_02). Follow the steps in the previous procedure to download and install the plug-in.
 
 ## Storage
 
@@ -897,7 +897,7 @@ Pre-create a persistent volume. If you configure the label=value pair described 
 	* **persistence.enabled:true**
 	* **persistence.useDynamicProvisioning:false**
 
-> Note: By configuring the following two parameters, the persistent volum claim is automatically generated. Ensure that this label=value pair is inserted in the persistent volume you created: 
+> Note: By configuring the following two parameters, the persistent volume claim is automatically generated. Ensure that this label=value pair is inserted in the persistent volume you created: 
 
 - \<wa-component>.persistence.dataPVC.selector.label
 - \<wa-component>.persistence.dataPVC.selector.value
