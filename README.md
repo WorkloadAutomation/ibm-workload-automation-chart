@@ -442,6 +442,7 @@ The following table lists the configurable parameters of the chart relative to t
 | waagent.image.pullPolicy                         | image pull policy                                                                                                                                                                                                                                                    | yes            | Always                           | Always                           |
 | waagent.agent.name                               | Agent display name                                                                                                                                                                                                                                                   | yes            | WA_AGT                           | WA_AGT                           |
 | waagent.agent.tz                                 | If used, it sets the TZ operating system environment variable                                                                                                                                                                                                        | no             | America/Chicago                  |                                  |
+| waagent.agent.networkpolicyEgress                                 | Customize egress policy. If empty, no egress policy is defined                                                                                                                                                                                                        | no             | See [Network enablement](#network-enablement) 
 | waagent.agent.dynamic.server.mdmhostname         | Hostname or IP address of the master domain manager                                                                                                                                                                                                                  | no (mandatory if a server is not present inside the same namespace)            | wamdm.demo.com                   |                                  |
 | waagent.agent.dynamic.server.port                | The HTTPS port that the dynamic agent must use to connect to the master domain manager                                                                                                                                                                               | no             | 31116                            | 31116                            |
 | waagent.agent.dynamic.pools*                      | The static pools of which the Agent should be a member                                                                                                                                                                                                               | no             | Pool1, Pool2                     |                                  |
@@ -509,7 +510,8 @@ The following table lists the configurable parameters of the chart relative to t
 | waconsole.persistence.dataPVC.selector.value        | Volume label value to bind (only limited to single label)                                                                                                                                                                                                              | no            | my-volume-value                  |                                                    |
 | waconsole.persistence.dataPVC.size                  | The minimum size of the Persistent Volume                                                                                                                                                                                                                              | no            | 5Gi                              | 5Gi                                                |
 | waconsole.console.exposeServiceType            | The network enablement configuration implemented. Valid values: LOAD BALANCER or INGRESS   | yes           |     INGRESS                          |                                                | 
-| waconsole.console.exposeServiceAnnotation      | Annotations of either the resource of the service or the resource of the ingress, customized in accordance with the cloud provider   | yes           |                               |                     | 	
+| waconsole.console.exposeServiceAnnotation      | Annotations of either the resource of the service or the resource of the ingress, customized in accordance with the cloud provider   | yes           |                               |                     |
+| waconsole.console.networkpolicyEgress      | Customize egress policy. If empty, no egress policy is defined | no |See [Network enablement](#network-enablement)|
 | waconsole.console.ingressHostName      | The virtual hostname defined in the DNS used to reach the Console.   | yes, only if the network enablement implementation is INGRESS           |                               |                     | 
 | waconsole.console.ingressSecretName      | The name of the secret to store certificates used by ingress. If not used, leave it empty.   | yes, only if the network enablement implementation is INGRESS.     |      |  wa-console-ingress-secret | 	
 
@@ -568,7 +570,8 @@ The following table lists the configurable parameters of the chart and an exampl
 | waserver.persistence.dataPVC.selector.value       | Volume label value to bind (only limited to single value)                                                                                                                                                                                                                     | no            | my-volume-value                  |                                                  |
 | waserver.persistence.dataPVC.size                 | The minimum size of the Persistent Volume                                                                                                                                                                                                                                     | no            | 5Gi                              | 5Gi                                              |
 | waserver.server.exposeServiceType            | The network enablement configuration implemented. Valid values: LOAD BALANCER or INGRESS   | yes           |     INGRESS                          |                                                | 
-| waserver.server.exposeServiceAnnotation      | Annotations of either the resource of the service or the resource of the ingress, customized in accordance with the cloud provider   | yes           |                               |                     |	
+| waserver.server.exposeServiceAnnotation      | Annotations of either the resource of the service or the resource of the ingress, customized in accordance with the cloud provider   | yes           |                               |                     |
+| waserver.server.networkpolicyEgress                                | Customize egress policy. If empty, no egress policy is defined                                                                                                                                                                                                                  | no            | See [Network enablement](#network-enablement)                  |                                                  |
 | waserver.server.ingressHostName      | The virtual hostname defined in the DNS used to reach the Server   | yes, only if the network enablement implementation is INGRESS            |                               |                     | 
 | waserver.server.ingressSecretName      | The name of the secret to store certificates used by the ingress. If not used, leave it empty   | yes, only if the network enablement implementation is INGRESS     |      |  wa-server-ingress-secret | 
 	
@@ -591,6 +594,33 @@ The IBM Workload Automation server and console can use two different ways to rou
 * An **ingress** service that manages external access to the services in the cluster
 
 You can freely switch between these two types of configuration.
+
+#### Network policy
+
+You can optionally specify an egress policy for the server, Dynamic Workload Console and agent. See the following example, which allows egress to another destination:
+	
+       networkpolicyEgress:
+	- name: to-mdm
+	  egress:
+	  - to:
+	    - podSelector:
+	        matchLabels:
+		  app.kubernetes.io/name: waserver
+	    - port: 31116
+	        protocol: TCP
+        - name: dns
+          egress:
+          - to:
+              - namespaceSelector:
+                  matchLabels:
+                    name: kube-system
+         - ports:
+             - port: 53
+               protocol: UDP
+             - port: 53
+               protocol: TCP
+
+For more information, see [Network Policies](https://kubernetes.io/docs/concepts/services-networking/network-policies/).
 
 #### Load balancer service
 
