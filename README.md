@@ -863,7 +863,7 @@ where, <master_pod> is the workstation with the master role. The default is \<re
 
 **NOTE**:
 
-A Kubernetes plug-in is available on Automation Hub. It enables you to run and automate Kubernetes jobs: [https://www.yourautomationhub.io/detail/kubernetes_9_5_0_02](https://www.yourautomationhub.io/detail/kubernetes_9_5_0_02). Follow the steps in the previous procedure to download and install the plug-in.
+A Kubernetes plug-in is available on Automation Hub. It enables you to run and automate Kubernetes jobs: [https://www.yourautomationhub.io/detail/kubernetes](https://www.yourautomationhub.io/detail/kubernetes). Follow the steps in the previous procedure to download and install the plug-in.
 
 ## Storage
 
