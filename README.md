@@ -79,6 +79,7 @@ Before you begin the deployment process, ensure your environment meets the follo
 - OpenSSL
 - Grafana and Prometheus for monitoring dashboard
 - Jetstack cert-manager
+- Ingress controller: to manage the ingress service, ensure an ingress controller is corrected configured. For example, to configure an NGINX ingress controller, refer to [NGINX Ingress Controller](https://kubernetes.github.io/ingress-nginx/).
 - Kubernetes version: >=1.15 (no specific APIs need to be enabled)
 - `kubectl` command-line tool to control Kubernetes clusters 
 - API key for accessing IBM Entitled Registry: `cp.icr.io`
@@ -125,9 +126,13 @@ To create the namespace, run the following command:
 
 ### Create the Secret 
 
+ 
+
 Obtain your entitlement key and store it on your cluster by creating a [Kubernetes Secret](https://kubernetes.io/docs/concepts/configuration/secret/). Using a Kubernetes secret allows you to securely store the key on your cluster and access the registry to download the chart and product images. 
 
-1. Access to the entitled registry. Log in to [MyIBM Container Software Library](https://myibm.ibm.com/products-services/containerlibrary) with the IBMid and password that are associated with the entitled software.
+1. Access the entitled registry. 
+Log in to [MyIBM Container Software Library](https://myibm.ibm.com/products-services/containerlibrary) with the IBMid and password that are associated with the entitled software.
+
 
 2.  In the **Container software library** tile, click **View library** and then click **Copy key** to copy the entitlement key to the clipboard. 
 
@@ -163,7 +168,7 @@ Cert-manager is a Kubernetes addon that automates the management and issuance of
 
    a.   `.\openssl.exe genrsa -out ca.key 2048`
     
-   b.   `.\openssl.exe req -x509 -new -nodes -key ca.key -subj "/CN=WA_ROOT_CA" -days 3650 -out ca.crt `
+   b.   `.\openssl.exe req -x509 -new -nodes -key ca.key -subj "/CN=WA_ROOT_CA" -days 3650 -out ca.crt`
 	
 4.  Create the CA key pair secret by running the following command:
 
@@ -176,10 +181,10 @@ Cert-manager is a Kubernetes addon that automates the management and issuance of
         apiVersion: cert-manager.io/v1alpha2
         kind: Issuer
         metadata:
-           labels:
-             app.kubernetes.io/name: cert-manager
-         name: wa-ca-issuer
-         namespace: <workload_automation_namespace>
+          labels:
+            app.kubernetes.io/name: cert-manager
+          name: wa-ca-issuer
+          namespace: <workload_automation_namespace>
         spec:
           ca:
             secretName: ca-key-pair
@@ -238,10 +243,8 @@ To deploy the IBM Workload Automation components, ensure you have first download
 
    a. Add the repository:
    
-        helm repo add <repo_name> https://workloadautomation.github.io/ibm-workload-automation-chart/stable
-	
-   where <repo_name> is the name of the local repository chosen by the user
-   
+        helm repo add workload https://workloadautomation.github.io/ibm-workload-automation-chart/stable
+        
    b.  Update the Helm chart:
    
        helm repo update 
@@ -249,8 +252,12 @@ To deploy the IBM Workload Automation components, ensure you have first download
    c. Pull the Helm chart:
 
 
-        helm pull <repo_name>/workload-automation-prod
+        `helm pull workload/ibm-workload-automation-prod`
 
+
+
+      
+   where, workload/ibm-workload-automation-prod, represents the chosen image repository
    
    
 **Update your chart:**
@@ -263,7 +270,7 @@ To deploy the IBM Workload Automation components, ensure you have first download
 	 
 3. Deploy the instance by running the following command: 
 
-        helm install -f values.yaml <workload_automation_release_name> <repo_name>/workload-automation-prod -n <workload_automation_namespace>
+        helm install -f values.yaml <workload_automation_release_name> workload/ibm-workload-automation-prod -n <workload_automation_namespace>
 
 where, <workload_automation_release_name> is the deployment name of the instance. 
 **TIP:** Because this name is used in the server component name and the pod names, use a short name or acronym when specifying this value to ensure it is readable.
@@ -276,7 +283,7 @@ The following are some useful Helm commands:
 	
 * To update the Helm release:
 
-        helm upgrade <workload_automation_release_name> <repo_name>/workload-automation-prod -f values.yaml -n <workload_automation_namespace>
+        helm upgrade <workload_automation_release_name> workload/ibm-workload-automation-prod -f values.yaml -n <workload_automation_namespace>
 	
 * To delete the Helm release: 
 
@@ -375,7 +382,7 @@ Verifying the default engine connection depends on the network enablement config
 
 Before you upgrade a chart, verify if there are jobs currently running and manually stop the related processes or wait until the jobs complete.	To upgrade the release <workload_automation_release_name> to a new version of the chart, run the following command from the directory where the values.yaml file is located:
 
- `helm upgrade release_name <repo_name>/workload-automation-prod -f values.yaml -n <workload_automation_namespace>`
+ `helm upgrade release_name workload/workload-automation-prod -f values.yaml -n <workload_automation_namespace>`
 		
 
 ## Rolling Back the Chart
@@ -442,7 +449,7 @@ The following table lists the configurable parameters of the chart relative to t
 | waagent.image.pullPolicy                         | image pull policy                                                                                                                                                                                                                                                    | yes            | Always                           | Always                           |
 | waagent.agent.name                               | Agent display name                                                                                                                                                                                                                                                   | yes            | WA_AGT                           | WA_AGT                           |
 | waagent.agent.tz                                 | If used, it sets the TZ operating system environment variable                                                                                                                                                                                                        | no             | America/Chicago                  |                                  |
-| waagent.agent.networkpolicyEgress                                 | Customize egress policy. If empty, no egress policy is defined                                                                                                                                                                                                        | no             | See [Network enablement](#network-enablement) 
+| waagent.agent.networkpolicyEgress                                 | Customize egress policy. If empty, no egress policy is defined                                                                                                                                                                                                        | no             | See [Network enablement](#network-enablement)                  |                                  |
 | waagent.agent.dynamic.server.mdmhostname         | Hostname or IP address of the master domain manager                                                                                                                                                                                                                  | no (mandatory if a server is not present inside the same namespace)            | wamdm.demo.com                   |                                  |
 | waagent.agent.dynamic.server.port                | The HTTPS port that the dynamic agent must use to connect to the master domain manager                                                                                                                                                                               | no             | 31116                            | 31116                            |
 | waagent.agent.dynamic.pools*                      | The static pools of which the Agent should be a member                                                                                                                                                                                                               | no             | Pool1, Pool2                     |                                  |
@@ -460,7 +467,8 @@ The following table lists the configurable parameters of the chart relative to t
 | waagent.persistence.dataPVC.storageClassName     | The name of the Storage Class to be used. Leave empty to not use a storage class                                                                                                                                                                                     | no             | nfs-dynamic                      |                                  |
 | waagent.persistence.dataPVC.selector.label       | Volume label to bind (only limited to single label)                                                                                                                                                                                                                  | no             | my-volume-label                  |                                  |
 | waagent.persistence.dataPVC.selector.value       | Volume label value to bind (only limited to single value)                                                                                                                                                                                                            | no             | my-volume-value                  |                                  |
-| waagent.persistence.dataPVC.size                 | The minimum size of the Persistent Volume 
+| waagent.persistence.dataPVC.size                 | The minimum size of the Persistent Volume                                                                                                                                                                                                                            | no             | 2Gi                              | 2Gi                              |
+
 
 >\(*) **Note:** for details about static agent workstation pools, see: 
 [Workstation](https://www.ibm.com/support/knowledgecenter/en/SSGSPN_9.5.0/com.ibm.tivoli.itws.doc_9.5/distr/src_ref/awsrgworkstationconcept.htm).
@@ -512,7 +520,7 @@ The following table lists the configurable parameters of the chart relative to t
 | waconsole.console.exposeServiceType            | The network enablement configuration implemented. Valid values: LOAD BALANCER or INGRESS   | yes           |     INGRESS                          |                                                | 
 | waconsole.console.exposeServiceAnnotation      | Annotations of either the resource of the service or the resource of the ingress, customized in accordance with the cloud provider   | yes           |                               |                     |
 | waconsole.console.networkpolicyEgress      | Customize egress policy. If empty, no egress policy is defined | no |See [Network enablement](#network-enablement)|
-| waconsole.console.ingressHostName      | The virtual hostname defined in the DNS used to reach the Console.   | yes, only if the network enablement implementation is INGRESS           |                               |                     | 
+| waconsole.console.ingressHostName      | The virtual nostname defined in the DNS used to reach the Console.   | yes, only if the network enablement implementation is INGRESS           |                               |                     | 
 | waconsole.console.ingressSecretName      | The name of the secret to store certificates used by ingress. If not used, leave it empty.   | yes, only if the network enablement implementation is INGRESS.     |      |  wa-console-ingress-secret | 	
 
 
@@ -731,7 +739,7 @@ To configure an on-premises agent to communicate with components in the cloud:
 3. Replace the files on the on-premises agent in the same path.
 
 **On-premises console engine connection (connection between an on-premises console with a server in the cloud):**
-1. Copy the public CA root certificate from the server. Refer to the IBM Workload Automation product documentation for details about creating custom certificates for communication between the server and the console: [Customizing certificates](https://www.ibm.com/support/knowledgecenter/en/SSGSPN_9.5.0/com.ibm.tivoli.itws.doc_9.5/distr/src_ad/awsadMDMDWCcomm.htm).
+1. Copy the public CA root certificate from the. Refer to the IBM Workload Automation product documentation for details about creating custom certificates for communication between the server and the console: [Customizing certificates](https://www.ibm.com/support/knowledgecenter/en/SSGSPN_9.5.0/com.ibm.tivoli.itws.doc_9.5/distr/src_ad/awsadMDMDWCcomm.htm).
 
 2. To enable the changes, restart the Console workstation.
 
@@ -796,7 +804,7 @@ If you use customized certificates, `useCustomizedCert:true`, you must create a 
  For the master domain manager, type the following command:
  
  ```
- kubectl create secret generic waserver-cert-secret --from-file=TWSClientKeyStore.kdb --from-file=TWSClientKeyStore.sth --from-file=TWSClientKeyStoreJKS.jks --from-file=TWSClientKeyStoreJKS.sth --from-file=TWSServerKeyFile.jks --from-file=TWSServerKeyFile.jks.pwd --from-file=TWSServerTrustFile.jks --from-file=TWSServerTrustFile.jks.pwd -n <workload-automation-namespace>   
+ kubectl create secret generic waconsole-cert-secret --from-file=TWSServerKeyFile.jks --from-file=TWSServerKeyFile.jks.pwd --from-file=TWSServerTrustFile.jks --from-file=TWSServerTrustFile.jks.pwd --from-file=ltpa.keys -n <workload_automation_namespace>   
  ``` 
 For the Dynamic Workload Console, type the following command:
 
@@ -838,7 +846,7 @@ You can extend IBM Workload Automation with a number of out-of-the-box integrati
 
 To download the plug-ins:
 
-1) Download the plug-ins from [Automation Hub](https://www.yourautomationhub.io/) to your <plug-ins_folder> folder on your machine. Ensure that this folder contains only .jar files related to plug-ins.
+1) Download the plug-ins from [Automation Hub](https://www.yourautomationhub.io/) and extract the contents to a folder on the local computer.
 
 2) From your local computer, go to the <plug-ins_folder> folder and run the following command:
 
@@ -863,7 +871,7 @@ where, <master_pod> is the workstation with the master role. The default is \<re
 
 **NOTE**:
 
-A Kubernetes plug-in is available on Automation Hub. It enables you to run and automate Kubernetes jobs: [https://www.yourautomationhub.io/detail/kubernetes](https://www.yourautomationhub.io/detail/kubernetes). Follow the steps in the previous procedure to download and install the plug-in.
+A Kubernetes job plug-in is available on Automation Hub. It enables you to automate the execution of Kubernetes jobs. [https://www.yourautomationhub.io/detail/kubernetes_9_5_0_02](https://www.yourautomationhub.io/detail/kubernetes_9_5_0_02). Follow the steps in the previous procedure to download and install the plug-in.
 
 ## Storage
 
@@ -897,7 +905,7 @@ Pre-create a persistent volume. If you configure the label=value pair described 
 	* **persistence.enabled:true**
 	* **persistence.useDynamicProvisioning:false**
 
-> Note: By configuring the following two parameters, the persistent volume claim is automatically generated. Ensure that this label=value pair is inserted in the persistent volume you created: 
+> Note: By configuring the following two parameters, the persistent volum claim is automatically generated. Ensure that this label=value pair is inserted in the persistent volume you created: 
 
 - \<wa-component>.persistence.dataPVC.selector.label
 - \<wa-component>.persistence.dataPVC.selector.value
