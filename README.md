@@ -270,7 +270,7 @@ To deploy the IBM Workload Automation components, ensure you have first download
 	 
 3. Deploy the instance by running the following command: 
 
-        helm install -f values.yaml <workload_automation_release_name> workload/ibm-workload-automation-prod -n <workload_automation_namespace>
+        helm install -f values.yaml <workload_automation_release_name> workload/workload-automation-prod -n <workload_automation_namespace>
 
 where, <workload_automation_release_name> is the deployment name of the instance. 
 **TIP:** Because this name is used in the server component name and the pod names, use a short name or acronym when specifying this value to ensure it is readable.
@@ -283,7 +283,7 @@ The following are some useful Helm commands:
 	
 * To update the Helm release:
 
-        helm upgrade <workload_automation_release_name> workload/ibm-workload-automation-prod -f values.yaml -n <workload_automation_namespace>
+        helm upgrade <workload_automation_release_name> workload/workload-automation-prod -f values.yaml -n <workload_automation_namespace>
 	
 * To delete the Helm release: 
 
