@@ -35,7 +35,7 @@ entries:
     - name: IBM Workload Automation
     name: workload-automation-prod
     urls:
-    - workload-automation-prod-1.4.0.tgz
+    - https://workloadautomation.github.io/ibm-workload-automation-chart/stable/workload-automation-prod-1.4.0.tgz
     version: 1.4.0
   - apiVersion: v2
     appVersion: 9.5.0.02
@@ -71,6 +71,6 @@ entries:
     - name: IBM Workload Automation
     name: workload-automation-prod
     urls:
-    - workload-automation-prod-1.1.0.tgz
+    - https://workloadautomation.github.io/ibm-workload-automation-chart/stable/workload-automation-prod-1.1.0.tgz
     version: 1.1.0
 generated: "2020-12-18T12:57:22.549052+01:00"
