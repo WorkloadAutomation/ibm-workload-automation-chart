@@ -252,7 +252,7 @@ To deploy the IBM Workload Automation components, ensure you have first download
    c. Pull the Helm chart:
 
 
-        `helm pull workload/workload-automation-prod`
+       helm pull workload/workload-automation-prod
 
 
 
