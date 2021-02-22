@@ -1,14 +1,16 @@
 # IBM Workload Automation
 
 ## Introduction
-You can use Amazon Elastic Kubernetes Service (EKS) to run IBM Workload Automation containers on Amazon Web Services (AWS). 
-
-IBM Workload Automation is a complete, modern solution for batch and real-time workload management. It enables organizations to gain complete visibility and control over attended or unattended workloads. From a single point of control, it supports multiple platforms and provides advanced integration with enterprise applications including ERP, Business Analytics, File Transfer, Big Data, and Cloud applications.
+To ensure a fast and responsive experience when using IBM Workload Automation, you can deploy IBM Workload Automation on a cloud infrastructure. A cloud deployment ensures access anytime anywhere and is a fast and efficient way to get up and running quickly. It also simplifies maintenance, lowers costs, provides rapid upscale and downscale, minimizes IT requirements and physical on-premises data storage.
 
 As more and more organizations move their critical workloads to the cloud, there is an increasing demand for solutions and services that help them easily migrate and manage their cloud environment.
 
-To respond to the growing request to make automation opportunities more accessible, IBM Workload Automation can be deployed on the Amazon Web Services cloud.
+To respond to the growing request to make automation opportunities more accessible, IBM Workload Automation containers can be deployed into the following supported third-party cloud provider infrastructures:
 
+- ![Amazon EKS](images/tagawseks.png "Amazon EKS") Amazon Web Services (AWS) Elastic Kubernetes Service (EKS)
+- ![Microsoft Azure](images/tagmsa.png "Microsoft Azure") Microsoft&reg; Azure Kubernetes Service (AKS)
+
+IBM Workload Automation is a complete, modern solution for batch and real-time workload management. It enables organizations to gain complete visibility and control over attended or unattended workloads. From a single point of control, it supports multiple platforms and provides advanced integration with enterprise applications including ERP, Business Analytics, File Transfer, Big Data, and Cloud applications.
 
 The information in this README contains the steps for deploying the following IBM Workload Automation components using a chart and container images:
 
@@ -57,43 +59,63 @@ In addition to the product components, the following objects are installed:
 
 ## Supported Platforms
 
-- Amazon Elastic Kubernetes Service (EKS) on amd64: 64-bit Intel/AMD x86
+- ![Amazon EKS](images/tagawseks.png "Amazon EKS") Amazon Elastic Kubernetes Service (EKS) on amd64: 64-bit Intel/AMD x86
+- ![Microsoft Azure](images/tagmsa.png "Microsoft Azure") Azure Kubernetes Service (AKS) on amd64: 64-bit Intel/AMD x86
 	
 ## Accessing the container images
 
 You can access the IBM Workload Automation chart and container images from the Entitled Registry. See [Create the secret](#create-the-secret) for more information about accessing the registry. The images are as follows:
 
 
-* cp.icr.io/cp/ibm-workload-automation-agent-dynamic:9.5.0.03.20201218
-* cp.icr.io/cp/ibm-workload-automation-server:9.5.0.03.20201218
-* cp.icr.io/cp/ibm-workload-automation-console:9.5.0.03.20201218
+* cp.icr.io/cp/ibm-workload-automation-agent-dynamic:9.5.0.03.20210218
+* cp.icr.io/cp/ibm-workload-automation-server:9.5.0.03.20210218
+* cp.icr.io/cp/ibm-workload-automation-console:9.5.0.03.20210218
 
 
 
  
 ## Prerequisites
 Before you begin the deployment process, ensure your environment meets the following prerequisites:
-- Amazon Kubernetes Service (EKS) installed and running
-- aws (command line)
 - Helm 3.0
 - OpenSSL
 - Grafana and Prometheus for monitoring dashboard
 - Jetstack cert-manager
-- Ingress controller: to manage the ingress service, ensure an ingress controller is corrected configured. For example, to configure an NGINX ingress controller, refer to [NGINX Ingress Controller](https://kubernetes.github.io/ingress-nginx/).
+- Ingress controller: to manage the ingress service, ensure an ingress controller is correctly configured. For example, to configure an NGINX ingress controller, ensure the following option is set if NGINX is installed using a Helm chart: `"controller.extraArgs.enable-ssl-passthrough"`. Refer to the [NGINX Ingress Controller documentation](https://kubernetes.github.io/ingress-nginx/) for more details.
 - Kubernetes version: >=1.15 (no specific APIs need to be enabled)
 - `kubectl` command-line tool to control Kubernetes clusters 
 - API key for accessing IBM Entitled Registry: `cp.icr.io`
 
+The following are prerequisites specific to each supported cloud provider:
+
+![Amazon EKS](images/tagawseks.png "Amazon EKS") 
+- Amazon Kubernetes Service (EKS) installed and running
+- AWS CLI (AWS command line)
+
+![Microsoft Azure](images/tagmsa.png "Microsoft Azure") 
+- Azure Kubernetes Service (AKS) installed and running
+- azcli (Azure command line)
+
 ### Storage classes static PV and dynamic provisioning
 
+![Amazon EKS](images/tagawseks.png "Amazon EKS") 
 | Provider            | Disk Type    | PVC Size | PVC Access Mode |
 | ------------------- | ------------ | -------- |---------------- |
 | AWS EBS             | GP2 SSD      | Default  | ReadWriteOnce   |
 | AWS EBS             | IO1 SSD      | Default  | ReadWriteOnce   |
 
+For additional details about AWS storage settings, see [Storage classes](https://docs.aws.amazon.com/eks/latest/userguide/storage-classes.html).
 
-For more details about the storage requirements for your persistent volume claims, see the **[Storage](#storage)** section of this README file. For additional details about AWS storage settings, see [Storage classes](https://docs.aws.amazon.com/eks/latest/userguide/storage-classes.html).
+![Microsoft Azure](images/tagmsa.png "Microsoft Azure") 
+| Provider               | Disk Type    | PVC Size | PVC Access Mode |
+| ---------------------- | ------------ | -------- |---------------- |
+| Azure File             |     SSD      | Default  | ReadWriteOnce   |
+| Azure Disk             |     SSD      | Default  | ReadWriteOnce   |
 
+**Note:** The volumeBindingMode must be set to **WaitforFirstConsumer** and not **Immediate**. 
+
+For additional details about Microsoft Azure storage settings, see [Azure Files - Dynamic](https://docs.microsoft.com/en-us/azure/aks/azure-files-dynamic-pv).
+
+For more details about the storage requirements for your persistent volume claims, see the **[Storage](#storage)** section of this README file.
 
 ## Resources Required
   
@@ -113,6 +135,7 @@ Installing and configuring IBM Workload Automation, involves the following high-
 2. [Creating a Kubernetes Secret](#create-the-secret) by accessing the entitled registry to store an entitlement key for the IBM Workload Automation offering on your cluster. 
 3. [Securing communication](#securing-communication) using either Jetstack cert-manager or using your custom certificates.
 4. [Creating a secrets file](#creating-a-secrets-file) to store passwords for the console and server components, or if you use custom certificates, to add your custom certificates to the Certificates Secret.
+5. (For Microsoft Azure AKS only) [Configuring the Microsoft Azure SQL database](#configuring-the-microsoft-azure-sql-database).
 5. [Deploying the product components](#deploying-the-product-components).
 6. [Verifying the installation](#verifying-the-installation).
 
@@ -225,14 +248,66 @@ where:
 
 2. Once the file has been created and filled in, it must be imported.
 
-   a. From the command line, log in to the AWS EKS cluster.
+   a. From the command line, log in to the cluster.
 	
    b. Apply the WA-Secret (wa-pwd-secret). Create a secrets file to store passwords for both the server and console components. Launch the following command:
 	
 	    kubectl apply -f <my_path>/mysecret.yaml -n <workload_automation_namespace>
 	  
-where **<my_path>** is the location path of the mysecret.yaml file.		
-		
+where **<my_path>** is the location path of the mysecret.yaml file.	
+
+### Configuring the Microsoft Azure SQL server database ###
+
+![Microsoft Azure](images/tagmsa.png "Microsoft Azure") 
+
+Running the IBM Workload Automation product containers within Azure AKS gives you access to services such as a highly scalable cloud database service. You can deploy and run any of the following Azure SQL Server database models in the Azure cloud, depending on your needs:
+
+- SQL server database
+- SQL managed instance
+- SQL virtual machine
+
+To use the database with both the server and console components, set the `type` parameter to `type= MSSQL` in the values.yaml file, and then configure the database settings in the same file according to the chosen database model as follows:
+
+  **SQL database server and SQL managed instance:** 
+  
+ | Server               | Console              |
+| -------------------- | -------------------- |
+| sslConnection: false | sslConnection: false |
+| tsLogName: PRIMARY   | tsName: PRIMARY      |
+| tsLogPath: null      |                      |
+| tsName: PRIMARY      |                      |
+| tsPath: null         | tsPath: null         |
+| tsPlanName: PRIMARY  |                      |
+| tsPlanPath: null     |                      |
+| tsTempName: null     | tsTempName: null     |
+| tssbspace: null      | tssbspace: null      |
+| type: MSSQL          |  type: MSSQL         |
+| usepartitioning: true|usepartitioning: true |
+| user: <db_user>      | user: <db_user>      |	
+
+
+For the SQL managed instance database model, ensure that the hostname is the IP address or hostname used to connect to the Azure database for MSSQL.
+
+**SQL virtual machine:** 
+
+| Server                          | Console                    |
+| ------------------------------- | -------------------------- |
+| sslConnection: false            | sslConnection: false       |
+| tsLogName: TWS\_LOG             | tsName: TWS\_DATA\_DWC     |
+| tsLogPath: /var/opt/mssql/data  |                            |
+| tsName: TWS\_DATA               |                            |
+| tsPath: /var/opt/mssql/data     | tsPath: /var/opt/mssql/dat |
+| tsPlanName: TWS\_PLAN           |                            |
+| tsPlanPath: /var/opt/mssql/data |                            |
+| tsTempName: null                | tsTempName: null           |
+| tssbspace: null                 | tssbspace: null            |
+| type: MSSQL                     | type: MSSQL                |
+| usepartitioning: true           | usepartitioning: true      |
+| user: <db_user>                 | user: >db_user>            |
+ 	
+	
+
+
 ### Deploying the product components		
 
 To deploy the IBM Workload Automation components, ensure you have first downloaded the chart from the IBM Entitled Registry: `cp.icr.io` and have unpacked it to a local directory. If you already have the chart then update it.
@@ -243,34 +318,38 @@ To deploy the IBM Workload Automation components, ensure you have first download
 
    a. Add the repository:
    
-        helm repo add workload https://workloadautomation.github.io/ibm-workload-automation-chart/stable
-        
+        helm repo add <repo_name> https://workloadautomation.github.io/ibm-workload-automation-chart/stable, where <repo_name> represents the name of the chosen local repository
+   
    b.  Update the Helm chart:
    
-       helm repo update 
+        helm repo update 
    
    c. Pull the Helm chart:
 
 
-       helm pull workload/workload-automation-prod
+
+        helm pull <repo_name>/workload-automation-prod
+
 
 
 
       
-   where, workload/ibm-workload-automation-prod, represents the chosen image repository
-   
-   
+     
 **Update your chart:**
 
         helm repo update 	 
 		
-2. Customize the deployment. Configure each product component by adjusting the values in the `values.yaml` file. See these parameters and their default values in [Configuration Parameters](#configuration-parameters). By default a single server, console, and agent is installed.
+1. Customize the deployment. Configure each product component by adjusting the values in the `values.yaml` file. See these parameters and their default values in [Configuration Parameters](#configuration-parameters). By default a single server, console, and agent is installed.
 
 >**Note:**  If you specify the `waconsole.engineHostName` and `waconsole.enginePort` parameters in the `values.yaml` file, only a single engine connection related to an engine external to the cluster is automatically defined in the Dynamic Workload Console using the values assigned to these parameters. By default, the values for these parameters are blank, and the server is deployed within the cluster and the engine connection is related to the server in the cluster. If, instead, you deploy both a server within the cluster and one external to the cluster, a single engine connection is automatically created in the console using the values of the parameters related to the external engine (server). If you require an engine connection to the server deployed within the cluster, you must define the connection manually. 
 	 
 3. Deploy the instance by running the following command: 
 
-        helm install -f values.yaml <workload_automation_release_name> workload/workload-automation-prod -n <workload_automation_namespace>
+
+        helm install -f values.yaml <workload_automation_release_name> <repo_name>/workload-automation-prod -n <workload_automation_namespace>
+
+
+
 
 where, <workload_automation_release_name> is the deployment name of the instance. 
 **TIP:** Because this name is used in the server component name and the pod names, use a short name or acronym when specifying this value to ensure it is readable.
@@ -347,8 +426,15 @@ Verifying the default engine connection depends on the network enablement config
 **For load balancer:**
 
 1. Run the following command to obtain the token to be inserted in https://\<loadbalancer>:9443/console to connect to the console:
+
+![Amazon EKS](images/tagawseks.png "Amazon EKS") 
 	
         kubectl get svc <workload_automation_release_name>-waconsole-lb  -o 'jsonpath={..status.loadBalancer.ingress..hostname}' -n <workload_automation_namespace>
+
+![Microsoft Azure](images/tagmsa.png "Microsoft Azure")
+
+       kubectl get svc <workload_automation_release_name>-waconsole-lb  -o 'jsonpath={..status.loadBalancer.ingress..ipaddress}' -n <workload_automation_namespace>
+
 
 2. With the output obtained, replace \<loadbalancer> in the URL https://\<loadbalancer>:9443/console.
 
@@ -449,7 +535,8 @@ The following table lists the configurable parameters of the chart relative to t
 | waagent.image.pullPolicy                         | image pull policy                                                                                                                                                                                                                                                    | yes            | Always                           | Always                           |
 | waagent.agent.name                               | Agent display name                                                                                                                                                                                                                                                   | yes            | WA_AGT                           | WA_AGT                           |
 | waagent.agent.tz                                 | If used, it sets the TZ operating system environment variable                                                                                                                                                                                                        | no             | America/Chicago                  |                                  |
-| waagent.agent.networkpolicyEgress                                 | Customize egress policy. If empty, no egress policy is defined                                                                                                                                                                                                        | no             | See [Network enablement](#network-enablement)                  |                                  |
+| waagent.agent.networkpolicyEgress                                 | Customize egress policy. Controls network traffic and how a component pod is allowed to communicate with other pods. If empty, no egress policy is defined                                                                                                                                                                                                        | no             | See [Network enablement](#network-enablement)                  |                                  |
+| waagent.agent.nodeAffinityRequired                 | A set of rules that determines on which nodes an agent can be deployed using custom labels on nodes and label selectors specified in pods.                                                                                                                                                                                                                           | no             |   See [Network enablement](#network-enablement)              |                               |
 | waagent.agent.dynamic.server.mdmhostname         | Hostname or IP address of the master domain manager                                                                                                                                                                                                                  | no (mandatory if a server is not present inside the same namespace)            | wamdm.demo.com                   |                                  |
 | waagent.agent.dynamic.server.port                | The HTTPS port that the dynamic agent must use to connect to the master domain manager                                                                                                                                                                               | no             | 31116                            | 31116                            |
 | waagent.agent.dynamic.pools*                      | The static pools of which the Agent should be a member                                                                                                                                                                                                               | no             | Pool1, Pool2                     |                                  |
@@ -519,9 +606,10 @@ The following table lists the configurable parameters of the chart relative to t
 | waconsole.persistence.dataPVC.size                  | The minimum size of the Persistent Volume                                                                                                                                                                                                                              | no            | 5Gi                              | 5Gi                                                |
 | waconsole.console.exposeServiceType            | The network enablement configuration implemented. Valid values: LOAD BALANCER or INGRESS   | yes           |     INGRESS                          |                                                | 
 | waconsole.console.exposeServiceAnnotation      | Annotations of either the resource of the service or the resource of the ingress, customized in accordance with the cloud provider   | yes           |                               |                     |
-| waconsole.console.networkpolicyEgress      | Customize egress policy. If empty, no egress policy is defined | no |See [Network enablement](#network-enablement)|
-| waconsole.console.ingressHostName      | The virtual nostname defined in the DNS used to reach the Console.   | yes, only if the network enablement implementation is INGRESS           |                               |                     | 
+| waconsole.console.networkpolicyEgress      | Customize egress policy. Controls network traffic and how a component pod is allowed to communicate with other pods. If empty, no egress policy is defined | no | See [Network enablement](#network-enablement)|
+| waconsole.console.ingressHostName      | The virtual hostname defined in the DNS used to reach the Console.   | yes, only if the network enablement implementation is INGRESS           |                               |                     | 
 | waconsole.console.ingressSecretName      | The name of the secret to store certificates used by ingress. If not used, leave it empty.   | yes, only if the network enablement implementation is INGRESS.     |      |  wa-console-ingress-secret | 	
+| waconsole.console.nodeAffinityRequired                 | A set of rules that determines on which nodes a console can be deployed using custom labels on nodes and label selectors specified in pods.                                                                                                                                                                                                                           | no             | See [Network enablement](#network-enablement)       |                               |
 
 
 - #### Server parameters
@@ -579,9 +667,11 @@ The following table lists the configurable parameters of the chart and an exampl
 | waserver.persistence.dataPVC.size                 | The minimum size of the Persistent Volume                                                                                                                                                                                                                                     | no            | 5Gi                              | 5Gi                                              |
 | waserver.server.exposeServiceType            | The network enablement configuration implemented. Valid values: LOAD BALANCER or INGRESS   | yes           |     INGRESS                          |                                                | 
 | waserver.server.exposeServiceAnnotation      | Annotations of either the resource of the service or the resource of the ingress, customized in accordance with the cloud provider   | yes           |                               |                     |
-| waserver.server.networkpolicyEgress                                | Customize egress policy. If empty, no egress policy is defined                                                                                                                                                                                                                  | no            | See [Network enablement](#network-enablement)                  |                                                  |
+| waserver.server.networkpolicyEgress                                | Controls network traffic and how a component pod is allowed to communicate with other pods. Customize egress policy. If empty, no egress policy is defined                                                                                                                                                                                                                  | no            | See [Network enablement](#network-enablement)                  |                     |
 | waserver.server.ingressHostName      | The virtual hostname defined in the DNS used to reach the Server   | yes, only if the network enablement implementation is INGRESS            |                               |                     | 
 | waserver.server.ingressSecretName      | The name of the secret to store certificates used by the ingress. If not used, leave it empty   | yes, only if the network enablement implementation is INGRESS     |      |  wa-server-ingress-secret | 
+| waserver.server.nodeAffinityRequired                 | A set of rules that determines on which nodes a server can be deployed using custom labels on nodes and label selectors specified in pods.                                                                                                                                                                                                                           | no             |   See [Network enablement](#network-enablement)              |                               |
+| waserver.server.ftaName         |  The name of the IBM Workload Automation workstation for this installation.                                                                                                                                                                                                                           | no             |     WA-SERVER                    |                               |
 	
 
 ## Configuring
@@ -596,7 +686,7 @@ The following procedures are ways in which you can configure the default deploym
 
 ### Network enablement
 
-The IBM Workload Automation server and console can use two different ways to route external traffic into the Amazon Web Services Elastic Kubernetes Service cluster:
+The IBM Workload Automation server and console can use two different ways to route external traffic into the Kubernetes Service cluster:
 
 * A **load balancer** service that redirects traffic
 * An **ingress** service that manages external access to the services in the cluster
@@ -605,9 +695,10 @@ You can freely switch between these two types of configuration.
 
 #### Network policy
 
-You can optionally specify an egress policy for the server, Dynamic Workload Console and agent. See the following example, which allows egress to another destination:
-	
-       networkpolicyEgress:
+You can specify an egress network policy to include a list of allowed egress rules for the server, console, and agent components. Each rule allows traffic leaving the cluster which matches both the "to" and "ports" sections. For example, the following sample demonstrates how to allow egress to another destination:
+
+networkpolicyEgress:
+
 	- name: to-mdm
 	  egress:
 	  - to:
@@ -615,20 +706,32 @@ You can optionally specify an egress policy for the server, Dynamic Workload Con
 	        matchLabels:
 		  app.kubernetes.io/name: waserver
 	    - port: 31116
-	        protocol: TCP
-        - name: dns
-          egress:
-          - to:
-              - namespaceSelector:
-                  matchLabels:
-                    name: kube-system
-         - ports:
-             - port: 53
-               protocol: UDP
-             - port: 53
-               protocol: TCP
+	      protocol: TCP
+	- name: dns
+	  egress:
+	    - to:
+	      - namespaceSelector:
+	          matchLabels:
+		    name: kube-system
+	    - ports:
+	        - port: 53
+		  protocol: UDP
+		- port: 53
+		  protocol: TCP
 
 For more information, see [Network Policies](https://kubernetes.io/docs/concepts/services-networking/network-policies/).
+
+#### Node affinity Required
+You can also specify node affinity required to determine on which nodes a component can be deployed using custom labels on nodes and label selectors specified in pods. The following is an example:
+
+nodeAffinityRequired:
+
+	-key: iwa-node
+	  operator: In
+	  values:
+	  - 'true'
+
+where iwa-node represents the value of the node affinity required.
 
 #### Load balancer service
 
@@ -647,14 +750,20 @@ For more information about these configurable parameters, see the **[Server para
 
 3. In the `exposeServiceAnnotation` section, uncomment the lines in this section as follows:
 
+![Amazon EKS](images/tagawseks.png "Amazon EKS") 
+
 		service.beta.kubernetes.io/aws-load-balancer-type: nlb
 		service.beta.kubernetes.io/aws-load-balancer-internal: "true"
+		
+![Microsoft Azure](images/tagmsa.png "Microsoft Azure") 
+
+		service.beta.kubernetes.io/azure-load-balancer-internal: "true"
 
 4. Specify the load balancer type and set the load balancer to internal by specifying "true".
 
 - **Console:**
 
-  Because of a limitation in AWS EKS with stick sessions, you can only use the load balancer on the console component for a single console instance. Configure the load balancer for the console as follows: 
+  Because of a limitation with sticky sessions, you can only use the load balancer on the console component for a single console instance. Configure the load balancer for the console as follows: 
 
 1. Locate the following parameters in the `values.yaml` file:
 
@@ -666,11 +775,17 @@ For more information about these configurable parameters, see the **[Server para
 2. Set the value of the `exposeServiceType`parameter to `LoadBalancer`.
 
 3. In the `exposeServiceAnnotation` section, uncomment the lines in this section as follows:
+
+![Amazon EKS](images/tagawseks.png "Amazon EKS") 
 	
 		service.beta.kubernetes.io/aws-load-balancer-backend-protocol: https
 		service.beta.kubernetes.io/aws-load-balancer-type: "clb"
 		#service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
 		service.beta.kubernetes.io/aws-load-balancer-internal: "true"
+		
+![Microsoft Azure](images/tagmsa.png "Microsoft Azure") 
+
+		service.beta.kubernetes.io/azure-load-balancer-internal: "true"		
 		
 4. Specify the load balancer protocol and type.
 
@@ -693,8 +808,14 @@ For more information about these configurable parameters, see the **[Server para
 
 3. In the `exposeServiceAnnotation` section, leave the following lines as comments:
 
+![Amazon EKS](images/tagawseks.png "Amazon EKS") 
+
 		#service.beta.kubernetes.io/aws-load-balancer-type:nlb
 		#service.beta.kubernetes.io/aws-load-balancer-internal: "true"
+
+![Microsoft Azure](images/tagmsa.png "Microsoft Azure")
+
+		#service.beta.kubernetes.io/azure-load-balancer-internal: "true"		
 
 - **Console:**
 
@@ -729,7 +850,7 @@ To configure an on-premises agent to communicate with components in the cloud:
 
 1. Install the agent using the twinst script on a local computer passing the `-gateway local` parameter. If there are already other agents installed, the EIF port might already be in use by another instance. Specify a different port by passing the following parameter to the twsinst script: `-gweifport <free-port>`.
 
-2. Make a copy of the following AWS cloud server certificates located in the following path `<DATA_DIR>/ITA/cpa/ita/cert`:
+2. Make a copy of the following cloud server certificates located in the following path `<DATA_DIR>/ITA/cpa/ita/cert`:
 
 * TWSClientKeyStoreJKS.sth
 * TWSClientKeyStoreJKS.jks
@@ -739,11 +860,11 @@ To configure an on-premises agent to communicate with components in the cloud:
 3. Replace the files on the on-premises agent in the same path.
 
 **On-premises console engine connection (connection between an on-premises console with a server in the cloud):**
-1. Copy the public CA root certificate from the. Refer to the IBM Workload Automation product documentation for details about creating custom certificates for communication between the server and the console: [Customizing certificates](https://www.ibm.com/support/knowledgecenter/en/SSGSPN_9.5.0/com.ibm.tivoli.itws.doc_9.5/distr/src_ad/awsadMDMDWCcomm.htm).
+1. Copy the public CA root certificate from the server. Refer to the IBM Workload Automation product documentation for details about creating custom certificates for communication between the server and the console: [Customizing certificates](https://www.ibm.com/support/knowledgecenter/en/SSGSPN_9.5.0/com.ibm.tivoli.itws.doc_9.5/distr/src_ad/awsadMDMDWCcomm.htm).
 
 2. To enable the changes, restart the Console workstation.
 
-**On-premises engine connection (connection between a console in the AWS cloud and an on-premises engine or another engine in a different namespace):**
+**On-premises engine connection (connection between a console in the cloud and an on-premises engine or another engine in a different namespace):**
 
 Access the master (server or pod) and extract the CA root certificate and, to add it to the console trustkeystore, create a secret in the console namespace with the extracted key encoded in base64 as follows: 
 
@@ -804,7 +925,7 @@ If you use customized certificates, `useCustomizedCert:true`, you must create a 
  For the master domain manager, type the following command:
  
  ```
- kubectl create secret generic waconsole-cert-secret --from-file=TWSServerKeyFile.jks --from-file=TWSServerKeyFile.jks.pwd --from-file=TWSServerTrustFile.jks --from-file=TWSServerTrustFile.jks.pwd --from-file=ltpa.keys -n <workload_automation_namespace>   
+kubectl create secret generic waserver-cert-secret --from-file=TWSClientKeyStore.kdb --from-file=TWSClientKeyStore.sth --from-file=TWSClientKeyStoreJKS.jks --from-file=TWSClientKeyStoreJKS.sth --from-file=TWSServerKeyFile.jks --from-file=TWSServerKeyFile.jks.pwd --from-file=TWSServerTrustFile.jks --from-file=TWSServerTrustFile.jks.pwd -n <workload-automation-namespace>   
  ``` 
 For the Dynamic Workload Console, type the following command:
 
@@ -846,7 +967,7 @@ You can extend IBM Workload Automation with a number of out-of-the-box integrati
 
 To download the plug-ins:
 
-1) Download the plug-ins from [Automation Hub](https://www.yourautomationhub.io/) and extract the contents to a folder on the local computer.
+1) Download the plug-ins from [Automation Hub](https://www.yourautomationhub.io/) to your <plug-ins_folder> folder on your machine. Ensure that this folder contains only .jar files related to plug-ins.
 
 2) From your local computer, go to the <plug-ins_folder> folder and run the following command:
 
@@ -871,7 +992,44 @@ where, <master_pod> is the workstation with the master role. The default is \<re
 
 **NOTE**:
 
-A Kubernetes job plug-in is available on Automation Hub. It enables you to automate the execution of Kubernetes jobs. [https://www.yourautomationhub.io/detail/kubernetes_9_5_0_02](https://www.yourautomationhub.io/detail/kubernetes_9_5_0_02). Follow the steps in the previous procedure to download and install the plug-in.
+A Kubernetes plug-in is available on Automation Hub. It enables you to run and automate Kubernetes jobs: [https://www.yourautomationhub.io/detail/kubernetes_9_5_0_02](https://www.yourautomationhub.io/detail/kubernetes_9_5_0_02). This specific job can be installed following the previous procedure, but it requires a couple of extra steps to configure the project and permit the execution of Kubernetes jobs. After following the previous procedure, perform the following steps: 
+
+1. `oc apply -f wa-k8s-role.yaml`
+2. `oc apply -f k8s-role-binding.yaml`
+
+where wa-k8s-role.yaml is structured as follows:
+
+	apiVersion: rbac.authorization.k8s.io/v1
+	kind: Role
+	metadata:
+	name: wa-pod-role
+	namespace: <namespace>
+	rules:
+
+	    apiGroups:
+	    ""
+	    extensions
+	    apps
+	    batch
+	    resources:
+	    '*'
+	    verbs:
+	    '*'
+	    
+and where the k8s-role-binding.yaml is structured as follows:
+
+	kind: RoleBinding
+	apiVersion: rbac.authorization.k8s.io/v1
+	metadata:
+	name: plugin-k8s-role-binding
+	subjects:
+
+	    kind: ServiceAccount
+	    name: <arbitrary wa service name - do not use the user one, e.g. wauser>
+	    roleRef:
+	    kind: Role
+	    name: <match the name key of wa-k8s-role.yaml>
+	    apiGroup: rbac.authorization.k8s.io
 
 ## Storage
 
@@ -905,7 +1063,7 @@ Pre-create a persistent volume. If you configure the label=value pair described 
 	* **persistence.enabled:true**
 	* **persistence.useDynamicProvisioning:false**
 
-> Note: By configuring the following two parameters, the persistent volum claim is automatically generated. Ensure that this label=value pair is inserted in the persistent volume you created: 
+> Note: By configuring the following two parameters, the persistent volume claim is automatically generated. Ensure that this label=value pair is inserted in the persistent volume you created: 
 
 - \<wa-component>.persistence.dataPVC.selector.label
 - \<wa-component>.persistence.dataPVC.selector.value
@@ -1016,7 +1174,7 @@ For more information about using Grafana dashboards see [Dashboards overview](ht
 *  Limited to amd64 platforms.
 *  Anonymous connections are not permitted.
 *  When sharing Dynamic Workload Console resources, such as tasks, engines, scheduling objects and so on, to groups, ensure the user sharing the resource is a member of the group to which the user is sharing the resourc.
-*  On AWS, LDAP configuration on the chart is not supported. Manual configuration is required using the traditional LDAP configuration. 
+*  LDAP configuration on the chart is not supported. Manual configuration is required using the traditional LDAP configuration. 
 
 
 ## Documentation
@@ -1058,4 +1216,16 @@ In case of problems related to deploying the product with containers, see [Troub
    
 3. Save the changes to the file.   
 
+### Change history
 
+## Added Febbruary 2021 - version 1.4.1
+
+* New configurable parameters aded to values.yaml file for agent, console and server components: 
+
+    * waagent.agent.networkpolicyEgress
+    * waconsole.console.networkpolicyEgress
+    * waserver.server.networkpolicyEgress
+    
+ * New optional configurable parameter added to the values.yaml file for the server component: waserver.server.ftaName which represents the name of the Workload Automation workstation for the installation.
+    
+* RFE 148080: Provides the capability to constrain a product component pod to run on particular nodes The nodeAffinityRequired parameter has been added to the configurable parameters in the values.yaml file for the agent, console, and server components so you can determine on which nodes a component can be deployed using custom labels on nodes and label selectors specified in pods.    
