@@ -3,7 +3,7 @@ entries:
   workload-automation-prod:
   - apiVersion: v2
     appVersion: 9.5.0.03
-    created: "2021-02-22T12:14:30.56691+01:00"
+    created: "2021-02-24T10:12:47.22548+01:00"
     dependencies:
     - alias: waserver
       condition: waserver.enableServer
@@ -21,7 +21,7 @@ entries:
       repository: ""
       version: 1.4.1
     description: Helm chart for configuring IBM Workload Automation.
-    digest: 5dad2473e30a5a3767ebd22b4fb7bd5bfe33c39ee95a7cd78c9e64544cdcf441
+    digest: aa279d5c233a4ee52c70a35cd821167e140625072896197cbafdc8caf18d0a2b
     keywords:
     - Commercial
     - amd64
@@ -39,7 +39,7 @@ entries:
     version: 1.4.1
   - apiVersion: v2
     appVersion: 9.5.0.02
-    created: "2021-02-22T12:14:30.551666+01:00"
+    created: "2021-02-24T10:12:47.21213+01:00"
     dependencies:
     - alias: waserver
       condition: waserver.enableServer
@@ -75,7 +75,7 @@ entries:
     version: 1.4.0
   - apiVersion: v2
     appVersion: 9.5.0.02
-    created: "2021-02-22T12:14:30.534994+01:00"
+    created: "2021-02-24T10:12:47.19614+01:00"
     dependencies:
     - alias: waserver
       condition: waserver.enableServer
@@ -109,4 +109,4 @@ entries:
     urls:
     - https://workloadautomation.github.io/ibm-workload-automation-chart/stable/workload-automation-prod-1.1.0.tgz
     version: 1.1.0
-generated: "2021-02-22T12:14:30.517998+01:00"
+generated: "2021-02-24T10:12:47.175279+01:00"
