@@ -9,6 +9,7 @@ To respond to the growing request to make automation opportunities more accessib
 
 - ![Amazon EKS](images/tagawseks.png "Amazon EKS") Amazon Web Services (AWS) Elastic Kubernetes Service (EKS)
 - ![Microsoft Azure](images/tagmsa.png "Microsoft Azure") Microsoft&reg; Azure Kubernetes Service (AKS)
+- ![Google GKE](images/taggke.png "Google GKE") Google Kubernetes Engine (GKE)
 
 IBM Workload Automation is a complete, modern solution for batch and real-time workload management. It enables organizations to gain complete visibility and control over attended or unattended workloads. From a single point of control, it supports multiple platforms and provides advanced integration with enterprise applications including ERP, Business Analytics, File Transfer, Big Data, and Cloud applications.
 
@@ -61,6 +62,7 @@ In addition to the product components, the following objects are installed:
 
 - ![Amazon EKS](images/tagawseks.png "Amazon EKS") Amazon Elastic Kubernetes Service (EKS) on amd64: 64-bit Intel/AMD x86
 - ![Microsoft Azure](images/tagmsa.png "Microsoft Azure") Azure Kubernetes Service (AKS) on amd64: 64-bit Intel/AMD x86
+- ![Google GKE](images/taggke.png "Google GKE") Google Kubernetes Engine (GKE) on amd64: 64-bit Intel/AMD x86
 	
 ## Accessing the container images
 
@@ -95,6 +97,10 @@ The following are prerequisites specific to each supported cloud provider:
 - Azure Kubernetes Service (AKS) installed and running
 - azcli (Azure command line)
 
+![Google GKE](images/taggke.png "Google GKE") 
+- Google Kubernetes Engine (GKE) installed and running
+- gcloud SDK (Google command line)
+
 ### Storage classes static PV and dynamic provisioning
 
 ![Amazon EKS](images/tagawseks.png "Amazon EKS") 
@@ -112,8 +118,15 @@ For additional details about AWS storage settings, see [Storage classes](https:/
 | Azure Disk             |     SSD      | Default  | ReadWriteOnce   |
 
 **Note:** The volumeBindingMode must be set to **WaitforFirstConsumer** and not **Immediate**. 
-
 For additional details about Microsoft Azure storage settings, see [Azure Files - Dynamic](https://docs.microsoft.com/en-us/azure/aks/azure-files-dynamic-pv).
+
+![Google GKE](images/taggke.png "Google GKE")
+| Provider               | Disk Type                | PVC Size | PVC Access Mode |
+| ---------------------- | -------------------------| -------- |---------------- |
+| GCP                    |Standard Persistent Disks | Default  | ReadWriteOnce   |
+| GCP                    |Balanced Persistent Disks | Default  | ReadWriteOnce   |
+| GCP                    |SSD Persistent Disks      | Default  | ReadWriteOnce   |
+
 
 For more details about the storage requirements for your persistent volume claims, see the **[Storage](#storage)** section of this README file.
 
@@ -135,7 +148,8 @@ Installing and configuring IBM Workload Automation, involves the following high-
 2. [Creating a Kubernetes Secret](#create-the-secret) by accessing the entitled registry to store an entitlement key for the IBM Workload Automation offering on your cluster. 
 3. [Securing communication](#securing-communication) using either Jetstack cert-manager or using your custom certificates.
 4. [Creating a secrets file](#creating-a-secrets-file) to store passwords for the console and server components, or if you use custom certificates, to add your custom certificates to the Certificates Secret.
-5. (For Microsoft Azure AKS only) [Configuring the Microsoft Azure SQL database](#configuring-the-microsoft-azure-sql-database).
+5. (For Microsoft Azure AKS and Google GKE only) [Configuring the Microsoft Azure SQL server database](#configuring-the-microsoft-azure-sql-server-database) or [Configuring the Google Cloud SQL for SQL Server
+ database](#configuring-the-google-cloud-sql-for-sql-server-database).
 5. [Deploying the product components](#deploying-the-product-components).
 6. [Verifying the installation](#verifying-the-installation).
 
@@ -306,6 +320,33 @@ For the SQL managed instance database model, ensure that the hostname is the IP 
 | user: <db_user>                 | user: >db_user>            |
  	
 	
+### Configuring the Google Cloud SQL for SQL Server database ###
+
+![Google GKE](images/taggke.png "Google GKE") 
+
+Running the IBM Workload Automation product containers within Google GKE gives you access to services such as a secure and compliant cloud database service. You can deploy and run the following Google Cloud SQL for SQL Server database model in the Google GPC cloud:
+
+- Google Cloud SQL for SQL Server
+
+To use the database with both the server and console components, set the `type` parameter to `type= MSSQL` in the values.yaml file, and then configure the database settings in the same file as follows:
+
+  **SQL database server and SQL managed instance:** 
+  
+ | Server               | Console              |
+| -------------------- | -------------------- |
+| sslConnection: false | sslConnection: false |
+| tsLogName: PRIMARY   | tsName: PRIMARY      |
+| tsLogPath: null      |                      |
+| tsName: PRIMARY      |                      |
+| tsPath: null         | tsPath: null         |
+| tsPlanName: PRIMARY  |                      |
+| tsPlanPath: null     |                      |
+| tsTempName: null     | tsTempName: null     |
+| tssbspace: null      | tssbspace: null      |
+| type: MSSQL          |  type: MSSQL         |
+| usepartitioning: true|usepartitioning: true |
+| user: <db_user>      | user: <db_user>      |	
+
 
 
 ### Deploying the product components		
@@ -362,7 +403,7 @@ The following are some useful Helm commands:
 	
 * To update the Helm release:
 
-        helm upgrade <workload_automation_release_name> workload/workload-automation-prod -f values.yaml -n <workload_automation_namespace>
+        helm upgrade <workload_automation_release_name> <repo_name>/ibm-workload-automation-prod -f values.yaml -n <workload_automation_namespace>
 	
 * To delete the Helm release: 
 
@@ -434,6 +475,11 @@ Verifying the default engine connection depends on the network enablement config
 ![Microsoft Azure](images/tagmsa.png "Microsoft Azure")
 
        kubectl get svc <workload_automation_release_name>-waconsole-lb  -o 'jsonpath={..status.loadBalancer.ingress..ipaddress}' -n <workload_automation_namespace>
+       
+
+![Google GKE](images/taggke.png "Google GKE")
+
+       kubectl get svc <workload_automation_release_name>-waconsole-lb  -o 'jsonpath={..status.loadBalancer.ingress..ipaddress}' -n <workload_automation_namespace>
 
 
 2. With the output obtained, replace \<loadbalancer> in the URL https://\<loadbalancer>:9443/console.
@@ -468,7 +514,7 @@ Verifying the default engine connection depends on the network enablement config
 
 Before you upgrade a chart, verify if there are jobs currently running and manually stop the related processes or wait until the jobs complete.	To upgrade the release <workload_automation_release_name> to a new version of the chart, run the following command from the directory where the values.yaml file is located:
 
- `helm upgrade release_name workload/workload-automation-prod -f values.yaml -n <workload_automation_namespace>`
+ `helm upgrade release_name <repo_name>/workload-automation-prod -f values.yaml -n <workload_automation_namespace>`
 		
 
 ## Rolling Back the Chart
@@ -487,7 +533,7 @@ Before you roll back a chart, verify if there are jobs currently running and man
 
  To uninstall the deployed components associated with the chart and clean up the orphaned Persistent Volumes, run:
  
- 1. Uninstall the ibm-workload-automation-prod deployment, run:
+ 1. Uninstall the workload-automation-prod deployment, run:
 
         helm uninstall release_name -n <workload_automation_namespace> 
 
@@ -630,9 +676,9 @@ The following table lists the configurable parameters of the chart and an exampl
 | waserver.server.tz                                | If used, it sets the TZ operating system environment variable                                                                                                                                                                                                                 | no            | America/Chicago                  |                                                  |
 | waserver.server.createPlan                        | If true, an automatic JnextPlan is executed at the same time of the container deployment                                                                                                                                                                                      | no            | no                               | no                                               |
 | waserver.server.containerDebug                    | The container is executed in debug mode                                                                                                                                                                                                                                       | no            | no                               | no                                               |
-| waserver.enableSingleInstanceNetwork                    | If true an additional load balancer for each server pod is created. This is used to establish a connection between on-premises master domain manager and cloud backup domain manager when porting your workload to the cloud.                                                                                                                                                                                                                                       | no            | false                               | false                                               |
+| waserver.enableSingleInstanceNetwork               | If true an additional load balancer for each server pod is created. This is used to establish a connection between on-premises master domain manager and cloud backup domain manager when porting your workload to the cloud.                                                                                                                                                                                                                                       | no            | false                               | false                                               |
 | waserver.server.db.type                           | The preferred remote database server type (e.g. DERBY, DB2, ORACLE, MSSQL, IDS)                                                                                                                                                                                               | yes           | DB2                              | DB2                                              |
-| waserver.server.db.hostname                       | The Hostname or the IP Address of the database server                                                                                                                                                                                                                         | yes           | <dbhostname>                     |                                                  |
+| waserver.server.db.hostname                       | The Hostname or the IP Address of the database server                                                                                                                                                                                                                         | yes           | \<dbhostname>                     |                                                  |
 | waserver.server.db.port                           | The port of the database server                                                                                                                                                                                                                                               | yes           | 50000                            | 50000                                            |
 | waserver.server.db.name                           | Depending on the database type, the name is different; enter the name of the Server's database for DB2/Informix/MSSQL, enter the Oracle Service Name for Oracle                                                                                                               | yes           | TWS                              | TWS                                              |
 | waserver.server.db.tsName                         | The name of the DATA table space                                                                                                                                                                                                                                              | no            | TWS_DATA                         |                                                  |
@@ -672,7 +718,7 @@ The following table lists the configurable parameters of the chart and an exampl
 | waserver.server.ingressHostName      | The virtual hostname defined in the DNS used to reach the Server   | yes, only if the network enablement implementation is INGRESS            |                               |                     | 
 | waserver.server.ingressSecretName      | The name of the secret to store certificates used by the ingress. If not used, leave it empty   | yes, only if the network enablement implementation is INGRESS     |      |  wa-server-ingress-secret | 
 | waserver.server.nodeAffinityRequired                 | A set of rules that determines on which nodes a server can be deployed using custom labels on nodes and label selectors specified in pods.                                                                                                                                                                                                                           | no             |   See [Network enablement](#network-enablement)              |                               |
-| waserver.server.ftaName         |  The name of the IBM Workload Automation workstation for this installation.                                                                                                                                                                                                                           | no             |     WA-SERVER                    |                               |
+| waserver.server.ftaName         |  The name of the Workload Automation workstation for this installation.                                                                                                                                                                                                                           | no             |     WA-SERVER                    |                               |
 	
 
 ## Configuring
@@ -760,6 +806,11 @@ For more information about these configurable parameters, see the **[Server para
 
 		service.beta.kubernetes.io/azure-load-balancer-internal: "true"
 
+![Google GKE](images/taggke.png "Google GKE") 
+
+		networking.gke.io/load-balancer-type: "Internal"
+
+
 4. Specify the load balancer type and set the load balancer to internal by specifying "true".
 
 - **Console:**
@@ -773,8 +824,10 @@ For more information about these configurable parameters, see the **[Server para
 
    For more information about these configurable parameters, see the **[Console parameters](#console-parameters)** table.
 
-2. Set the value of the `exposeServiceType`parameter to `LoadBalancer`.
+2. Set the value of the `exposeServiceType`parameter to `LoadBalancer`. 
 
+   **Note:** You can also set the value of the `exposeServiceType` parameter to`LoadBalancer_sessionAffinity` for Azure AKS and Google  GKE. This parameter ensures each user session always remains active on the same pod, providing a smooth and seamless user experience.
+   
 3. In the `exposeServiceAnnotation` section, uncomment the lines in this section as follows:
 
 ![Amazon EKS](images/tagawseks.png "Amazon EKS") 
@@ -788,6 +841,10 @@ For more information about these configurable parameters, see the **[Server para
 
 		service.beta.kubernetes.io/azure-load-balancer-internal: "true"		
 		
+![Google GKE](images/taggke.png "Google GKE") 
+
+		networking.gke.io/load-balancer-type: "Internal"
+
 4. Specify the load balancer protocol and type.
 
 5. Set the load balancer to internal by specifying "true".
@@ -816,7 +873,11 @@ For more information about these configurable parameters, see the **[Server para
 
 ![Microsoft Azure](images/tagmsa.png "Microsoft Azure")
 
-		#service.beta.kubernetes.io/azure-load-balancer-internal: "true"		
+		#service.beta.kubernetes.io/azure-load-balancer-internal: "true"	
+		
+![Microsoft Azure](images/taggke.png "Microsoft Azure")
+
+                #networking.gke.io/load-balancer-type: "Internal"
 
 - **Console:**
 
@@ -838,6 +899,10 @@ For more information about these configurable parameters, see the **[Server para
 		#service.beta.kubernetes.io/aws-load-balancer-type: "clb"
 		#service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
 		#service.beta.kubernetes.io/aws-load-balancer-internal: "true"
+		#service.beta.kubernetes.io/azure-load-balancer-internal: "true"
+		#networking.gke.io/load-balancer-type: "Internal"
+
+		
 
 		
 ### Enabling communication between product components in an on-premises offering with components in the Cloud
@@ -1120,10 +1185,10 @@ The following is an example of the various metrics available with focus on the w
  
   ![Job status](images/WA_dashboard_pv.png)
   
-  ### Setting the Grafana service on the EKS cluster
-  Before you set the Grafana service on the EKS cluster, ensure that you have already installed Grafana and Prometheus on the EKS cluster. For information about deploying Grafana see [Install Grafana](https://github.com/helm/charts/blob/master/stable/grafana/README.md). For information about deploying the open-source Prometheus project see [Download Promotheus](https://github.com/helm/charts/tree/master/stable/prometheus).
+  ### Setting the Grafana service
+  Before you set the Grafana service, ensure that you have already installed Grafana and Prometheus on your cluster. For information about deploying Grafana see [Install Grafana](https://github.com/helm/charts/blob/master/stable/grafana/README.md). For information about deploying the open-source Prometheus project see [Download Promotheus](https://github.com/helm/charts/tree/master/stable/prometheus).
   
-1. Log in to the EKS cluster. To identify where Grafana is deployed, retrieve the value for the \<grafana-namespace> by running:
+1. Log in to your cluster. To identify where Grafana is deployed, retrieve the value for the \<grafana-namespace> by running:
   
           helm list -A
 		  
@@ -1219,9 +1284,14 @@ In case of problems related to deploying the product with containers, see [Troub
 
 ### Change history
 
-## Added Febbruary 2021 - version 1.4.1
+## Added March 2021 - version 1.4.2
 
-* New configurable parameters aded to values.yaml file for agent, console and server components: 
+* Support for Google Kubernetes Engine (GKE)
+* Support for Google Cloud SQL for SQL Server
+
+## Added February 2021 - version 1.4.1
+
+* New configurable parameters added to values.yaml file for agent, console and server components: 
 
     * waagent.agent.networkpolicyEgress
     * waconsole.console.networkpolicyEgress
@@ -1229,4 +1299,4 @@ In case of problems related to deploying the product with containers, see [Troub
     
  * New optional configurable parameter added to the values.yaml file for the server component: waserver.server.ftaName which represents the name of the Workload Automation workstation for the installation.
     
-* RFE 148080: Provides the capability to constrain a product component pod to run on particular nodes The nodeAffinityRequired parameter has been added to the configurable parameters in the values.yaml file for the agent, console, and server components so you can determine on which nodes a component can be deployed using custom labels on nodes and label selectors specified in pods.    
+* RFE 148080: Provides the capability to constrain a product component pod to run on particular nodes The nodeAffinityRequired parameter has been added to the configurable parameters in the values.yaml file for the agent, console, and server components so you can determine on which nodes a component can be deployed using custom labels on nodes and label selectors specified in pods.  
