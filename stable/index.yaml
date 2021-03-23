@@ -3,7 +3,43 @@ entries:
   workload-automation-prod:
   - apiVersion: v2
     appVersion: 9.5.0.03
-    created: "2021-02-24T10:12:47.22548+01:00"
+    created: "2021-03-23T16:42:42.648104+01:00"
+    dependencies:
+    - alias: waserver
+      condition: waserver.enableServer
+      name: wa-server-prod
+      repository: ""
+      version: 1.4.2
+    - alias: waconsole
+      condition: waconsole.enableConsole
+      name: wa-console-prod
+      repository: ""
+      version: 1.4.2
+    - alias: waagent
+      condition: waagent.enableAgent
+      name: wa-dyn-agent-prod
+      repository: ""
+      version: 1.4.2
+    description: Helm chart for configuring IBM Workload Automation.
+    digest: 762fb88215dd441e3fac6d38c44957882f0463b5d30a192be0b2148ff5cc47c9
+    keywords:
+    - Commercial
+    - amd64
+    - Workload Scheduler
+    - Workload Automation
+    - Automation
+    - DevOps
+    - ICP
+    kubeVersion: '>=1.14.0 || >=1.14.0-0'
+    maintainers:
+    - name: IBM Workload Automation
+    name: workload-automation-prod
+    urls:
+    - https://workloadautomation.github.io/ibm-workload-automation-chart/stable/workload-automation-prod-1.4.2.tgz
+    version: 1.4.2
+  - apiVersion: v2
+    appVersion: 9.5.0.03
+    created: "2021-03-23T16:42:42.631227+01:00"
     dependencies:
     - alias: waserver
       condition: waserver.enableServer
@@ -39,7 +75,7 @@ entries:
     version: 1.4.1
   - apiVersion: v2
     appVersion: 9.5.0.02
-    created: "2021-02-24T10:12:47.21213+01:00"
+    created: "2021-03-23T16:42:42.614654+01:00"
     dependencies:
     - alias: waserver
       condition: waserver.enableServer
@@ -75,7 +111,7 @@ entries:
     version: 1.4.0
   - apiVersion: v2
     appVersion: 9.5.0.02
-    created: "2021-02-24T10:12:47.19614+01:00"
+    created: "2021-03-23T16:42:42.598395+01:00"
     dependencies:
     - alias: waserver
       condition: waserver.enableServer
@@ -109,4 +145,4 @@ entries:
     urls:
     - https://workloadautomation.github.io/ibm-workload-automation-chart/stable/workload-automation-prod-1.1.0.tgz
     version: 1.1.0
-generated: "2021-02-24T10:12:47.175279+01:00"
+generated: "2021-03-23T16:42:42.581382+01:00"
