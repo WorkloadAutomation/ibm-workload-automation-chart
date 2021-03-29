@@ -69,9 +69,9 @@ In addition to the product components, the following objects are installed:
 You can access the IBM Workload Automation chart and container images from the Entitled Registry. See [Create the secret](#create-the-secret) for more information about accessing the registry. The images are as follows:
 
 
-* cp.icr.io/cp/ibm-workload-automation-agent-dynamic:9.5.0.03.20210218
-* cp.icr.io/cp/ibm-workload-automation-server:9.5.0.03.20210218
-* cp.icr.io/cp/ibm-workload-automation-console:9.5.0.03.20210218
+* cp.icr.io/cp/ibm-workload-automation-agent-dynamic:9.5.0.03.20210326
+* cp.icr.io/cp/ibm-workload-automation-server:9.5.0.03.20210326
+* cp.icr.io/cp/ibm-workload-automation-console:9.5.0.03.20210326
 
 
 
@@ -1283,6 +1283,10 @@ In case of problems related to deploying the product with containers, see [Troub
 3. Save the changes to the file.   
 
 ### Change history
+
+## Added March 2021 - version 1.4.3
+
+* Images vulnerabilities fixed
 
 ## Added March 2021 - version 1.4.2
 
