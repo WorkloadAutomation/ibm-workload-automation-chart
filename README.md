@@ -18,7 +18,7 @@ The information in this README contains the steps for deploying the following IB
  > **IBM Workload Automation**, which comprises master domain manager and its backup, Dynamic Workload Console, and Dynamic Agent
  
  
- For more information about IBM Workload Automation, see the product documentation library in [IBM Knowledge Center]( https://www.ibm.com/support/knowledgecenter/en/SSGSPN_9.5.0/com.ibm.tivoli.itws.doc_9.5/twa_landing.htm).
+ For more information about IBM Workload Automation, see the product documentation library in [IBM Documentation]( https://www.ibm.com/docs/en/workload-scheduler/9.5.0).
  
 ## Details
 
@@ -26,7 +26,7 @@ By default, a single  server (master domain manager), Dynamic Workload Console (
 
 To achieve high availability in an IBM Workload Automation environment, the minimum base configuration is composed of 2 Dynamic Workload Consoles and 2 servers (master domain managers). For more details about IBM Workload Automation and high availability, see: 
 
-[An active-active high availability scenario](https://www.ibm.com/support/knowledgecenter/en/SSGSPN_9.5.0/com.ibm.tivoli.itws.doc_9.5/distr/src_ad/awsadhaloadbal.htm).
+[An active-active high availability scenario](https://www.ibm.com/docs/en/workload-scheduler/9.5.0?topic=scheduler-active-active-high-availability-scenario).
 
 
 IBM Workload Automation can be deployed across a single cluster, but you can add multiple instances of the product components by using a different namespace in the cluster. The product components can run in multiple failure zones in a single cluster.
@@ -69,9 +69,9 @@ In addition to the product components, the following objects are installed:
 You can access the IBM Workload Automation chart and container images from the Entitled Registry. See [Create the secret](#create-the-secret) for more information about accessing the registry. The images are as follows:
 
 
-* cp.icr.io/cp/ibm-workload-automation-agent-dynamic:9.5.0.03.20210326
-* cp.icr.io/cp/ibm-workload-automation-server:9.5.0.03.20210326
-* cp.icr.io/cp/ibm-workload-automation-console:9.5.0.03.20210326
+* cp.icr.io/cp/ibm-workload-automation-agent-dynamic:9.5.0.04.20210709
+* cp.icr.io/cp/ibm-workload-automation-server:9.5.0.04.20210709
+* cp.icr.io/cp/ibm-workload-automation-console:9.5.0.04.20210709
 
 
 
@@ -150,6 +150,8 @@ Installing and configuring IBM Workload Automation, involves the following high-
 4. [Creating a secrets file](#creating-a-secrets-file) to store passwords for the console and server components, or if you use custom certificates, to add your custom certificates to the Certificates Secret.
 5. (For Microsoft Azure AKS and Google GKE only) [Configuring the Microsoft Azure SQL server database](#configuring-the-microsoft-azure-sql-server-database) or [Configuring the Google Cloud SQL for SQL Server
  database](#configuring-the-google-cloud-sql-for-sql-server-database).
+6. [Installing Automation Hub integrations](#installing-automation-hub-integrations).
+7. [Installing custom integrations](#installing-custom-integrations).
 5. [Deploying the product components](#deploying-the-product-components).
 6. [Verifying the installation](#verifying-the-installation).
 
@@ -347,6 +349,196 @@ To use the database with both the server and console components, set the `type` 
 | usepartitioning: true|usepartitioning: true |
 | user: <db_user>      | user: <db_user>      |	
 
+### Installing Automation Hub integrations  
+
+You can extend Workload Automation with a number of out-of-the-box integrations, or plug-ins. Complete documentation for the integrations is available on [Automation Hub](https://www.yourautomationhub.io/). Use this procedure to integrate only the integrations you need to automate your business workflows.
+
+**Note:** You must perform this procedure before deploying the server and console components. Any changes made post-installation are applied the next time you perform an upgrade.
+
+The following procedure describes how you can create and customize a *configMap* file to identify the integrations you want to make available in your Workload Automation environment:
+
+1) Create a .yaml file, for example, **plugins-config.yaml**, with the following content. This file name will need to be specified in a subsequent step.
+
+		####################################################################
+		# Licensed Materials Property of HCL*
+		# (c) Copyright HCL Technologies Ltd. 2021. All rights reserved.
+		#
+		# * Trademark of HCL Technologies Limited
+		####################################################################
+
+		apiVersion: v1
+		kind: ConfigMap
+		metadata:
+		  name: <configmap_name>
+		data:
+		  plugins.properties: |
+		      com.hcl.scheduling.agent.kubernetes
+		      com.hcl.scheduling.agent.udeploycode
+		      com.hcl.wa.plugin.ansible
+		      com.hcl.wa.plugin.automationanywherebotrunner
+		      com.hcl.wa.plugin.automationanywherebottrader
+		      com.hcl.wa.plugin.awscloudformation
+		      com.hcl.wa.plugin.awslambda
+		      com.hcl.wa.plugin.awssns
+		      com.hcl.wa.plugin.awssqs
+		      com.hcl.wa.plugin.azureresourcemanager
+		      com.hcl.wa.plugin.blueprism
+		      com.hcl.wa.plugin.compression
+		      com.hcl.wa.plugin.encryption
+		      com.hcl.wa.plugin.gcpcloudstorage
+		      com.hcl.wa.plugin.gcpdeploymentmanager
+		      com.hcl.wa.plugin.jdedwards
+		      com.hcl.wa.plugin.obiagent
+		      com.hcl.wa.plugin.odiloadplan
+		      com.hcl.wa.plugin.oraclehcmdataloader
+		      com.hcl.wa.plugin.oracleucm
+		      com.hcl.wa.plugin.saphanaxsengine
+		      com.hcl.waPlugin.chefbootstrap
+		      com.hcl.waPlugin.chefrunlist
+		      com.hcl.waPlugin.obirunreport
+		      com.hcl.waPlugin.odiscenario
+		      com.ibm.scheduling.agent.apachespark
+		      com.ibm.scheduling.agent.aws
+		      com.ibm.scheduling.agent.azure
+		      com.ibm.scheduling.agent.biginsights
+		      com.ibm.scheduling.agent.centralizedagentupdate
+		      com.ibm.scheduling.agent.cloudant
+		      com.ibm.scheduling.agent.cognos
+		      com.ibm.scheduling.agent.database
+		      com.ibm.scheduling.agent.datastage
+		      com.ibm.scheduling.agent.ejb
+		      com.ibm.scheduling.agent.filetransfer
+		      com.ibm.scheduling.agent.hadoopfs
+		      com.ibm.scheduling.agent.hadoopmapreduce
+		      com.ibm.scheduling.agent.j2ee
+		      com.ibm.scheduling.agent.java
+		      com.ibm.scheduling.agent.jobdurationpredictor
+		      com.ibm.scheduling.agent.jobmanagement
+		      com.ibm.scheduling.agent.jobstreamsubmission
+		      com.ibm.scheduling.agent.jsr352javabatch
+		      com.ibm.scheduling.agent.mqlight
+		      com.ibm.scheduling.agent.mqtt
+		      com.ibm.scheduling.agent.mssqljob
+		      com.ibm.scheduling.agent.oozie
+		      com.ibm.scheduling.agent.openwhisk
+		      com.ibm.scheduling.agent.oracleebusiness
+		      com.ibm.scheduling.agent.pichannel
+		      com.ibm.scheduling.agent.powercenter
+		      com.ibm.scheduling.agent.restful
+		      com.ibm.scheduling.agent.salesforce
+		      com.ibm.scheduling.agent.sapbusinessobjects
+		      com.ibm.scheduling.agent.saphanalifecycle
+		      com.ibm.scheduling.agent.softlayer
+		      com.ibm.scheduling.agent.sterling
+		      com.ibm.scheduling.agent.variabletable
+		      com.ibm.scheduling.agent.webspheremq
+		      com.ibm.scheduling.agent.ws
+
+4) In the **plugins-config.yaml** file, assign a name of your choice to the configmap:
+
+		name: <configmap_name>
+		
+5) Assign this same name to the `Global.customPlugins` parameter in the **values.yaml file**. See [Global parameters](#global-parameters) for more information about this global parameter.		
+
+6) Delete the lines related to the integrations you do not want to make available in your environment. The remaining integrations will be integrated into Workload Automation at deployment time. Save your changes to the file.
+
+   You can always refer back to this readme file and add an integration back into the file in the future. The integration becomes available the next time you update the console and server containers.
+   
+7) To apply the configMap to your environment and integrate the plug-ins, run the following command:
+
+        kubectl apply -f plugins_config.yaml -n <workload_automation_namespace>
+	
+	
+Proceed to deploy the product components. After the deployment, you can include jobs related to these integrations when defining your workload.	
+
+### Installing custom integrations
+
+In addition to the integrations available on Automation Hub, you can extend Workload Automation with custom plug-ins that you create. For information about creating a custom plug-in, see [Workload Automation Lutist Development Kit](https://www.yourautomationhub.io/toolkit) on Automation Hub.
+
+To install a custom plug-in and make it available to be used in your workload, perform the following steps before deploying or upgrading the console and server components:
+
+1) Create a new folder with a name of your choosing, for example, "my_custom_plugins".
+
+2) Create a Dockerfile with the following content and save it to the new folder as is, "my_custom_plugins". This file does not require any customization.
+
+		FROM registry.access.redhat.com/ubi8:8.3
+
+		ENV WA_BASE_UID=999
+		ENV WA_BASE_GID=0
+		ENV WA_USER=wauser
+		ENV WA_USER_HOME=/home/${WA_USER}
+
+		USER 0
+
+		RUN echo "Creating \"${WA_USER}\" user for Workload Automation and assign it to group \"${WA_BASE_GID}\"" \
+		&& userdel systemd-coredump \
+		&& if  [ ${WA_BASE_GID} -ne 0 ];then \
+		groupadd -g ${WA_BASE_GID} -r ${WA_USER};fi \
+		&& /usr/sbin/useradd -u ${WA_BASE_UID} -m -d ${WA_USER_HOME} -r -g ${WA_BASE_GID} ${WA_USER}
+
+		RUN mkdir -p /opt/wa_plugins /opt/wautils /tmp/custom_plugins
+		COPY plugins/* /opt/wa_plugins/
+
+		RUN chown -R ${WA_BASE_UID}:0 /opt/wa_plugins \
+		&& chmod -R 755 /opt/wa_plugins
+
+		COPY copy_custom_plugins.sh /opt/wautils/copy_custom_plugins.sh
+
+		RUN chmod 755 /opt/wautils/copy_custom_plugins.sh \
+		&& chown ${WA_BASE_UID}:${WA_BASE_GID} /opt/wautils/copy_custom_plugins.sh
+
+		USER ${WA_BASE_UID}
+
+		CMD [ "/opt/wautils/copy_custom_plugins.sh" ] 
+
+3) Create another file specifically with the name: **copy_custom_plugins.sh**. The file must contain the following content, and it must be saved to the new folder, "my_custom_plugins":
+
+		#!/bin/sh
+		####################################################################
+		# Licensed Materials Property of HCL*
+		# (c) Copyright HCL Technologies Ltd. 2021. All rights reserved.
+		#
+		# * Trademark of HCL Technologies Limited
+		####################################################################
+
+
+		copyCustomPlugins(){
+		    SOURCE_PLUGINS_DIR=$1
+		    REMOTE_PLUGINS_DIR=$2
+
+
+		    echo "I: Starting copy of custom plugins...." 
+		    if [ -d "${SOURCE_PLUGINS_DIR}" ] && [ -d "${REMOTE_PLUGINS_DIR}" ];then
+			echo "I: Copying custom plugins...." 
+			cp --verbose -R ${SOURCE_PLUGINS_DIR} ${REMOTE_PLUGINS_DIR}
+		    fi
+		}
+
+		###############
+		#MAIN
+		###############
+
+		copyCustomPlugins $1 $2
+
+4) Create a sub-folder specifically named: "plugins", in the new folder "my_custom_plugins".
+
+5) Copy your custom .jar plug-ins to the "plugins" sub-folder.
+
+6) Run the following command to build the Docker image:
+
+        docker build -t <your_docker_registry_name>/<your_image_name>:<your_tag> .
+	
+   where <your_docker_registry_name> is the name of your docker registry, <your_image_name> is the name of your Docker image, and <your_tag> is the tag you assigned to your Docker image.
+  
+7) Run the following command to push the Docker image to the registry:
+
+        docker push <your_docker_registry_name>/<your_image_name>:<your_tag>
+	
+8) Configure the `customPluginImageName` parameter in the values.yaml file with the name of the image and tag built in the previous steps. See [Global parameters](#global-parameters) for more information about this parameter.
+
+        customPluginImageName: <your_docker_registry_name>/<your_image_name>:<your_tag>
+	
+Proceed to deploy the product components. After the deployment, you can include jobs related to your custom plug-ins when defining your workload.	
 
 
 ### Deploying the product components		
@@ -380,7 +572,7 @@ To deploy the IBM Workload Automation components, ensure you have first download
 
         helm repo update 	 
 		
-1. Customize the deployment. Configure each product component by adjusting the values in the `values.yaml` file. See these parameters and their default values in [Configuration Parameters](#configuration-parameters). By default a single server, console, and agent is installed.
+1. Customize the deployment. Configure each product component by adjusting the values in the `values.yaml` file. See these parameters and their default values in [Configuration Parameters](#configuration-parameters). By default, a single server, console, and agent is installed.
 
 >**Note:**  If you specify the `waconsole.engineHostName` and `waconsole.enginePort` parameters in the `values.yaml` file, only a single engine connection related to an engine external to the cluster is automatically defined in the Dynamic Workload Console using the values assigned to these parameters. By default, the values for these parameters are blank, and the server is deployed within the cluster and the engine connection is related to the server in the cluster. If, instead, you deploy both a server within the cluster and one external to the cluster, a single engine connection is automatically created in the console using the values of the parameters related to the external engine (server). If you require an engine connection to the server deployed within the cluster, you must define the connection manually. 
 	 
@@ -458,7 +650,7 @@ To manually verify that the installation was successfully installed, you can per
 	 
         optman ls
 		
-This command lists the current values of all IBM Workload Automation global options. For more information about the global options see [Global Options - detailed description](https://www.ibm.com/support/knowledgecenter/en/SSGSPN_9.5.0/com.ibm.tivoli.itws.doc_9.5/distr/src_ad/awsadgloboptdescr.htm).	
+This command lists the current values of all IBM Workload Automation global options. For more information about the global options see [Global Options - detailed description](https://www.ibm.com/docs/en/workload-scheduler/9.5.0?topic=options-global-detailed-description).	
 	
 * **Verify that the default engine connection is created from the Dynamic Workload Console**
 
@@ -515,7 +707,8 @@ Verifying the default engine connection depends on the network enablement config
 Before you upgrade a chart, verify if there are jobs currently running and manually stop the related processes or wait until the jobs complete.	To upgrade the release <workload_automation_release_name> to a new version of the chart, run the following command from the directory where the values.yaml file is located:
 
  `helm upgrade release_name <repo_name>/workload-automation-prod -f values.yaml -n <workload_automation_namespace>`
-		
+
+If you have configured a configMaps file as described in [Installing Automation Hub integrations](installing-automation-hub-integrations), this upgrade procedure automatically upgrades any integrations or plug-ins previously installed from Automation Hub.
 
 ## Rolling Back the Chart
 
@@ -567,6 +760,8 @@ The following table lists the global configurable parameters of the chart relati
 | global.language                         | The language of the container internal system. The supported language are: en (English), de (German), es (Spanish), fr (French), it (Italian), ja (Japanese), ko (Korean), pt_BR (Portuguese (BR)), ru (Russian), zh_CN (Simplified Chinese) and zh_TW (Traditional Chinese) | yes            | en                               | en                               |  
 | global.customLabels                      | This parameter contains two fields: *name* and *value*. Insert customizable labels to group resources linked together.                                                                                                                                                                                                                               | no             | name: environment value: prod                             | name: environment value: prod                             |
 | global.enablePrometheus                          | Use to enable (true) or disable (false) Prometheus metrics                                                                                                                                                                                                                                 | no            | true                     |true                     |
+| global.customPlugins                          | If specified, the plug-ins and integrations listed in the configMap file are automatically installed when deploying the server and console containers.  See [Installing Automation Hub integrations](#installing-automation-hub-integrations) for details about the procedure.                                                                                                                                                                                                                            | no            | mycustomplugin (the value specified must match the value specified in the configMap file)   |        |
+| global.customPluginsImageName                 | To install a custom plug-in when deploying the server and console containers, specify the name of the Docker registry, the plug-in image, and the tag assigned to the Docker image. See [Installing custom integrations](#installing-custom-integrations) for details about the procedure.                                                                                                                                                                                                                             | no            | myregistry/mypluginimage:my_tag   |        |
 
 -  #### Agent parameters
 The following table lists the configurable parameters of the chart relative to the agent and an example of their values:
@@ -604,7 +799,7 @@ The following table lists the configurable parameters of the chart relative to t
 
 
 >\(*) **Note:** for details about static agent workstation pools, see: 
-[Workstation](https://www.ibm.com/support/knowledgecenter/en/SSGSPN_9.5.0/com.ibm.tivoli.itws.doc_9.5/distr/src_ref/awsrgworkstationconcept.htm).
+[Workstation](https://www.ibm.com/docs/en/workload-scheduler/9.5.0?topic=objects-workstation).
 
 
 - #### Dynamic Workload Console parameters
@@ -729,7 +924,6 @@ The following procedures are ways in which you can configure the default deploym
 * [Enabling communication between product components in an on-premises offering with components in the Cloud](#enabling-communication-between-product-components-in-an-on-premises-offering-with-components-in-the-cloud)
 * [Scaling the product](#scaling-the-product)
 * [Managing your custom certificates](#managing-your-custom-certificates)
-* [Installing Automation Hub Plug-ins](#installing-automation-hub-plug-ins)
 
 ### Network enablement
 
@@ -926,7 +1120,7 @@ To configure an on-premises agent to communicate with components in the cloud:
 3. Replace the files on the on-premises agent in the same path.
 
 **On-premises console engine connection (connection between an on-premises console with a server in the cloud):**
-1. Copy the public CA root certificate from the server. Refer to the IBM Workload Automation product documentation for details about creating custom certificates for communication between the server and the console: [Customizing certificates](https://www.ibm.com/support/knowledgecenter/en/SSGSPN_9.5.0/com.ibm.tivoli.itws.doc_9.5/distr/src_ad/awsadMDMDWCcomm.htm).
+1. Copy the public CA root certificate from the server. Refer to the IBM Workload Automation product documentation for details about creating custom certificates for communication between the server and the console: [Customizing certificates](https://www.ibm.com/docs/en/workload-scheduler/9.5.0?topic=scbdwcwsc-customizing-certificates-master-domain-manager-dynamic-workload-console-communication).
 
 2. To enable the changes, restart the Console workstation.
 
@@ -1006,7 +1200,7 @@ For the Dynamic Workload Console, type the following command:
     
    where, TWSClientKeyStoreJKS.sth, TWSClientKeyStore.kdb, TWSClientKeyStore.sth, TWSClientKeyStoreJKS.jks, TWSServerTrustFile.jks and TWSServerKeyFile.jks are the Container keystore and stash file containing your customized certificates.
    
-   For details about custom certificates, see [Connection security overview](https://www.ibm.com/support/knowledgecenter/en/SSGSPN_9.5.0/com.ibm.tivoli.itws.doc_9.5/distr/src_ad/awsadconnsec.htm).
+   For details about custom certificates, see [Connection security overview](https://www.ibm.com/docs/en/workload-scheduler/9.5.0?topic=configuration-connection-security-overview).
     
 
 > **Note**: Passwords for "TWSServerTrustFile.jks" and "TWSServerKeyFile.jks" files must be entered in the respective "TWSServerTrustFile.jks.pwd" and "TWSServerKeyFile.jks.pwd" files.
@@ -1027,75 +1221,6 @@ If you want to use SSL connection to DB, set `db.sslConnection:true` and `useCus
         
 If you define custom certificates, you are in charge of keeping them up to date, therefore, ensure you check their duration and plan to rotate them as necessary. To rotate custom certificates, delete the previous secret and upload a new secret, containing new certificates. The pod restarts automatically and the new certificates are applied.
 
-### Installing Automation Hub plug-ins 
- 
-You can extend IBM Workload Automation with a number of out-of-the-box integrations available on Automation Hub.
-
-To download the plug-ins:
-
-1) Download the plug-ins from [Automation Hub](https://www.yourautomationhub.io/) to your <plug-ins_folder> folder on your machine. Ensure that this folder contains only .jar files related to plug-ins.
-
-2) From your local computer, go to the <plug-ins_folder> folder and run the following command:
-
-         kubectl cp <plugin_name.jar> <namespace>/<master-pod>:/home/wauser/wadata/wa_plugins/<plugin_name.jar>
-		 
-where, <master_pod> is the workstation with the master role. The default is \<release-name>-waserver-0.
-
-3) Access the <master_pod> pod terminal and run the following command:
-
-`cp /home/wauser/wadata/wa_plugins/<plugin_name.jar> /opt/wa/TWS/applicationJobPlugIn/<plugin_name.jar>`
-
-4) To grant execution permissions for the .jar file, run:
-
-`chmod 755 /opt/wa/TWS/applicationJobPlugIn/<plugin_name.jar>`
-
-5) From the <master_pod> pod, to restart application server, run:
-
--   /opt/wa/appservertools/appserverstart.sh stop
--   /opt/wa/appservertools/appserverstart.sh start
-
->NOTE: Each time you restart the master pod, the plug-in you downloaded is removed. After a restart, rerun the procedure from step 5. to step 7.
-
-**NOTE**:
-
-A Kubernetes plug-in is available on Automation Hub. It enables you to run and automate Kubernetes jobs: [https://www.yourautomationhub.io/detail/kubernetes_9_5_0_02](https://www.yourautomationhub.io/detail/kubernetes_9_5_0_02). This specific job can be installed following the previous procedure, but it requires a couple of extra steps to configure the project and permit the execution of Kubernetes jobs. After following the previous procedure, perform the following steps: 
-
-1. `oc apply -f wa-k8s-role.yaml`
-2. `oc apply -f k8s-role-binding.yaml`
-
-where wa-k8s-role.yaml is structured as follows:
-
-	apiVersion: rbac.authorization.k8s.io/v1
-	kind: Role
-	metadata:
-	name: wa-pod-role
-	namespace: <namespace>
-	rules:
-
-	    apiGroups:
-	    ""
-	    extensions
-	    apps
-	    batch
-	    resources:
-	    '*'
-	    verbs:
-	    '*'
-	    
-and where the k8s-role-binding.yaml is structured as follows:
-
-	kind: RoleBinding
-	apiVersion: rbac.authorization.k8s.io/v1
-	metadata:
-	name: plugin-k8s-role-binding
-	subjects:
-
-	    kind: ServiceAccount
-	    name: <arbitrary wa service name - do not use the user one, e.g. wauser>
-	    roleRef:
-	    kind: Role
-	    name: <match the name key of wa-k8s-role.yaml>
-	    apiGroup: rbac.authorization.k8s.io
 
 ## Storage
 
@@ -1161,20 +1286,45 @@ IBM Workload Automation supports only ReadWriteOnce (RWO) access mode. The volum
 
 ## Metrics monitoring 
 
-IBM Workload Automation uses Grafana to display performance data related to the product and metrics related to the server and console application servers (WebSphere Application Server Liberty Base). Grafana is an open source tool for visualizing application metrics. Metrics provide insight into the state, health, and performance of your deployments and infrastructure. IBM Workload Automation cloud metric monitoring uses an opensource Cloud Native Computing Foundation (CNCF) project called Prometheus.
+IBM Workload Automation exposes a number of metrics to provide you with insight into the state, health, and performance of your environment and infrastructure. You can access the product APIs for monitoring and retrieving insightful metrics data. The metrics are exposed and can be visualized with tools for displaying application metrics such as, the open source tool Grafana. Grafana is an open source tool for visualizing application metrics. IBM Workload Automation  cloud metric monitoring uses an opensource Cloud Native Computing Foundation (CNCF) project called Prometheus. It is particularly useful for collecting time series data that can be easily queried. Prometheus integrates with Grafana to visualize the metrics collected.
+
+If you use Grafana, you can take advantage of the preconfigured dashboard that is included in the Helm chart. In addition, the dashboard is also available from [Automation Hub](https://www.yourautomationhub.io/integrations). Automation Hub gives you access to the downloadable JSON file on the Grafana web site. The dashboard includes metrics related to the server and console application servers (WebSphere Application Server Liberty Base), your workload, your workstations, critical jobs, message queues, the database connection status, and more. The user that performs the cloud deployment is already authenticated to access the metrics. However, to grant other users access to the metrics securely, using a set of credentials, you must add additional users to the `authentication_config.xml` file and then modify the `prometheus.xml` file that is automatically created in the cloud environment. For more information about this procedure, see [Metrics monitoring](https://www.ibm.com/support/knowledgecenter/en/SSGSPN_9.5.0/com.ibm.tivoli.itws.doc_9.5/distr/src_ref/awsrgmonprom.html).
 
 The following metrics are collected and available to be visualized in the preconfigured Grafana dashboard. The dashboard is named **<workload_automation_namespace> <workload_automation_release_name>**:
 
-| Metric Name                             | Description                                                                                                                               |
-|-----------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------|
-| Workload                                | Workload by job status: SUCC, ABEND, HOLD, CANCEL, FAIL, READY, SUPPR                                                                            |
-| PODs                                    | For server, console and agent pods: pod restarts, failing pods, CPU usage, and RAM usage. For the console and server: Network I/O         |
-| Persistent Volumes                      | For server, console, and agent: volume capacity (used, free)                                                                              |
-| WA Server - Internal Message Queues     | Queue usage for mirrorbox.msg, Mailbox.msg, Intercom.msg, and Courier.msg                                                                 |
-| WA  Server - Liberty                    | Heap usage percentage, active sessions, live sessions, active threads, threadpool size, time per garbage collection cycle moving average  |
-| WA Sever - Connection Pools (Liberty)   | average time usage per connection over last, managed connections, free connections, connection handles, created and destroyed connections |
-| WA  Console - Liberty                   | Heap usage percentage, active sessions, live sessions, active threads, threadpool size, time per garbage collection cycle moving average  |
-| WA Console - Connection Pools (Liberty) | average time usage per connection over last, managed connections, free connections, connection handles, created and destroyed connections |
+| Metric Display Name    | Metric Name                         | Description                                                                                                                               |
+|-----------------------------------------|--------------------------|-----------------------------------------------------------------------------------------------------------------|
+| Workload                                | application_wa_JobsInPlanCount_jobs   |Workload by job status: WAITING, READY, HELD, BLOCKED, CANCELED, ERROR, RUNNING, SUCCESSFUL, SUPPRESS, UNDECIDED  |
+|                               | application_wa_JobsByWorkstation    |Job status by workstation  |
+|                               | application_wa_JobsByFolder_jobs    |Job status by folder  |
+|                               | application_wa_JobsInPlanCount_jobs  | Workload throughput (jobs/minute)
+| Critical Jobs              | application_wa_criticalJob_incompletePredecessor    |Incomplete predecessors  |
+|                            | application_wa_criticalJob_potentialRisk_boolean   |Risk level:  potential risk  |
+|                            | application_wa_criticalJob_highRisk_boolean |Risk level: high risk  |
+|                            | application_wa_criticalJob_estimateEnd_seconds  | Estimated end  |
+|                            | application_wa_criticalJob_confidence_factor     | Confidence factor  |
+| WA Server - Internal Message Queues | application_wa_msgFileFill_percent    | Internal message queue usage for Appserverbox.msg, Courier.msg, mirrorbox.msg, Mailbox.msg, Monbox.msgn, Moncmd.msg, auditbox.msg, clbox.msg, planbox.msg, Intercom.msg, pobox messages, and server.msg   |
+| Workstation Status     | application_wa_workstation_running | Workstations running  |
+|                        | application_wa_workstation_linked_boolean | Workstations linked  |
+| Database Connection Status  | application_wa_DB_connected_boolean            |  1 - connected, 0 - not connected   |
+| PODs        |  kube_pod_container_status_restarts_total | Pod restarts (server, console, and agent) |
+|             |  kube_pod_status_phase                     | Failing pods (server, console, and agent)|
+|             |  container_cpu_usage_seconds_total          | POD CPU usage (server, console, and agent)        |
+|             |  container_network_transmit_bytes_total  |  Network I/O (server and console)        |
+|             |  container_network_receive_bytes_total  |  Network I/O (server and console)        |
+|             |  container_memory_usage_bytes          | RAM usage (server, console, and agent)       |
+| Persistent Volumes | kubelet_volume_stats_used_bytes   | For server, console, and agent: volume capacity (used, free)      |
+| WA  Server and Console - Liberty  |  base_memory_usedHeap_bytes     | Heap usage percentage  |
+|                                   | vendor_session_activeSessions   | Active sessions  |
+|                                   | vendor_session_liveSessions     |   Live sessions  |
+|                                   | vendor_threadpool_activeThreads | Active threads  |
+|                                   | vendor_threadpool_size          | Threadpool size  |
+|                                   | base_gc_time_seconds            |Time per garbage collection cycle moving average  |
+| WA Sever and Console - Connection Pools (Liberty) | vendor_connectionpool_inUseTime_total_seconds | Average time usage per connection over last |
+|                                   | vendor_connectionpool_managedConnections| Managed connections |
+|                                   | vendor_connectionpool_freeConnections | Free connections |
+|                                   | vendor_connectionpool_connectionHandles  | Connection handles |
+|                                   | vendor_connectionpool_destroy_total  | Created and destroyed connections |
 
 The following is an example of the various metrics available with focus on the workload job status:
 
@@ -1245,7 +1395,7 @@ For more information about using Grafana dashboards see [Dashboards overview](ht
 
 ## Documentation
 
-To access the complete product documentation library for IBM Workload Automation, see https://www.ibm.com/support/knowledgecenter/en/SSGSPN_9.5.0/com.ibm.tivoli.itws.doc_9.5/twa_landing.html  .
+To access the complete product documentation library for IBM Workload Automation, see https://www.ibm.com/docs/en/workload-scheduler/9.5.0  .
 
 
 ## Troubleshooting
@@ -1253,16 +1403,16 @@ To access the complete product documentation library for IBM Workload Automation
 
 In the event a problem should occur while using IBM Workload Automation, Customer Support might ask you to supply information about your system and environment to perform problem determination. The following utilities are available:
 
--   A general data capture utility command that extracts information about IBM Workload Automation  and related agent workstations, system-specific information, and data related to WebSphere Application Server Liberty Base; see [Data capture utility](https://www.ibm.com/support/knowledgecenter/en/SSGSPN_9.5.0/com.ibm.tivoli.itws.doc_9.5/distr/src_tr/awstrmetronome.htm).
+-   A general data capture utility command that extracts information about IBM Workload Automation  and related agent workstations, system-specific information, and data related to WebSphere Application Server Liberty Base; see [Data capture utility](https://www.ibm.com/docs/en/workload-scheduler/9.5.0?topic=data-capture-utility).
 
--   A first failure data capture (ffdc) facility built into **batchman** and **mailman** that automatically runs the data capture utility when failures occur in **jobman**, **mailman**, or **batchman** and collects products logs, traces and configuration files; see [First failure data capture (ffdc)](https://www.ibm.com/support/knowledgecenter/en/SSGSPN_9.5.0/com.ibm.tivoli.itws.doc_9.5/distr/src_tr/awstrffdc.htm).
+-   A first failure data capture (ffdc) facility built into **batchman** and **mailman** that automatically runs the data capture utility when failures occur in **jobman**, **mailman**, or **batchman** and collects products logs, traces and configuration files; see [First failure data capture (ffdc)](https://www.ibm.com/docs/en/workload-scheduler/9.5.0?topic=data-first-failure-capture-ffdc).
 
--   A data gather script to collect data related to the Dynamic Workload Console to assist in problem determination; see [Gathering Dynamic Workload Console data](https://www.ibm.com/support/knowledgecenter/en/SSGSPN_9.5.0/com.ibm.tivoli.itws.doc_9.5/distr/src_tr/awstrdwcdatagath.htm#awstrdwcdatagath).
+-   The data capture utility script, wa_pull_info, is also used to collect data related to the Dynamic Workload Console to assist in problem determination; see [Data capture utility](https://www.ibm.com/docs/en/workload-scheduler/9.5.0?topic=data-capture-utility).
 
--   WebSphere Application Server Liberty Base javadump command to create the heap dump for WebSphere Application Server Liberty Base that runs on the Dynamic Workload Console and the master domain manager; see [Creating application server dumps](https://www.ibm.com/support/knowledgecenter/en/SSGSPN_9.5.0/com.ibm.tivoli.itws.doc_9.5/distr/src_tr/awstrcoredumpserver.htm#coredumpserver).
+-   WebSphere Application Server Liberty Base javadump command to create the heap dump for WebSphere Application Server Liberty Base that runs on the Dynamic Workload Console and the master domain manager; see [Creating application server dumps](https://www.ibm.com/docs/en/workload-scheduler/9.5.0?topic=data-creating-application-server-dumps).
 
 
-In case of problems related to deploying the product with containers, see [Troubleshooting](https://www.ibm.com/support/knowledgecenter/en/SSGSPN_9.5.0/com.ibm.tivoli.itws.doc_9.5/distr/src_pi/awspitrblcontainers.htm).
+In case of problems related to deploying the product with containers, see [Troubleshooting](https://www.ibm.com/docs/en/workload-scheduler/9.5.0?topic=containers-troubleshooting).
 
 ### Known problems
 
@@ -1284,9 +1434,17 @@ In case of problems related to deploying the product with containers, see [Troub
 
 ### Change history
 
+## Added June 2021
+
+* Additional metrics are monitored by Prometheus and made available in the preconfigured Grafana dashboard.
+
+* Automation Hub integrations (plug-ins) now automatically installed with the product container deployment 
+
+* New procedure for installing custom integrations
+
 ## Added March 2021 - version 1.4.3
 
-* Images vulnerabilities fixed
+* Image vulnerabilities fixed
 
 ## Added March 2021 - version 1.4.2
 
@@ -1294,6 +1452,8 @@ In case of problems related to deploying the product with containers, see [Troub
 * Support for Google Cloud SQL for SQL Server
 
 ## Added February 2021 - version 1.4.1
+
+* Support for Microsoft Azure Kubernetes Service (AKS)
 
 * New configurable parameters added to values.yaml file for agent, console and server components: 
 
@@ -1304,3 +1464,4 @@ In case of problems related to deploying the product with containers, see [Troub
  * New optional configurable parameter added to the values.yaml file for the server component: waserver.server.ftaName which represents the name of the Workload Automation workstation for the installation.
     
 * RFE 148080: Provides the capability to constrain a product component pod to run on particular nodes The nodeAffinityRequired parameter has been added to the configurable parameters in the values.yaml file for the agent, console, and server components so you can determine on which nodes a component can be deployed using custom labels on nodes and label selectors specified in pods.  
+
