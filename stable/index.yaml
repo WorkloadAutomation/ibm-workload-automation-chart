@@ -2,8 +2,44 @@ apiVersion: v1
 entries:
   workload-automation-prod:
   - apiVersion: v2
+    appVersion: 9.5.0.4
+    created: "2021-07-13T10:27:51.721664+02:00"
+    dependencies:
+    - alias: waserver
+      condition: waserver.enableServer
+      name: wa-server-prod
+      repository: ""
+      version: 1.5.12
+    - alias: waconsole
+      condition: waconsole.enableConsole
+      name: wa-console-prod
+      repository: ""
+      version: 1.5.12
+    - alias: waagent
+      condition: waagent.enableAgent
+      name: wa-dyn-agent-prod
+      repository: ""
+      version: 1.5.12
+    description: Helm chart for configuring IBM Workload Automation.
+    digest: bba3d7d17351b7ff8b15590701564af27969df8536c0bcbc9957b9b20e38c827
+    keywords:
+    - Commercial
+    - amd64
+    - Workload Scheduler
+    - Workload Automation
+    - Automation
+    - DevOps
+    - ICP
+    kubeVersion: '>=1.14.0 || >=1.14.0-0'
+    maintainers:
+    - name: IBM Workload Automation
+    name: workload-automation-prod
+    urls:
+    - workload-automation-prod-1.5.12.tgz
+    version: 1.5.12
+  - apiVersion: v2
     appVersion: 9.5.0.03
-    created: "2021-03-29T15:18:16.774696+02:00"
+    created: "2021-07-13T10:27:51.7146647+02:00"
     dependencies:
     - alias: waserver
       condition: waserver.enableServer
@@ -35,11 +71,11 @@ entries:
     - name: IBM Workload Automation
     name: workload-automation-prod
     urls:
-    - https://workloadautomation.github.io/ibm-workload-automation-chart/stable/workload-automation-prod-1.4.3.tgz
+    - workload-automation-prod-1.4.3.tgz
     version: 1.4.3
   - apiVersion: v2
     appVersion: 9.5.0.03
-    created: "2021-03-29T15:18:16.763313+02:00"
+    created: "2021-07-13T10:27:51.6966715+02:00"
     dependencies:
     - alias: waserver
       condition: waserver.enableServer
@@ -71,11 +107,11 @@ entries:
     - name: IBM Workload Automation
     name: workload-automation-prod
     urls:
-    - https://workloadautomation.github.io/ibm-workload-automation-chart/stable/workload-automation-prod-1.4.2.tgz
+    - workload-automation-prod-1.4.2.tgz
     version: 1.4.2
   - apiVersion: v2
     appVersion: 9.5.0.03
-    created: "2021-03-29T15:18:16.750338+02:00"
+    created: "2021-07-13T10:27:51.6786684+02:00"
     dependencies:
     - alias: waserver
       condition: waserver.enableServer
@@ -107,11 +143,11 @@ entries:
     - name: IBM Workload Automation
     name: workload-automation-prod
     urls:
-    - https://workloadautomation.github.io/ibm-workload-automation-chart/stable/workload-automation-prod-1.4.1.tgz
+    - workload-automation-prod-1.4.1.tgz
     version: 1.4.1
   - apiVersion: v2
     appVersion: 9.5.0.02
-    created: "2021-03-29T15:18:16.737214+02:00"
+    created: "2021-07-13T10:27:51.6567059+02:00"
     dependencies:
     - alias: waserver
       condition: waserver.enableServer
@@ -143,11 +179,11 @@ entries:
     - name: IBM Workload Automation
     name: workload-automation-prod
     urls:
-    - https://workloadautomation.github.io/ibm-workload-automation-chart/stable/workload-automation-prod-1.4.0.tgz
+    - workload-automation-prod-1.4.0.tgz
     version: 1.4.0
   - apiVersion: v2
     appVersion: 9.5.0.02
-    created: "2021-03-29T15:18:16.722135+02:00"
+    created: "2021-07-13T10:27:51.6346694+02:00"
     dependencies:
     - alias: waserver
       condition: waserver.enableServer
@@ -179,6 +215,6 @@ entries:
     - name: IBM Workload Automation
     name: workload-automation-prod
     urls:
-    - https://workloadautomation.github.io/ibm-workload-automation-chart/stable/workload-automation-prod-1.1.0.tgz
+    - workload-automation-prod-1.1.0.tgz
     version: 1.1.0
-generated: "2021-03-29T15:18:16.707208+02:00"
+generated: "2021-07-13T10:27:51.6146946+02:00"
