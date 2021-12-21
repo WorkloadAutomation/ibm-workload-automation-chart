@@ -1,0 +1,131 @@
+####################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2021. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+####################################################################
+global:
+  # set to "accept" to accept the license
+  license: "not accepted"
+  serviceAccountName:
+  enablePrometheus: true
+  customPluginImageName: 
+  configPlugins:
+  language: "en"
+  customLabels:
+    - name: "environment"
+      value: "prod"
+replicaCount: 1
+image:
+  repository: cp.icr.io/cp/ibm-workload-automation-server
+  tag: 9.5.0.05.20211217
+  pullPolicy: Always
+licenseType: "PVU"
+runAsUser: 999
+fsGroupId: 999
+supplementalGroupId:
+server:
+  company: "my-company"
+  ftaName:
+  agentName: "WA_SAGT"
+  dateFormat: "MM/DD/YYYY"
+  startOfDay: "0700"
+  timezone:
+  tz:
+  createPlan: true
+  containerDebug: false
+  enableSSO: true
+  enableSingleInstaceNetwork: false
+  adminGroup:
+  db:
+    adminUser: db2inst1
+    hostname: dbhost
+    alternateHostName:
+    name: TWS
+    port: 50000
+    alternatePort:
+    server:
+    sslConnection: false
+    tsLogName: null
+    tsLogPath: null
+    tsName: null
+    tsPath: null
+    tsPlanName: null
+    tsPlanPath: null
+    tsTempName: null
+    tssbspace: null
+    type: DB2
+    usepartitioning: true
+    user: db2inst1
+  licenseServerUrl:
+  licenseServerId:
+  pwdSecretName: wa-pwd-secret
+  libConfigName:
+  readinessProbe:
+    initialDelaySeconds: 600
+  livenessProbe:
+    initialDelaySeconds: 600
+  # Variable to specify the customized certificates for SSL communication
+  useCustomizedCert: false
+  certSecretName:  waserver-cert-secret
+  routes:
+    enabled: true
+    hostname:
+  exposeServiceType: None
+  exposeServiceAnnotation: {}
+  networkpolicyEgress: {}
+  nodeAffinityRequired: {}
+resources:
+  requests:
+    cpu: 1
+    memory: 6Gi
+  limits:
+    cpu: 4
+    memory: 16Gi
+persistence:
+  # Determine whether to use Persistent Volumes for the pods
+  enabled: true
+  # Determine whether to use Storage Classes to dynamically create Persistent Volumes for the pods
+  useDynamicProvisioning: true
+  #
+  # Settings for the pod Persistent Volume Claims,
+  # which each pod uses for data
+  dataPVC:
+    # Prefix for names of this Persistent Volume Claim
+    name: "data"
+    # Name of the Storage Class to use. If no Storage Class is used, leave an empty string
+    storageClassName: ""
+    # If your not using dynamic provisioning, you can use selectors to
+    # refine the binding process. You cannot specify a selector if you are using dynamic provisioning!
+    selector:
+      label: ""
+      value: ""
+    # Minimum size of the Persistent Volume
+    size: 10Gi
+  extraVolumes: []
+      # - name: custom-volume-1
+      #   persistentVolumeClaim:
+      #     claimName: pvc-name
+      # - name: custom-volume-2
+      #   configMap:
+      #      name: custom-configMap
+      #      defaultMode: 0755
+      # - name: custom-volume-3
+      #   secret:
+      #     secretName: custom-secret
+      #     defaultMode: 0744
+      # - name: nfs-volume
+      #   nfs: 
+      #     # URL for the NFS server
+      #     server: <nfs_server> # Change this!
+      #     path: /
+  extraVolumeMounts: []
+      # - name: custom-volume-1
+      #   mountPath: /custom/mount/path-1
+      #   readOnly: false
+      # - name: custom-volume-2
+      #   mountPath: /custom/mount/path-2
+      # - name: custom-volume-3
+      #   mountPath: /custom/mount/path-3
+      # - name: nfs-volume
+      #   mountPath: /path/nfs

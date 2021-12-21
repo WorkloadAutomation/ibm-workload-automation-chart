@@ -1,0 +1,360 @@
+####################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2020. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+####################################################################
+global:
+  language: en
+  license: not accepted
+  serviceAccountName: wauser
+  enablePrometheus: true
+  customPluginImageName: 
+  configPlugins:
+  customLabels:
+    - name: "environment"
+      value: "prod"
+waagent:
+  enableAgent: true
+  licenseType: "PVU"
+  runAsUser: 999
+  fsGroupId: 999
+  supplementalGroupId:
+  agent:
+    containerDebug: false
+    dynamic:
+      certSecretName: waagent-cert-secret
+      useSaaSConfig: false
+      saasConfig:
+        engine: sijr27wamxo-355.wa.ibmserviceengage.com
+        subscriptionID:
+        controllerHostname: wastagdal05gov.wa.ibmserviceengage.com
+        userID:
+        password:
+      pools: null
+      server:
+        mdmhostname: null
+        port: "31116"
+      useCustomizedCert: false
+    livenessProbe:
+      initialDelaySeconds: 60
+    name: WA_AGT
+    networkpolicyEgress: {}
+    # Allows all  Egress to mdm.
+    #  - name: to-mdm
+    #    egress:
+    #    - to:
+    #      - podSelector:
+    #          matchLabels:
+    #            app.kubernetes.io/name: waserver
+    #    
+    #  - name: dns
+    #    egress:
+    #    - to:
+    #        - namespaceSelector:
+    #            matchLabels:
+    #              name: kube-system
+    #    - ports:
+    #        - port: 53
+    #          protocol: UDP
+    #        - port: 53
+    #          protocol: TCP 
+    nodeAffinityRequired: {}
+    tz: null
+  image:
+    pullPolicy: Always
+    repository: cp.icr.io/cp/ibm-workload-automation-agent-dynamic
+    tag: 9.5.0.05.20211217
+  persistence:
+    dataPVC:
+      name: data
+      selector:
+        label: ""
+        value: ""
+      size: 2Gi
+      storageClassName: ""
+    enabled: true
+    useDynamicProvisioning: true
+    extraVolumes: []
+        # - name: custom-volume-1
+        #   persistentVolumeClaim:
+        #     claimName: pvc-name
+        # - name: custom-volume-2
+        #   configMap:
+        #      name: custom-configMap
+        #      defaultMode: 0755
+        # - name: custom-volume-3
+        #   secret:
+        #     secretName: custom-secret
+        #     defaultMode: 0744
+        # - name: nfs-volume
+        #   nfs: 
+        #     # URL for the NFS server
+        #     server: <nfs_server> # Change this!
+        #     path: /
+    extraVolumeMounts: []
+        # - name: custom-volume-1
+        #   mountPath: /custom/mount/path-1
+        #   readOnly: false
+        # - name: custom-volume-2
+        #   mountPath: /custom/mount/path-2
+        # - name: custom-volume-3
+        #   mountPath: /custom/mount/path-3
+        # - name: nfs-volume
+        #   mountPath: /path/nfs
+  replicaCount: 1
+  resources:
+    limits:
+      cpu: 1
+      memory: 2Gi
+    requests:
+      cpu: 200m
+      memory: 200Mi
+waconsole:
+  enableConsole: true
+  runAsUser: 999
+  fsGroupId: 999
+  supplementalGroupId:
+  console:
+    certSecretName: waconsole-cert-secret
+    containerDebug: false
+    enableSSO: true
+    adminGroup:
+    engineHostName:
+    enginePort:
+    db:
+      adminUser: db2inst1
+      hostname: dbhost
+      alternateHostName:
+      name: DWC
+      port: 50000
+      alternatePort:
+      server:
+      sslConnection: false
+      tsName: null
+      tsPath: null
+      tsTempName: null
+      tssbspace: null
+      type: DB2
+      usepartitioning: true
+      user: db2inst1
+    routes:
+      enabled: true
+    ingress:
+      hostname:
+      secretName: wa-console-ingress-secret
+    exposeServiceType: Ingress
+    exposeServiceAnnotation: {}
+      #cert-manager.io/issuer: wa-ca-issuer
+      #service.beta.kubernetes.io/aws-load-balancer-backend-protocol: https
+      #service.beta.kubernetes.io/aws-load-balancer-type: "clb"
+      #service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+      #service.beta.kubernetes.io/aws-load-balancer-internal: "true"
+      #service.beta.kubernetes.io/azure-load-balancer-internal: "true"
+      #networking.gke.io/load-balancer-type: "Internal"
+    networkpolicyEgress: {}
+    # Allows all  Egress to mdm.
+    #  - name: to-mdm
+    #    egress:
+    #    - to:
+    #      - podSelector:
+    #          matchLabels:
+    #            app.kubernetes.io/name: waserver
+    #    
+    #  - name: dns
+    #    egress:
+    #    - to:
+    #        - namespaceSelector:
+    #            matchLabels:
+    #              name: kube-system
+    #    - ports:
+    #        - port: 53
+    #          protocol: UDP
+    #        - port: 53
+    #          protocol: TCP 
+    nodeAffinityRequired: {}
+    libConfigName: null
+    livenessProbe:
+      initialDelaySeconds: 100
+    pwdSecretName: wa-pwd-secret
+    useCustomizedCert: false
+  image:
+    pullPolicy: Always
+    repository: cp.icr.io/cp/ibm-workload-automation-console
+    tag: 9.5.0.05.20211217
+  persistence:
+    dataPVC:
+      name: data
+      selector:
+        label: ""
+        value: ""
+      size: 5Gi
+      storageClassName: ""
+    enabled: true
+    useDynamicProvisioning: true
+    extraVolumes: []
+        # - name: custom-volume-1
+        #   persistentVolumeClaim:
+        #     claimName: pvc-name
+        # - name: custom-volume-2
+        #   configMap:
+        #      name: custom-configMap
+        #      defaultMode: 0755
+        # - name: custom-volume-3
+        #   secret:
+        #     secretName: custom-secret
+        #     defaultMode: 0744
+        # - name: nfs-volume
+        #   nfs: 
+        #     # URL for the NFS server
+        #     server: <nfs_server> # Change this!
+        #     path: /
+    extraVolumeMounts: []
+        # - name: custom-volume-1
+        #   mountPath: /custom/mount/path-1
+        #   readOnly: false
+        # - name: custom-volume-2
+        #   mountPath: /custom/mount/path-2
+        # - name: custom-volume-3
+        #   mountPath: /custom/mount/path-3
+        # - name: nfs-volume
+        #   mountPath: /path/nfs
+  replicaCount: 1
+  resources:
+    limits:
+      cpu: 4
+      memory: 16Gi
+    requests:
+      cpu: 1
+      memory: 4Gi
+waserver:
+  enableServer: true
+  licenseType: "PVU"
+  runAsUser: 999
+  fsGroupId: 999
+  supplementalGroupId:
+  image:
+    pullPolicy: Always
+    repository: cp.icr.io/cp/ibm-workload-automation-server
+    tag: 9.5.0.05.20211217
+  persistence:
+    dataPVC:
+      name: data
+      selector:
+        label: ""
+        value: ""
+      size: 10Gi
+      storageClassName: ""
+    enabled: true
+    useDynamicProvisioning: true
+    extraVolumes: []
+      # - name: custom-volume-1
+      #   persistentVolumeClaim:
+      #     claimName: pvc-name
+      # - name: custom-volume-2
+      #   configMap:
+      #      name: custom-configMap
+      #      defaultMode: 0755
+      # - name: custom-volume-3
+      #   secret:
+      #     secretName: custom-secret
+      #     defaultMode: 0744
+      # - name: nfs-volume
+      #   nfs: 
+      #     # URL for the NFS server
+      #     server: <nfs_server> # Change this!
+      #     path: /
+    extraVolumeMounts: []
+      # - name: custom-volume-1
+      #   mountPath: /custom/mount/path-1
+      #   readOnly: false
+      # - name: custom-volume-2
+      #   mountPath: /custom/mount/path-2
+      # - name: custom-volume-3
+      #   mountPath: /custom/mount/path-3
+      # - name: nfs-volume
+      #   mountPath: /path/nfs
+  replicaCount: 1
+  resources:
+    limits:
+      cpu: 4
+      memory: 16Gi
+    requests:
+      cpu: 1
+      memory: 4Gi
+  server:
+    ftaName: 
+    agentName: WA_SAGT
+    certSecretName: waserver-cert-secret
+    company: my-company
+    containerDebug: false
+    enableSSO: true
+    enableSingleInstaceNetwork: false
+    adminGroup:
+    createPlan: true
+    dateFormat: MM/DD/YYYY
+    db:
+      adminUser: db2inst1
+      hostname: dbhost
+      alternateHostName:
+      name: TWS
+      port: 50000
+      alternatePort:
+      server:
+      sslConnection: false
+      tsLogName: null
+      tsLogPath: null
+      tsName: null
+      tsPath: null
+      tsPlanName: null
+      tsPlanPath: null
+      tsTempName: null
+      tssbspace: null
+      type: DB2
+      usepartitioning: true
+      user: db2inst1
+    routes:
+      enabled: true
+      hostname:
+    ingress:
+      hostname:
+      secretName: wa-server-ingress-secret
+    exposeServiceType: Ingress
+    exposeServiceAnnotation: {}
+      #service.beta.kubernetes.io/aws-load-balancer-type: nlb
+      #service.beta.kubernetes.io/aws-load-balancer-internal: "true"
+      #service.beta.kubernetes.io/azure-load-balancer-internal: "true"
+      #networking.gke.io/load-balancer-type: "Internal"
+    networkpolicyEgress: {}
+    # Allows all  Egress to mdm.
+    #  - name: to-mdm
+    #    egress:
+    #    - to:
+    #      - podSelector:
+    #          matchLabels:
+    #            app.kubernetes.io/name: waserver
+    #    
+    #  - name: dns
+    #    egress:
+    #    - to:
+    #        - namespaceSelector:
+    #            matchLabels:
+    #              name: kube-system
+    #    - ports:
+    #        - port: 53
+    #          protocol: UDP
+    #        - port: 53
+    #          protocol: TCP 
+    nodeAffinityRequired: {}
+    libConfigName: null
+    licenseServerId: null
+    licenseServerUrl: null
+    readinessProbe:
+      initialDelaySeconds: 530
+    livenessProbe:
+      initialDelaySeconds: 600
+    pwdSecretName: wa-pwd-secret
+    startOfDay: "0700"
+    timezone: null
+    tz: null
+    useCustomizedCert: false

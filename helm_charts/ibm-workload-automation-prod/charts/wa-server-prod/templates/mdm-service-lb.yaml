@@ -1,0 +1,32 @@
+{{- if eq (.Values.server.exposeServiceType | upper )  "LOADBALANCER" }} 
+####################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2019. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+####################################################################
+{{- include "wa.init" (list . "waserver") }}
+{{ $fullName := include "wa.fullName" . }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "waMdm.ServiceName" . }}-lb
+  labels:
+{{ include "wa.server.labels" . | indent 4 }}
+  annotations:
+{{- with .Values.server.exposeServiceAnnotation }}
+{{ toYaml . | indent 4 }} 
+{{- end }}
+    #service.beta.kubernetes.io/aws-load-balancer-internal: "true"
+spec:
+  type: LoadBalancer
+  ports:
+  - name: server-https
+    protocol: TCP
+    port: 31116
+    targetPort: 31116   
+  selector:
+    app.kubernetes.io/name: "{{ include "wa.appName" . }}"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+{{- end }}    
+  

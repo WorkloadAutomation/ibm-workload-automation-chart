@@ -1,0 +1,22 @@
+####################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2019. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+####################################################################
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-wa-operator-configmap
+  labels:
+{{ include "wa.labels" . | indent 4 }}
+data:
+  {{- if and (.Values.waserver.enableServer) (.Values.waagent.enableAgent) }}
+    wa_operator_run_server: "true"
+  {{- end }}  
+  {{- if and (.Values.waserver.enableServer) ( not (.Values.waagent.enableAgent)) }}
+    wa_operator_run_server: "true"
+  {{- end }}  
+  {{- if and (.Values.waagent.enableAgent) ( not (.Values.waserver.enableServer)) }}
+    wa_operator_run_agent: "true"
+  {{- end }}  

@@ -1,0 +1,56 @@
+{{- if eq (.Values.console.exposeServiceType | upper )  "INGRESS" }} 
+####################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2019. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+####################################################################
+{{- include "wa.init" (list . "waconsole") }}
+{{ $fullName := include "wa.fullName" . }}
+{{ $dwcServiceName := include "wa.fullName" . }}
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: {{ $dwcServiceName }}
+  labels:
+{{ include "wa.console.labels" . | indent 4 }}
+  annotations:
+    ingress.kubernetes.io/backend-protocol: HTTPS
+    ingress.kubernetes.io/force-ssl-redirect: "true"
+    ingress.kubernetes.io/secure-backends: "true"
+    nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/secure-backends: "true"
+    nginx.ingress.kubernetes.io/affinity: cookie
+    nginx.ingress.kubernetes.io/session-cookie-name: {{ $dwcServiceName }}-console-affinity-cookie
+    nginx.ingress.kubernetes.io/session-cookie-hash: sha1
+    ingress.kubernetes.io/affinity: cookie
+    ingress.kubernetes.io/session-cookie-name: {{ $dwcServiceName }}-console-affinity-cookie
+    ingress.kubernetes.io/session-cookie-hash: sha1
+{{- with .Values.console.exposeServiceAnnotation }}
+{{ toYaml . | indent 4 }} 
+{{- end }}  
+spec:
+  tls:
+    - hosts:
+      {{- if .Values.console.ingress.hostname }}
+       - {{ .Values.console.ingress.hostname }}
+      {{- else }}  
+       - {{ $fullName }}.{{ .Release.Name }}.{{ .Release.Namespace }}.mycluster.proxy
+      {{- end }}
+      {{- if .Values.console.ingress.secretName }}       
+      secretName: {{ .Values.console.ingress.secretName }}    
+      {{- end }}       
+  rules:
+  {{- if .Values.console.ingress.hostname }}
+  - host: {{ .Values.console.ingress.hostname }}
+  {{- else }}  
+  - host: {{ $fullName }}.{{ .Release.Name }}.{{ .Release.Namespace }}.mycluster.proxy
+  {{- end }}
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: {{ $dwcServiceName }}
+          servicePort: 9443
+{{- end }}             

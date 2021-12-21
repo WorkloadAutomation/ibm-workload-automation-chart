@@ -1,0 +1,94 @@
+####################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2019. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+####################################################################
+{{- include "wa.init" (list . "waserver") }}
+{{ $fullName := include "wa.fullName" . }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "waMdm.ServiceName" . }}
+  labels:
+{{ include "wa.server.labels" . | indent 4 }}
+  annotations:
+    prometheus.io/scrape: {{ .Values.global.enablePrometheus | quote | default "true" }}
+    prometheus.io/scheme: http
+    prometheus.io/port: "31115"
+    prometheus.io/path: /metrics
+spec:
+  type: ClusterIP
+  ports:
+  - name: server-https
+    protocol: TCP
+    port: 31116
+    targetPort: 31116
+  - name: server-monitoring
+    protocol: TCP
+    port: 31115
+    targetPort: 31115      
+  selector:
+    app.kubernetes.io/name: "{{ include "wa.appName" . }}"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+    waservertype: master
+  sessionAffinity: ClientIP
+{{- if  (.Values.server.enableSingleInstaceNetwork  )  }} 
+{{- $root := . -}}
+{{range $i, $e := until (.Values.replicaCount | int) }}
+---
+#  Licensed Materials Property of HCL* {{$i}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ template "waMdm.ServiceName" $root }}-{{ $i }}"
+  labels:
+{{ include "wa.server.labels" $root | indent 4 }}
+  annotations:
+spec:
+{{- if eq ($root.Values.server.exposeServiceType | upper )  "LOADBALANCER" }} 
+  type: LoadBalancer
+{{ else }}
+  type: ClusterIP
+{{ end }}
+  ports:
+  - name: server-ssl-eif
+    port: 31113
+    protocol: TCP
+    targetPort: 31113
+  - name: server-https-ssl-eif
+    port: 443
+    protocol: TCP
+    targetPort: 31113
+  - name: server-eif-a
+    port: 31111
+    protocol: TCP
+    targetPort: 31111
+  - name: server-a
+    port: 31114
+    protocol: TCP
+    targetPort: 31114
+  - name: server-b
+    port: 31115
+    protocol: TCP
+    targetPort: 31115
+  - name: server-https
+    port: 31116
+    protocol: TCP
+    targetPort: 31116
+  - name: server-c
+    port: 31131
+    protocol: TCP
+    targetPort: 31131
+  - name: server-broker-sec
+    port: 31134
+    protocol: TCP
+    targetPort: 31134
+  - name: server-broker-prim
+    port: 41114
+    protocol: TCP
+    targetPort: 41114             
+  selector:
+    statefulset.kubernetes.io/pod-name: "{{ $root.Release.Name }}-waserver-{{$i}}"
+{{- end }}  
+{{- end }}              

@@ -1,0 +1,42 @@
+####################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2019. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+####################################################################
+{{- include "wa.init" (list . "waserver") }}
+{{ $fullName := include "wa.fullName" . }}
+{{ $serviceName := include "wa.fullName" . }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $serviceName }}-h
+  labels:
+{{ include "wa.server.labels" . | indent 4 }}
+  annotations:
+    prometheus.io/scrape: {{ .Values.global.enablePrometheus | quote | default "true" }}
+    prometheus.io/scheme: http
+    prometheus.io/port: "31115"
+    prometheus.io/path: /metrics
+spec:
+  clusterIP: None
+  ports:
+  - name: ita-port
+    protocol: TCP
+    port: 31114
+    targetPort: 31114
+  - name: server-netman
+    protocol: TCP
+    port: 31111
+    targetPort: 31111
+  - name: server-eif
+    protocol: TCP
+    port: 31131
+    targetPort: 31131
+  - name: monitoring-port
+    protocol: TCP
+    port: 31115
+    targetPort: 31115         
+  selector:
+    app.kubernetes.io/name: "{{ include "wa.appName" . }}"
+    app.kubernetes.io/instance: "{{ .Release.Name }}" 

@@ -1,0 +1,74 @@
+{{- if .Capabilities.APIVersions.Has "route.openshift.io/v1" -}}
+{{- if or (.Values.server.routes.enabled) (eq (.Values.server.exposeServiceType | upper )  "ROUTE")  }} 
+####################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2019. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+####################################################################
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: wa-server-route
+  labels:
+{{ include "wa.server.labels" . | indent 4 }}
+  annotations:
+    openshift.io/host.generated: 'true'
+    haproxy.router.openshift.io/cookie_name: wa-console-affinity-cookie
+spec:
+  host: 
+  to:
+    kind: Service
+    name: {{ template "waMdm.ServiceName" . }}
+    weight: 100
+  port:
+    targetPort: server-https
+  tls:
+    termination: passthrough
+    insecureEdgeTerminationPolicy: None
+  wildcardPolicy: None
+status:
+  ingress:
+    - host: 
+      routerName: default
+      conditions:
+        - type: Admitted
+          status: 'True'
+      wildcardPolicy: None
+{{- if  (.Values.server.enableSingleInstaceNetwork  )  }} 
+{{- $root := . -}}
+{{range $i, $e := until (.Values.replicaCount |int )}}
+---
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: "s{{ $i }}"
+  labels:
+{{ include "wa.server.labels" $root | indent 4 }}
+  annotations:
+    openshift.io/host.generated: 'true'
+    haproxy.router.openshift.io/cookie_name: wa-console-affinity-cookie
+spec:
+  host: 
+  to:
+    kind: Service
+    name: {{ template "waMdm.ServiceName" $root }}-{{ $i }}
+    weight: 100
+  port:
+    targetPort: server-ssl-eif
+  tls:
+    termination: passthrough
+    insecureEdgeTerminationPolicy: None
+  wildcardPolicy: None
+status:
+  ingress:
+    - host: 
+      routerName: default
+      conditions:
+        - type: Admitted
+          status: 'True'
+      wildcardPolicy: None
+{{- end }}  
+{{- end }}  
+{{- end }} 
+{{- end }}  

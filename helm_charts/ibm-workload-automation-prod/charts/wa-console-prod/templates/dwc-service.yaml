@@ -1,0 +1,37 @@
+####################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2019. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+####################################################################
+{{- include "wa.init" (list . "waconsole") }}
+{{ $fullName := include "wa.fullName" . }}
+{{ $dwcServiceName := include "waDwc.ServiceName" . }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $dwcServiceName }}
+  labels:
+{{ include "wa.console.labels" . | indent 4 }}
+  annotations:
+    prometheus.io/scrape: {{ .Values.global.enablePrometheus | quote | default "true" }}
+    prometheus.io/scheme: http
+    prometheus.io/port: "9444"
+    prometheus.io/path: /metrics
+spec:
+  type: ClusterIP
+  ports:
+  - name: https
+    protocol: TCP
+    port: 9443
+    targetPort: 9443
+  - name: console-monitoring
+    protocol: TCP
+    port: 9444
+    targetPort: 9444     
+  selector:
+    app.kubernetes.io/name: "{{ include "wa.appName" . }}"
+    app.kubernetes.io/instance: "{{ .Release.Name }}" 
+#{{- if not (eq (.Values.console.exposeServiceType | upper )  "LOADBALANCER") }}
+  sessionAffinity: ClientIP
+#{{ end -}}

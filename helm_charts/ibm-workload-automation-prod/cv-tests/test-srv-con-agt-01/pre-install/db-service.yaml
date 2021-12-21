@@ -1,0 +1,25 @@
+####################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2019. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+####################################################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: test-wa-db2-service
+  labels:
+    app: {{ .cv.release }}-wa-db2
+    app.kubernetes.io/name: ibm-workload-automation-operator
+    app.kubernetes.io/instance: ibm-workload-automation-operator-instance
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: ibm-workload-automation-operator
+spec:
+  type: ClusterIP
+  ports:
+  - name: dbport
+    protocol: TCP
+    port: 50000
+    targetPort: 50000     
+  selector:
+    app: {{ .cv.release }}-wa-db2

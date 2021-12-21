@@ -1,0 +1,2 @@
+# Number of seconds to wait before being kicked out. # This will be divided by 30 to give a num of retries.
+timeout: 1800

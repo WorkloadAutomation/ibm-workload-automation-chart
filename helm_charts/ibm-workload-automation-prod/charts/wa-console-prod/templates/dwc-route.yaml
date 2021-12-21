@@ -1,0 +1,42 @@
+{{- if .Capabilities.APIVersions.Has "route.openshift.io/v1" -}}
+{{- if or (.Values.console.routes.enabled) (eq (.Values.console.exposeServiceType | upper )  "ROUTE")  }} 
+####################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2019. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+####################################################################
+{{- include "wa.init" (list . "waconsole") }}
+{{ $fullName := include "wa.fullName" . }}
+{{ $dwcServiceName := include "wa.fullName" . }}
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: wa-console-route
+  labels:
+{{ include "wa.console.labels" . | indent 4 }}
+  annotations:
+    openshift.io/host.generated: 'true'
+    haproxy.router.openshift.io/cookie_name: wa-console-affinity-cookie
+spec:
+  host: 
+  to:
+    kind: Service
+    name: {{ $dwcServiceName }}
+    weight: 100
+  port:
+    targetPort: https
+  tls:
+    termination: passthrough
+    insecureEdgeTerminationPolicy: None
+  wildcardPolicy: None
+status:
+  ingress:
+    - host: 
+      routerName: default
+      conditions:
+        - type: Admitted
+          status: 'True'
+      wildcardPolicy: None
+{{- end }}
+{{- end }}

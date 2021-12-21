@@ -1,0 +1,55 @@
+####################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2019. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+####################################################################
+{{- include "wa.init" (list . "waserver") }}
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: mdm-network-policy
+  labels:
+{{ include "wa.server.labels" . | indent 5 }}
+spec:
+  policyTypes:
+  - Ingress
+  podSelector:
+    matchLabels:
+{{ include "wa.server.labels" . | indent 7 }}
+  ingress:
+  - ports:
+      - protocol: TCP
+        port: 31116
+      - protocol: TCP
+        port: 31114
+      - protocol: TCP
+        port: 31111
+      - protocol: TCP
+        port: 31131
+      - protocol: TCP
+        port: 31134
+      - protocol: TCP
+        port: 31115
+      - protocol: TCP
+        port: 31113
+      - protocol: TCP
+        port: 41114
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-mdm-to-mdm-network-policy
+  labels:
+{{ include "wa.server.labels" . | indent 5 }}
+spec:
+  podSelector: 
+    matchLabels:
+     app.kubernetes.io/name: waserver
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: waserver
+  policyTypes:
+  - Ingress

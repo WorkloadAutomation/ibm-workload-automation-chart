@@ -1,0 +1,27 @@
+{{- if .Capabilities.APIVersions.Has "monitoringcontroller2.cloud.ibm.com/v1" }}
+####################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2019. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+####################################################################
+{{- include "wa.init" (list . "waserver") }}
+apiVersion: monitoringcontroller.cloud.ibm.com/v1
+kind: MonitoringDashboard
+metadata:
+  name: mdm-monitoring-dashboard-test
+  labels:
+{{ include "wa.server.labels" . | indent 5 }}
+spec:
+  enabled: true
+  data: |-
+    {
+        "id": null,
+        "uid": null,
+        "title": "WA MDM Test Dashboard",
+        "tags": [ "WA" ],
+        "timezone": "browser",
+        "schemaVersion": 16,
+        "version": 1
+      }
+{{- end }}

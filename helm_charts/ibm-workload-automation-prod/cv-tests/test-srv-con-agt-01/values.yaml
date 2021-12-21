@@ -1,0 +1,83 @@
+# This file contains any values to override (or specify in addition to) the <chartname>/values.yaml during chart
+# installation.   
+#
+# Common overrides include image repository to point to an internal artifactory such as hyc-icpcontent-docker-local.artifactory.swg-devops.com/),
+# pullPolicy to Always pull latest if version isn't always updated for internal drops,  chart specific values to specify flow of test (i.e. use
+# dynamic storage, etc).
+#
+global:
+  # set to "accept" to accept the license
+  license: "accept"
+  enableServer: true
+  enableConsole: true
+  enableAgent: true
+waserver:
+  # user group id (gid) for the secondary group the containers should run in
+  fsGroupId:
+  replicaCount: 1  
+  image:
+    repository: hyc-icpcontent-docker-local.artifactory.swg-devops.com/ibm-workload-automation-server
+    tag: 9.5.0.02
+    pullPolicy: Always
+  server:
+    agentName: "WA_SAGT"
+    createPlan: true
+    containerDebug: false
+    db:
+      type: "DB2"
+      hostname: test-wa-db2-service
+      port: 50000
+      name: "TWS"
+      adminUser: db2inst1
+      user: db2inst1        
+  resources:
+    requests:
+      cpu: 1
+      memory: 2Gi
+  ## Global persistence settings
+  persistence:
+    # Determine whether to use Persistent Volumes for the pods
+    enabled: false
+waconsole:
+  # user group id (gid) for the secondary group the containers should run in
+  fsGroupId:
+  replicaCount: 1  
+  image:
+    repository: hyc-icpcontent-docker-local.artifactory.swg-devops.com/ibm-workload-automation-console
+    tag: 9.5.0.02
+    pullPolicy: Always
+  console:
+    containerDebug: false
+    db:
+      type: "DERBY"
+      hostname: test-wa-db2-service
+      port: 50000
+      name: "TWS"
+      adminUser: db2inst1
+      user: db2inst1        
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi  
+  ## Global persistence settings
+  persistence:
+    # Determine whether to use Persistent Volumes for the pods
+    enabled: false
+waagent:
+  # user group id (gid) for the secondary group the containers should run in
+  fsGroupId:
+  replicaCount: 1  
+  image:
+    repository: hyc-icpcontent-docker-local.artifactory.swg-devops.com/ibm-workload-automation-agent-dynamic
+    tag: 9.5.0.02
+    pullPolicy: Always
+  agent:
+    containerDebug: false 
+  resources:
+    requests:
+      cpu: 500m
+      memory: 200Mi 
+  ## Global persistence settings
+  persistence:
+    # Determine whether to use Persistent Volumes for the pods
+    enabled: false

@@ -1,0 +1,22 @@
+####################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2019. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+####################################################################
+{{- if not (.Capabilities.APIVersions.Has "monitoringcontroller.cloud.ibm.com/v1") }}
+{{- if .Values.waserver.enableServer }}
+{{- include "wa.init" (list . "waserver") }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: wa-grafana-common-dashboard
+  labels:
+     grafana_dashboard: "1"
+{{ include "wa.server.labels" . | indent 5 }}
+spec:
+data:
+  k8s-{{ .Release.Name }}-dashboard.json: |-
+{{ tpl (.Files.Get "dashboards/WA_Performance_Metrics.json") . | indent 5 }}
+{{- end }}
+{{- end }}

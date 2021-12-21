@@ -1,0 +1,52 @@
+# This file contains any values to override (or specify in addition to) the <chartname>/values.yaml during chart
+# installation.   
+#
+# Common overrides include image repository to point to an internal artifactory such as hyc-icpcontent-docker-local.artifactory.swg-devops.com/),
+# pullPolicy to Always pull latest if version isn't always updated for internal drops,  chart specific values to specify flow of test (i.e. use
+# dynamic storage, etc).
+#
+global:
+  # set to "accept" to accept the license
+  license: "accept"
+  enableServer: false
+  enableConsole: true
+  enableAgent: false
+waconsole:
+  # user group id (gid) for the secondary group the containers should run in
+  fsGroupId:
+  replicaCount: 1  
+  image:
+    repository: hyc-icpcontent-docker-local.artifactory.swg-devops.com/ibm-workload-automation-console
+    tag: 9.5.0.02
+    pullPolicy: Always
+  console:
+    containerDebug: false
+    livenessProbe:
+      initialDelaySeconds: 2400     
+    db:
+      type: "DB2"
+      hostname: test-wa-db2-service
+      port: 50000
+      name: "DWC"
+      adminUser: db2inst1
+      user: db2inst1        
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi  
+  ## Global persistence settings
+  persistence:
+    # Determine whether to use Persistent Volumes for the pods
+    enabled: true
+    # Determine whether to use Storage Classes to dynamically create Persistent Volumes for the pods
+    useDynamicProvisioning: true
+    #
+    # Settings for the pod Persistent Volume Claims,
+    # which each pod uses for data
+    dataPVC:
+      # Prefix for names of this Persistent Volume Claim
+      name: "data"
+      # Name of the Storage Class to use. If no Storage Class is used, leave an empty string
+      storageClassName: "glusterfs"   
+      # Minimum size of the Persistent Volume
+      size: 100Mi

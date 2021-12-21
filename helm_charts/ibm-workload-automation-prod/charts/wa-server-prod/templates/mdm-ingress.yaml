@@ -1,0 +1,58 @@
+{{- if eq (.Values.server.exposeServiceType | upper )  "INGRESS" }} 
+####################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2019. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+####################################################################
+{{- include "wa.init" (list . "waserver") }}
+{{ $fullName := include "wa.fullName" . }}
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: {{ template "waMdm.ServiceName" . }}
+  labels:
+{{ include "wa.server.labels" . | indent 4 }}
+  annotations:
+    ingress.kubernetes.io/ssl-passthrough: "true"
+    nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+{{- with .Values.server.exposeServiceAnnotation }}
+{{ toYaml . | indent 4 }} 
+{{- end }}
+spec:
+  tls:
+    - hosts:
+      {{- if .Values.server.ingress.hostname }}
+       - {{ .Values.server.ingress.hostname }}
+      {{- else }}  
+       - {{ $fullName }}.{{ .Release.Name }}.{{ .Release.Namespace }}.mycluster.proxy
+      {{- end }}    
+      {{- if .Values.server.ingress.secretName }}       
+      secretName: {{ .Values.server.ingress.secretName }}    
+      {{- end }}         
+  rules:
+  {{- if .Values.server.ingress.hostname }}
+  - host: {{ .Values.server.ingress.hostname }}
+  {{- else }}  
+  - host: {{ $fullName }}.{{ .Release.Name }}.{{ .Release.Namespace }}.mycluster.proxy
+  {{- end }} 
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: {{ template "waMdm.ServiceName" . }}
+          servicePort: 31116
+{{- if  (.Values.server.enableSingleInstaceNetwork  )  }} 
+{{- $root := . -}}
+{{range $i, $e := until (.Values.replicaCount |int)}}
+  #- host: "{{ $root.Release.Name }}-waserver-{{$i}}.{{ template "waMdm.ServiceName" $root }}-h.{{ $root.Release.Namespace }}"
+  - host: "{{ $root.Release.Name }}-waserver-{{$i}}.{{ $root.Release.Namespace }}"
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: "{{ template "waMdm.ServiceName" $root }}-{{ $i }}"
+          servicePort: 31113
+{{end}}
+{{- end }}  
+{{- end }}           

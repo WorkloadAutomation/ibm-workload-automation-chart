@@ -1,0 +1,66 @@
+####################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2020. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+####################################################################
+{{ $waUserName := include "wa.waUser" .}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ .Values.global.serviceAccountName | default $waUserName }}-role
+  labels:
+{{ include "wa.labels" . | indent 4 }}
+rules:
+- apiGroups:
+  - '*'
+  resources:
+  - pods
+  - services
+  - routes
+  verbs:
+  - get
+  - watch
+  - list
+  - patch
+  - update 
+- apiGroups:
+  - ""
+  - extensions
+  - apps
+  - batch
+  resources:
+  - '*'
+  verbs:
+  - '*'
+- apiGroups:
+  - '*'
+  resources:
+  - secrets
+  - routes
+  verbs:
+  - get
+  - watch
+  - list
+{{- if .Capabilities.APIVersions.Has "oidc.security.ibm.com/v1" }} 
+- apiGroups:
+  - 'oidc.security.ibm.com'
+  resources:
+  - clients
+  verbs:
+  - get
+{{- end }}
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ .Values.global.serviceAccountName | default $waUserName }}-role-binding
+  labels:
+{{ include "wa.labels" . | indent 4 }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Values.global.serviceAccountName | default $waUserName }}
+roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: Role
+    name:  {{ .Values.global.serviceAccountName | default $waUserName }}-role
