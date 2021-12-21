@@ -63,15 +63,24 @@ In addition to the product components, the following objects are installed:
 - ![Amazon EKS](images/tagawseks.png "Amazon EKS") Amazon Elastic Kubernetes Service (EKS) on amd64: 64-bit Intel/AMD x86
 - ![Microsoft Azure](images/tagmsa.png "Microsoft Azure") Azure Kubernetes Service (AKS) on amd64: 64-bit Intel/AMD x86
 - ![Google GKE](images/taggke.png "Google GKE") Google Kubernetes Engine (GKE) on amd64: 64-bit Intel/AMD x86
+
+### Openshift support
+You can deploy IBM Workload Automation on Openshift 4.2 or later version by following the instruction in this documentation and using helm charts. 
+For Server and Console component ensure to modify the value of these parameters:
+- waserver.server.exposeServiceType
+- waconsole.console.exposeServiceType
+	
+From `LoadBalancer` to `Routes`
+	
 	
 ## Accessing the container images
 
 You can access the IBM Workload Automation chart and container images from the Entitled Registry. See [Create the secret](#create-the-secret) for more information about accessing the registry. The images are as follows:
 
 
-* cp.icr.io/cp/ibm-workload-automation-agent-dynamic:9.5.0.04.20210709
-* cp.icr.io/cp/ibm-workload-automation-server:9.5.0.04.20210709
-* cp.icr.io/cp/ibm-workload-automation-console:9.5.0.04.20210709
+* cp.icr.io/cp/ibm-workload-automation-agent-dynamic:9.5.0.05.20211217
+* cp.icr.io/cp/ibm-workload-automation-server:9.5.0.05.20211217
+* cp.icr.io/cp/ibm-workload-automation-console:9.5.0.05.20211217
 
 
 
@@ -249,6 +258,7 @@ Create a secrets file to store passwords for the server, console and database, o
 	       WA_PASSWORD: <hidden_password>
 	       DB_ADMIN_PASSWORD: <hidden_password>
 	       DB_PASSWORD: <hidden_password>	
+	       SSL_PASSWORD: <hidden_password>
      
 where:
      
@@ -257,10 +267,12 @@ where:
    - **<hidden_password>** must be entered; to enter an encrypted password, run the following command in a UNIX shell and copy the output into the yaml file:
 	    `echo -n 'mypassword' | base64`
 
-> **Note**: The `echo` command must be launched separately for each password that you want to enter as an encrypted password in the mysecret.yaml:
+> **Note a**: The `echo` command must be launched separately for each password that you want to enter as an encrypted password in the mysecret.yaml:
    - WA_PASSWORD: \<hidden password>
    - DB_ADMIN_PASSWORD: \<hidden password>
    - DB_PASSWORD: \<hidden password>    
+   - SSL_PASSWORD: \<hidden password>
+> **Note b**: The SSL_PASSWORD parameter is required only if you use custom certificates in PEM format.
 
 2. Once the file has been created and filled in, it must be imported.
 
@@ -699,7 +711,13 @@ Verifying the default engine connection depends on the network enablement config
  ![engine connection properties panel](images/dwcengcnxn.png)
 
 
-			
+
+To ensure the Dynamic Workload Console logout page redirects to the login page, modify the value of the logout url entry available in file authentication_config.xml:
+
+
+       <jndiEntry value="${logout.url}" jndiName="logout.url" />
+
+where the logout.url string in jndiName should be replaced with the logout URL of the provider.
 		
 
 ## Upgrading the Chart
@@ -774,6 +792,7 @@ The following table lists the configurable parameters of the chart relative to t
 | waagent.image.repository                         | IBM Workload Automation Agent image repository                                                                                                                                                                                                                                | yes            | @DOCKER.AGENT.IMAGE.NAME@        | @DOCKER.AGENT.IMAGE.NAME@        |
 | waagent.image.tag                                | IBM Workload Automation Agent image tag                                                                                                                                                                                                                                       | yes            | @VERSION@                        | @VERSION@                        |
 | waagent.image.pullPolicy                         | image pull policy                                                                                                                                                                                                                                                    | yes            | Always                           | Always                           |
+| waagent.licenseType                            | Product license type (IBM Workload Scheduler only)                                                                                                                                                                                                                                                            | yes           | PVU                           | PVU                       |
 | waagent.agent.name                               | Agent display name                                                                                                                                                                                                                                                   | yes            | WA_AGT                           | WA_AGT                           |
 | waagent.agent.tz                                 | If used, it sets the TZ operating system environment variable                                                                                                                                                                                                        | no             | America/Chicago                  |                                  |
 | waagent.agent.networkpolicyEgress                                 | Customize egress policy. Controls network traffic and how a component pod is allowed to communicate with other pods. If empty, no egress policy is defined                                                                                                                                                                                                        | no             | See [Network enablement](#network-enablement)                  |                                  |
@@ -817,7 +836,8 @@ The following table lists the configurable parameters of the chart relative to t
 | waconsole.console.db.type                           | The preferred remote database server type (e.g. DERBY, DB2, ORACLE, MSSQL, IDS). Use Derby database only for demo or test purposes.                                                                                                                                    | yes           | DB2                              | DB2                                                |
 | waconsole.console.db.hostname                       | The Hostname or the IP Address of the database server                                                                                                                                                                                                                  | yes           | \<dbhostname>                     |                                                    |
 | waconsole.console.db.port                           | The port of the database server                                                                                                                                                                                                                                        | yes           | 50000                            | 50000                                              |
-| waconsole.console.db.name                           | Depending on the database type, the name is different; enter the name of the Server's database for DB2/Informix/MSSQL, enter the Oracle Service Name for Oracle                                                                                                        | yes           | TWS                              | TWS                                                |
+| waconsole.console.db.name                           | Depending on the database type, the name is different; enter the name of the Server's database for DB2/Informix/OneDB/MSSQL, enter the Oracle Service Name for Oracle                                                                                                        | yes           | TWS                              | TWS                                                |
+| waconsole.console.db.server                           | The name of the Informix or OneDB database server                                                                                                               | yes only for IDS or ONEDB           | IDS                              | 
 | waconsole.console.db.tsName                         | The name of the DATA table space                                                                                                                                                                                                                                       | no            | TWS_DATA                         |                                                    |
 | waconsole.console.db.tsPath                         | The path of the DATA table space                                                                                                                                                                                                                                       | no            | TWS_DATA                         |                                                    |
 | waconsole.console.db.tsTempName                     | The name of the TEMP table space (Valid only for Oracle)                                                                                                                                                                                                               | no            | TEMP                             | leave it blank                                     |
@@ -861,7 +881,8 @@ The following table lists the configurable parameters of the chart and an exampl
 | waserver.replicaCount                             | Number of replicas to deploy                                                                                                                                                                                                                                                   | yes           | 1                                | 1                                                |
 | waserver.image.repository                         | IBM Workload Automation server image repository                                                                                                                                                                                                                                        | yes           | <*repository_url*>       | The name of the image server repository                      |
 | waserver.image.tag                                | IBM Workload Automation server image tag                                                                                                                                                                                                                                               | yes           | 1.0.0                        | the server image tag                                        |
-| waserver.image.pullPolicy                         | Image pull policy                                                                                                                                                                                                                                                             | yes           | Always                           | Always                                           |
+| waserver.image.pullPolicy                         | Image pull policy                                                                                                                                                                                                                                                             | yes           | Always                           | Always                |
+| waserver.licenseType                            | Product license type (IBM Workload Scheduler only)                                                                                                                                                                                                                                                            | yes           | PVU                           | PVU                                           |
 | waserver.fsGroupId                                | The secondary group ID of the user                                                                                                                                                                                                                                            | no            | 999                              |                                                  |
 | waserver.server.company                           | The name of your Company                                                                                                                                                                                                                                                      | no            | my-company                       | my-company                                       |
 | waserver.server.agentName                         | The name to be assigned to the dynamic agent of the Server                                                                                                                                                                                                                    | no            | WA_SAGT                          | WA_AGT                                           |
@@ -875,7 +896,8 @@ The following table lists the configurable parameters of the chart and an exampl
 | waserver.server.db.type                           | The preferred remote database server type (e.g. DERBY, DB2, ORACLE, MSSQL, IDS)                                                                                                                                                                                               | yes           | DB2                              | DB2                                              |
 | waserver.server.db.hostname                       | The Hostname or the IP Address of the database server                                                                                                                                                                                                                         | yes           | \<dbhostname>                     |                                                  |
 | waserver.server.db.port                           | The port of the database server                                                                                                                                                                                                                                               | yes           | 50000                            | 50000                                            |
-| waserver.server.db.name                           | Depending on the database type, the name is different; enter the name of the Server's database for DB2/Informix/MSSQL, enter the Oracle Service Name for Oracle                                                                                                               | yes           | TWS                              | TWS                                              |
+| waserver.server.db.name                           | Depending on the database type, the name is different; enter the name of the Server's database for DB2/Informix/OneDB/MSSQL, enter the Oracle Service Name for Oracle                                                                                                               | yes           | TWS                              | TWS                                              |
+| waserver.server.db.server                           | The name of the Informix or OneDB database server                                                                                                               | yes only for IDS or ONEDB           | IDS                              |  
 | waserver.server.db.tsName                         | The name of the DATA table space                                                                                                                                                                                                                                              | no            | TWS_DATA                         |                                                  |
 | waserver.server.db.tsPath                         | The path of the DATA table space                                                                                                                                                                                                                                              | no            | TWS_DATA                         |                                                  |
 | waserver.server.db.tsLogName                      | The name of the LOG table space                                                                                                                                                                                                                                               | no            | TWS_LOG                          |                                                  |
@@ -1171,6 +1193,9 @@ The IBM Workload Automation Helm chart does not support automatic scaling to zer
 
 If you use customized certificates, `useCustomizedCert:true`, you must create a secret containing the customized files that will replace the Server default ones in the \<workload_automation_namespace>. Customized files must have the same name as the default ones.
 
+    
+### Managing custom .JKS certificates
+
   * TWSClientKeyStoreJKS.sth
   * TWSClientKeyStore.kdb
   * TWSClientKeyStore.sth
@@ -1201,7 +1226,6 @@ For the Dynamic Workload Console, type the following command:
    where, TWSClientKeyStoreJKS.sth, TWSClientKeyStore.kdb, TWSClientKeyStore.sth, TWSClientKeyStoreJKS.jks, TWSServerTrustFile.jks and TWSServerKeyFile.jks are the Container keystore and stash file containing your customized certificates.
    
    For details about custom certificates, see [Connection security overview](https://www.ibm.com/docs/en/workload-scheduler/9.5.0?topic=configuration-connection-security-overview).
-    
 
 > **Note**: Passwords for "TWSServerTrustFile.jks" and "TWSServerKeyFile.jks" files must be entered in the respective "TWSServerTrustFile.jks.pwd" and "TWSServerKeyFile.jks.pwd" files.
  
@@ -1219,6 +1243,49 @@ If you want to use SSL connection to DB, set `db.sslConnection:true` and `useCus
       bash
       $ kubectl create secret generic release_name-secret --from-file=TWSServerTrustFile.jks --from-file=TWSServerKeyFile.jks --from-file=TWSServerTrustFile.jks.pwd --from-file=TWSServerKeyFile.jks.pwd --namespace=<workload_automation_namespace>
         
+### Managing custom .PEM certificates
+
+  * ca.crt
+  * tls.key
+  * tls.crt
+      
+  If you want to use custom certificates, set `useCustomizedCert:true` and use kubectl to apply the secret in the \<workload_automation_namespace>.
+ For the master domain manager, type the following command:
+ 
+ ```
+kubectl create secret generic waserver-cert-secret --from-file=ca.crt --from-file=tls.key --from-file=tls.crt -n <workload-automation-namespace>   
+ ``` 
+For the Dynamic Workload Console, type the following command:
+
+ ```
+  kubectl create secret generic waconsole-cert-secret --from-file=ca.crt --from-file=tls.key --from-file=tls.crt -n <workload_automation_namespace>   
+    
+  ``` 
+ For the dynamic agent, type the following command:
+ ```
+ kubectl create secret generic waagent-cert-secret --from-file=ca.crt --from-file=tls.key --from-file=tls.crt -n <workload_automation_namespace>    
+ ```   
+    
+   where, ca.crt, tls.key, and tls.crt are the Container keystore and stash file containing your customized certificates.
+   
+   For details about custom certificates, see [Connection security overview](https://www.ibm.com/docs/en/workload-scheduler/9.5.0?topic=configuration-connection-security-overview).
+
+<!-- > **Note**: Passwords for "TWSServerTrustFile.jks" and "TWSServerKeyFile.jks" files must be entered in the respective "TWSServerTrustFile.jks.pwd" and "TWSServerKeyFile.jks.pwd" files. -->
+ 
+> (**) **Note:** if you set `db.sslConnection:true`, you must also set the `useCustomizeCert` setting to true (on both server and console charts) and, in addition, you must add the following certificates in the customized SSL certificates secret on both the server and console charts:
+
+  * ca.crt
+  * tls.key
+  * tls.crt
+  
+ Customized files must have the same name as the ones listed above.
+         
+If you want to use SSL connection to DB, set `db.sslConnection:true` and `useCustomizedCert:true`, then use kubectl to create the secret in the same namespace where you want to deploy the chart:
+
+      bash
+      $ kubectl create secret generic release_name-secret --from-file=ca.crt --from-file=tls.key --from-file=tls.crt -n --namespace=<workload_automation_namespace>
+        
+
 If you define custom certificates, you are in charge of keeping them up to date, therefore, ensure you check their duration and plan to rotate them as necessary. To rotate custom certificates, delete the previous secret and upload a new secret, containing new certificates. The pod restarts automatically and the new certificates are applied.
 
 
@@ -1286,11 +1353,12 @@ IBM Workload Automation supports only ReadWriteOnce (RWO) access mode. The volum
 
 ## Metrics monitoring 
 
-IBM Workload Automation exposes a number of metrics to provide you with insight into the state, health, and performance of your environment and infrastructure. You can access the product APIs for monitoring and retrieving insightful metrics data. The metrics are exposed and can be visualized with tools for displaying application metrics such as, the open source tool Grafana. Grafana is an open source tool for visualizing application metrics. IBM Workload Automation  cloud metric monitoring uses an opensource Cloud Native Computing Foundation (CNCF) project called Prometheus. It is particularly useful for collecting time series data that can be easily queried. Prometheus integrates with Grafana to visualize the metrics collected.
+IBM Workload Automation uses Grafana to display performance data related to the product. This data includes metrics related to the server and console application servers (WebSphere Application Server Liberty Base), your workload, your workstations, critical jobs, message queues, the database connection status, and more. Grafana is an open source tool for visualizing application metrics. Metrics provide insight into the state, health, and performance of your deployments and infrastructure. IBM Workload Automation cloud metric monitoring uses an opensource Cloud Native Computing Foundation (CNCF) project called Prometheus. It is particularly useful for collecting time series data that can be easily queried. Prometheus integrates with Grafana to visualize the metrics collected.
 
-If you use Grafana, you can take advantage of the preconfigured dashboard that is included in the Helm chart. In addition, the dashboard is also available from [Automation Hub](https://www.yourautomationhub.io/integrations). Automation Hub gives you access to the downloadable JSON file on the Grafana web site. The dashboard includes metrics related to the server and console application servers (WebSphere Application Server Liberty Base), your workload, your workstations, critical jobs, message queues, the database connection status, and more. The user that performs the cloud deployment is already authenticated to access the metrics. However, to grant other users access to the metrics securely, using a set of credentials, you must add additional users to the `authentication_config.xml` file and then modify the `prometheus.xml` file that is automatically created in the cloud environment. For more information about this procedure, see [Metrics monitoring](https://www.ibm.com/support/knowledgecenter/en/SSGSPN_9.5.0/com.ibm.tivoli.itws.doc_9.5/distr/src_ref/awsrgmonprom.html).
+
 
 The following metrics are collected and available to be visualized in the preconfigured Grafana dashboard. The dashboard is named **<workload_automation_namespace> <workload_automation_release_name>**:
+
 
 | Metric Display Name    | Metric Name                         | Description                                                                                                                               |
 |-----------------------------------------|--------------------------|-----------------------------------------------------------------------------------------------------------------|
@@ -1433,6 +1501,13 @@ In case of problems related to deploying the product with containers, see [Troub
 3. Save the changes to the file.   
 
 ### Change history
+
+## Added December 2021
+
+* Official support for Openshift 4.2 or later by using helm charts deployment.
+* Workload Automation 9.5.0.05 support released.
+* RFE: support for custom volume and custom volumemounts inside Workload Automation pods. 
+* licenseType attribute for managing product licenses.
 
 ## Added June 2021
 
