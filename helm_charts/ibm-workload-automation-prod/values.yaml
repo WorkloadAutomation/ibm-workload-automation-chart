@@ -177,6 +177,7 @@ waconsole:
     livenessProbe:
       initialDelaySeconds: 100
     pwdSecretName: wa-pwd-secret
+    tz: null
     useCustomizedCert: false
   image:
     pullPolicy: Always
