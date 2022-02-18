@@ -871,6 +871,8 @@ The following table lists the configurable parameters of the chart relative to t
 | waconsole.console.ingressHostName      | The virtual hostname defined in the DNS used to reach the Console.   | yes, only if the network enablement implementation is INGRESS           |                               |                     | 
 | waconsole.console.ingressSecretName      | The name of the secret to store certificates used by ingress. If not used, leave it empty.   | yes, only if the network enablement implementation is INGRESS.     |      |  wa-console-ingress-secret | 	
 | waconsole.console.nodeAffinityRequired                 | A set of rules that determines on which nodes a console can be deployed using custom labels on nodes and label selectors specified in pods.                                                                                                                                                                                                                           | no             | See [Network enablement](#network-enablement)       |                               |
+| waconsole.console.tz                                | If used, it sets the TZ operating system environment variable                                                                                                                                                                                                           | no            | America/Chicago                  |                                                  |
+
 
 
 - #### Server parameters

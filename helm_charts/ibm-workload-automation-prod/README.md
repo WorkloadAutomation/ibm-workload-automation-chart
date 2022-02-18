@@ -63,15 +63,24 @@ In addition to the product components, the following objects are installed:
 - ![Amazon EKS](images/tagawseks.png "Amazon EKS") Amazon Elastic Kubernetes Service (EKS) on amd64: 64-bit Intel/AMD x86
 - ![Microsoft Azure](images/tagmsa.png "Microsoft Azure") Azure Kubernetes Service (AKS) on amd64: 64-bit Intel/AMD x86
 - ![Google GKE](images/taggke.png "Google GKE") Google Kubernetes Engine (GKE) on amd64: 64-bit Intel/AMD x86
+
+### Openshift support
+You can deploy IBM Workload Automation on Openshift 4.2 or later version by following the instruction in this documentation and using helm charts. 
+For Server and Console component ensure to modify the value of these parameters:
+- waserver.server.exposeServiceType
+- waconsole.console.exposeServiceType
+	
+From `LoadBalancer` to `Routes`
+	
 	
 ## Accessing the container images
 
 You can access the IBM Workload Automation chart and container images from the Entitled Registry. See [Create the secret](#create-the-secret) for more information about accessing the registry. The images are as follows:
 
 
-* cp.icr.io/cp/ibm-workload-automation-agent-dynamic:9.5.0.03.20210326
-* cp.icr.io/cp/ibm-workload-automation-server:9.5.0.03.20210326
-* cp.icr.io/cp/ibm-workload-automation-console:9.5.0.03.20210326
+* cp.icr.io/cp/ibm-workload-automation-agent-dynamic:9.5.0.05.20211217
+* cp.icr.io/cp/ibm-workload-automation-server:9.5.0.05.20211217
+* cp.icr.io/cp/ibm-workload-automation-console:9.5.0.05.20211217
 
 
 
@@ -1352,9 +1361,9 @@ IBM Workload Automation uses Grafana to display performance data related to the 
 
 The following metrics are collected and available to be visualized in the preconfigured Grafana dashboard. The dashboard is named **<workload_automation_namespace> <workload_automation_release_name>**:
 
+
 | Metric Display Name    | Metric Name                         | Description                                                                                                                               |
 |-----------------------------------------|--------------------------|-----------------------------------------------------------------------------------------------------------------|
-
 | Workload                                | application_wa_JobsInPlanCount_jobs   |Workload by job status: WAITING, READY, HELD, BLOCKED, CANCELED, ERROR, RUNNING, SUCCESSFUL, SUPPRESS, UNDECIDED  |
 |                               | application_wa_JobsByWorkstation    |Job status by workstation  |
 |                               | application_wa_JobsByFolder_jobs    |Job status by folder  |
@@ -1495,9 +1504,12 @@ In case of problems related to deploying the product with containers, see [Troub
 
 ### Change history
 
-## Added November 2021
+## Added December 2021
 
-* licenseType attribute for managing product licenses (IBM Workload Scheduler only)
+* Official support for Openshift 4.2 or later by using helm charts deployment.
+* Workload Automation 9.5.0.05 support released.
+* RFE: support for custom volume and custom volumemounts inside Workload Automation pods. 
+* licenseType attribute for managing product licenses.
 
 ## Added June 2021
 
