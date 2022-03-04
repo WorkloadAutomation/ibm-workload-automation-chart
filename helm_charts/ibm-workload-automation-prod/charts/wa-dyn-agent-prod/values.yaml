@@ -15,7 +15,7 @@ global:
 replicaCount: 1
 image:
   repository: cp.icr.io/cp/ibm-workload-automation-agent-dynamic
-  tag: 9.5.0.05.20211217
+  tag: 10.1.0.00.20220304
   pullPolicy: Always
 licenseType: "PVU"
 runAsUser: 999
@@ -76,13 +76,10 @@ persistence:
     size: 2Gi
   extraVolumes: []
       # - name: custom-volume-1
-      #   persistentVolumeClaim:
-      #     claimName: pvc-name
-      # - name: custom-volume-2
       #   configMap:
       #      name: custom-configMap
       #      defaultMode: 0755
-      # - name: custom-volume-3
+      # - name: custom-volume-2
       #   secret:
       #     secretName: custom-secret
       #     defaultMode: 0744
@@ -97,7 +94,5 @@ persistence:
       #   readOnly: false
       # - name: custom-volume-2
       #   mountPath: /custom/mount/path-2
-      # - name: custom-volume-3
-      #   mountPath: /custom/mount/path-3
       # - name: nfs-volume
       #   mountPath: /path/nfs

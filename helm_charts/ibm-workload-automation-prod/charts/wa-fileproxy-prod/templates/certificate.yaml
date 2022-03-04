@@ -1,0 +1,44 @@
+####################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2020. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+####################################################################
+{{- if not .Values.fileProxy.useCustomizedCert }}
+{{- if .Capabilities.APIVersions.Has "cert-manager.io/v1alpha2" }}
+apiVersion: cert-manager.io/v1alpha2
+{{- else }}
+apiVersion: certmanager.k8s.io/v1alpha1
+{{- end }}
+kind: Certificate
+metadata:
+  name: {{ include "wa-fileproxy-prod.fullname" . }}
+  labels:
+{{- include "wa-fileproxy-prod.labels" . | nindent 4 }}
+  #annotations:
+    #"helm.sh/hook": pre-install
+    #"helm.sh/hook-delete-policy": hook-failed
+spec:
+  secretName: {{ .Values.fileProxy.certSecretName | quote }}
+  duration: 2160h # 90d
+  renewBefore: 360h # 15d
+  organization:
+  - IBM
+  commonName: wafileproxy
+  isCA: false
+  keySize: 2048
+  keyAlgorithm: rsa
+  keyEncoding: pkcs1
+  usages:
+    - server auth
+    - client auth
+  dnsNames:
+  - wafileproxy
+ {{- if .Capabilities.APIVersions.Has "cert-manager.io/v1alpha2" }}
+  privateKey:
+    rotationPolicy: Always
+ {{- end }}
+  issuerRef:
+    name: wa-ca-issuer
+    kind: Issuer
+{{- end }}

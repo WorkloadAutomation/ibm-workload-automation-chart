@@ -1,0 +1,25 @@
+# *******************************************************************************
+# Licensed Materials - Property of HCL
+# (c) Copyright HCL Technologies Ltd. 2022. All Rights Reserved.
+# 
+# Note to U.S. Government Users Restricted Rights:
+# Use, duplication or disclosure restricted by GSA ADP Schedule
+# *******************************************************************************
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "aida-es.fullname" . }}
+  labels:
+    {{- include "aida-es.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.webport }}
+      targetPort: https
+      protocol: TCP
+      name: https
+    - port: {{ .Values.service.tcpport }}
+      protocol: TCP
+      name: tcp
+  selector:
+    {{- include "aida-es.selectorLabels" . | nindent 4 }}

@@ -1,0 +1,55 @@
+{{- if eq (.Values.exposeServiceType | upper )  "INGRESS" }} 
+# *******************************************************************************
+# Licensed Materials - Property of HCL
+# (c) Copyright HCL Technologies Ltd. 2022. All Rights Reserved.
+# 
+# Note to U.S. Government Users Restricted Rights:
+# Use, duplication or disclosure restricted by GSA ADP Schedule
+# *******************************************************************************
+{{ $fullName := include "aida-nginx.fullname" . }}
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: {{ $fullName }}
+  labels:
+{{ include "aida-nginx.labels" . | indent 4 }}
+  annotations:
+    ingress.kubernetes.io/backend-protocol: HTTPS
+    ingress.kubernetes.io/force-ssl-redirect: "true"
+    ingress.kubernetes.io/secure-backends: "true"
+    nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/secure-backends: "true"
+    nginx.ingress.kubernetes.io/affinity: cookie
+    nginx.ingress.kubernetes.io/session-cookie-name: {{ $fullName }}-console-affinity-cookie
+    nginx.ingress.kubernetes.io/session-cookie-hash: sha1
+    ingress.kubernetes.io/affinity: cookie
+    ingress.kubernetes.io/session-cookie-name: {{ $fullName }}-console-affinity-cookie
+    ingress.kubernetes.io/session-cookie-hash: sha1
+{{- with .Values.exposeServiceAnnotation }}
+{{ toYaml . | indent 4 }} 
+{{- end }}  
+spec:
+  tls:
+    - hosts:
+      {{- if .Values.ingress.hostname }}
+       - {{ .Values.ingress.hostname }}
+      {{- else }}  
+       - {{ $fullName }}.{{ .Release.Name }}.{{ .Release.Namespace }}.mycluster.proxy
+      {{- end }}
+      {{- if .Values.ingress.secretName }}       
+      secretName: {{ .Values.ingress.secretName }}    
+      {{- end }}       
+  rules:
+  {{- if .Values.ingress.hostname }}
+  - host: {{ .Values.ingress.hostname }}
+  {{- else }}  
+  - host: {{ $fullName }}.{{ .Release.Name }}.{{ .Release.Namespace }}.mycluster.proxy
+  {{- end }}
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: {{ $fullName }}
+          servicePort: 9432
+{{- end }}

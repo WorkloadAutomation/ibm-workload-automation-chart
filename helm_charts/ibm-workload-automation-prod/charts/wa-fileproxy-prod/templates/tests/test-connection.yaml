@@ -1,0 +1,21 @@
+####################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2021. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+####################################################################
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "wa-fileproxy-prod.fullname" . }}-test-connection"
+  labels:
+    {{- include "wa-fileproxy-prod.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['{{ include "wa-fileproxy-prod.fullname" . }}:{{ .Values.fileProxy.port }}']
+  restartPolicy: Never

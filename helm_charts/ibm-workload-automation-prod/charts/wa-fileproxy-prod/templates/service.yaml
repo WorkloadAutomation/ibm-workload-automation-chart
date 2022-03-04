@@ -1,0 +1,22 @@
+####################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2021. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+####################################################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "wa-fileproxy-prod.fullname" . }}
+  labels:
+    {{- include "wa-fileproxy-prod.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+    - port: {{ .Values.fileProxy.port }}
+      targetPort: {{ .Values.fileProxy.port }}
+      protocol: TCP
+      name: https
+  selector:
+    app.kubernetes.io/name: {{ include "wa-fileproxy-prod.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}

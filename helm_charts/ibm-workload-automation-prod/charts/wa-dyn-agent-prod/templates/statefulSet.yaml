@@ -32,7 +32,11 @@ spec:
 {{ include "wa.dyn-agent.labels" . | indent 8 }}
         affinity: wa-agent
       annotations:
-{{ include "wa.metering" . | indent 8 }}   
+      {{- if eq (.Values.licenseType | upper )  "PVU" }} 
+{{ include "wa.pvu.metering" . | indent 8 }} 
+      {{- else }}
+{{ include "wa.metering" . | indent 8 }}      
+      {{- end }}
     spec:
       hostNetwork: false
       hostPID: false
@@ -127,7 +131,7 @@ spec:
             secretKeyRef:
               name: {{ include "wa.fullName" . }}-secret
               key: WA_USER_ENGINE_PASSWORD
-              optional: true   
+              optional: true  
         - name: SSL_PASSWORD
           valueFrom:
             secretKeyRef:

@@ -1,0 +1,32 @@
+{{- if .Capabilities.APIVersions.Has "route.openshift.io/v1" -}}
+{{- if or (.Values.fileProxy.route.enabled) (eq (.Values.fileProxy.exposeServiceType | upper )  "ROUTE")  }} 
+####################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2021. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+####################################################################
+{{ $fileproxyServiceName := include "wa-fileproxy-prod.name" . }}
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: wa-fileproxy-route
+  labels:
+{{ include "wa-fileproxy-prod.labels" . | indent 4 }}
+  annotations:
+    openshift.io/host.generated: 'true'
+    haproxy.router.openshift.io/cookie_name: wa-fileproxy-affinity-cookie
+spec:
+  host: 
+  to:
+    kind: Service
+    name: {{ $fileproxyServiceName }}
+    weight: 100
+  port:
+    targetPort: https
+  tls:
+    termination: passthrough
+    insecureEdgeTerminationPolicy: None
+  wildcardPolicy: None
+{{- end }}
+{{- end }}

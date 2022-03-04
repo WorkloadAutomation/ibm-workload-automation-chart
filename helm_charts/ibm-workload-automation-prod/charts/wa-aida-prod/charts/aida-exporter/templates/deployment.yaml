@@ -1,0 +1,91 @@
+# *******************************************************************************
+# Licensed Materials - Property of HCL
+# (c) Copyright HCL Technologies Ltd. 2022. All Rights Reserved.
+# 
+# Note to U.S. Government Users Restricted Rights:
+# Use, duplication or disclosure restricted by GSA ADP Schedule
+# *******************************************************************************
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "aida-exporter.fullname" . }}
+  labels:
+    {{- include "aida-exporter.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "aida-exporter.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "aida-exporter.selectorLabels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "aida-exporter.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext:
+            privileged: false
+            readOnlyRootFilesystem: false
+            allowPrivilegeEscalation: false     
+            capabilities:
+              drop:
+              - ALL
+          env:
+            - name: LOG_LEVEL
+              value: {{ .Values.global.aidaEngineLogLevel | quote }}
+            - name: ESCONFIG
+              value: '["https://admin:admin@{{ include "aida-es.fullname" . }}:9200"]'
+            - name: WA_OMETRICS
+              value: "https://{{ include "aida-exporter.waHostName" . }}:{{ .Values.waPort }}/metrics"
+            - name: WA_METADATA
+              value: "https://{{ include "aida-exporter.waHostName" . }}:{{ .Values.waPort }}/twsd/engine/historical_metric/metadata"
+            - name: WA_RECORDS
+              value: "https://{{ include "aida-exporter.waHostName" . }}:{{ .Values.waPort }}/twsd/engine/historical_metric/record"
+            - name: ALERT_CONFIG_URL
+              value: "https://{{ include "aida-exporter.waHostName" . }}:{{ .Values.waPort }}/twsd/engine/definition/alert"
+            - name: KPI_CONFIG_URL
+              value: "https://{{ include "aida-exporter.waHostName" . }}:{{ .Values.waPort }}/twsd/engine/definition/kpi"
+            - name: WA_CATALOGS
+              value: "https://{{ include "aida-exporter.waHostName" . }}:{{ .Values.waPort }}/twsd/engine/definition/aida_catalog"
+            - name: DEFAULT_SHARD_COUNT
+              value: {{ .Values.global.defaultShardCount | quote }}
+            - name: HTTP_AUTH_USERNAME
+              value: {{ .Values.httpAuthUsername | quote }}
+            - name: HTTP_AUTH_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.httpAuthPasswordSecretName }}
+                  key: WA_PASSWORD
+            - name: ENDPOINTS_CONF
+              value: '{"KPI_CONFIG": "twsd/engine/definition/kpi", "ALERT_CONFIG": "twsd/engine/definition/alert", "WA_OMETRICS": "metrics", "WA_METADATA": "twsd/engine/historical_metric/metadata", "WA_RECORDS": "twsd/engine/historical_metric/record", "WA_CATALOGS": "twsd/engine/definition/aida_catalog"}'
+          ports:
+            - name: http
+              containerPort: 5000
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

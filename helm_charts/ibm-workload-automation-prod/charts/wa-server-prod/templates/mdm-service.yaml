@@ -45,6 +45,11 @@ metadata:
   labels:
 {{ include "wa.server.labels" $root | indent 4 }}
   annotations:
+{{- if eq ($root.Values.server.exposeServiceType | upper )  "LOADBALANCER" }} 
+{{- with .Values.server.exposeServiceAnnotation }}
+{{ toYaml . | indent 4 }} 
+{{- end }}
+{{ end }}
 spec:
 {{- if eq ($root.Values.server.exposeServiceType | upper )  "LOADBALANCER" }} 
   type: LoadBalancer

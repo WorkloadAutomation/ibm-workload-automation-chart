@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "aida-ui.fullname" . }}-test-connection"
+  labels:
+    {{- include "aida-ui.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['{{ include "aida-ui.fullname" . }}:{{ .Values.service.port }}']
+  restartPolicy: Never

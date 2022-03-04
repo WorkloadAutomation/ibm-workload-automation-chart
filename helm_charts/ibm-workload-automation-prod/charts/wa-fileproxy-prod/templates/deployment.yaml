@@ -1,0 +1,97 @@
+####################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2021. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+####################################################################
+{{ $waUserName := include "wa.fileproxy.waUser" .}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "wa-fileproxy-prod.fullname" . }}
+  labels:
+    {{- include "wa-fileproxy-prod.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "wa-fileproxy-prod.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        app.kubernetes.io/name: {{ include "wa-fileproxy-prod.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      serviceAccountName: {{ .Values.global.serviceAccountName | default $waUserName }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      volumes:
+      - name: cert-bind-volume
+        secret:
+          defaultMode: 0664
+          secretName: {{ .Values.fileProxy.certSecretName }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          volumeMounts:
+          - name: cert-bind-volume
+            mountPath: /opt/wautils/certs
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: https
+              containerPort: {{ .Values.fileProxy.port }}
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: fileproxy/q/health/ready
+              port: https
+              scheme: HTTPS
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 3
+          livenessProbe:
+            httpGet:
+              path: fileproxy/q/health/live
+              port: https
+              scheme: HTTPS
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 3
+          env:
+            - name: LICENSE
+              value: {{ .Values.global.license | quote }}
+            - name: SSL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.pwdSecretName | quote  }}
+                  key: SSL_PASSWORD
+                  optional: true
+            - name: SSL_PORT
+              value: {{ .Values.fileProxy.port | quote  }}
+            - name: WA_DEBUG
+              value: {{ .Values.fileProxy.containerDebug | quote  }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

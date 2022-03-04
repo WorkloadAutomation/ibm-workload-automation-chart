@@ -1,0 +1,71 @@
+# *******************************************************************************
+# Licensed Materials - Property of HCL
+# (c) Copyright HCL Technologies Ltd. 2022. All Rights Reserved.
+#
+# Note to U.S. Government Users Restricted Rights:
+# Use, duplication or disclosure restricted by GSA ADP Schedule
+# *******************************************************************************
+# Default values for aida-es.
+# Declare variables to be passed into your templates.
+global:
+  license: notaccepted
+  serviceAccountName: wauser
+  aidaEngineLogLevel: "INFO"
+  redisPwd: "default"
+  defaultShardCount: 1
+replicaCount: 1
+image:
+  repository: aida-es
+  pullPolicy: Never
+  tag: "latest"
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+serviceAccount:
+  create: false
+  annotations: {}
+  name: ""
+podAnnotations: {}
+podSecurityContext: {}
+securityContext: {}
+service:
+  type: ClusterIP
+  webport: 9200
+  tcpport: 9300
+persistence:
+  # Determine whether to use Persistent Volumes for the pods
+  enabled: true
+  # Determine whether to use Storage Classes to dynamically create Persistent Volumes for the pods
+  useDynamicProvisioning: true
+  #
+  # Settings for the pod Persistent Volume Claims,
+  # which each pod uses for data
+  dataPVC:
+    # Name of the Storage Class to use. If no Storage Class is used, leave an empty string
+    storageClassName: ""
+    # If your not using dynamic provisioning, you can use selectors to
+    # refine the binding process. You cannot specify a selector if you are using dynamic provisioning!
+    selector:
+      label: ""
+      value: ""
+    # Minimum size of the Persistent Volume
+    size: 10Gi
+ingress:
+  enabled: false
+  annotations: {}
+  hosts:
+    - host: chart-example.local
+      paths: []
+  tls: []
+resources:
+  limits:
+    cpu: 4
+    memory: 8Gi
+  requests:
+    cpu: 1
+    memory: 2Gi
+autoscaling:
+  enabled: false
+nodeSelector: {}
+tolerations: []
+affinity: {}

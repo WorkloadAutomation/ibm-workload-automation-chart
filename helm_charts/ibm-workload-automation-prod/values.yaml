@@ -8,8 +8,12 @@ global:
   language: en
   license: not accepted
   serviceAccountName: wauser
+  aidaEngineLogLevel: "INFO"
+  redisPwd: "default"
+  defaultShardCount: 1
   enablePrometheus: true
   customPluginImageName: 
+  pluginImageName: cp.icr.io/cp/ibm-workload-automation-plugins:10.1.0.00.20220304
   configPlugins:
   customLabels:
     - name: "environment"
@@ -64,7 +68,7 @@ waagent:
   image:
     pullPolicy: Always
     repository: cp.icr.io/cp/ibm-workload-automation-agent-dynamic
-    tag: 9.5.0.05.20211217
+    tag: 10.1.0.00.20220304
   persistence:
     dataPVC:
       name: data
@@ -76,32 +80,27 @@ waagent:
     enabled: true
     useDynamicProvisioning: true
     extraVolumes: []
-        # - name: custom-volume-1
-        #   persistentVolumeClaim:
-        #     claimName: pvc-name
-        # - name: custom-volume-2
-        #   configMap:
-        #      name: custom-configMap
-        #      defaultMode: 0755
-        # - name: custom-volume-3
-        #   secret:
-        #     secretName: custom-secret
-        #     defaultMode: 0744
-        # - name: nfs-volume
-        #   nfs: 
-        #     # URL for the NFS server
-        #     server: <nfs_server> # Change this!
-        #     path: /
+      # - name: custom-volume-1
+      #   configMap:
+      #      name: custom-configMap
+      #      defaultMode: 0755
+      # - name: custom-volume-2
+      #   secret:
+      #     secretName: custom-secret
+      #     defaultMode: 0744
+      # - name: nfs-volume
+      #   nfs: 
+      #     # URL for the NFS server
+      #     server: <nfs_server> # Change this!
+      #     path: /
     extraVolumeMounts: []
-        # - name: custom-volume-1
-        #   mountPath: /custom/mount/path-1
-        #   readOnly: false
-        # - name: custom-volume-2
-        #   mountPath: /custom/mount/path-2
-        # - name: custom-volume-3
-        #   mountPath: /custom/mount/path-3
-        # - name: nfs-volume
-        #   mountPath: /path/nfs
+      # - name: custom-volume-1
+      #   mountPath: /custom/mount/path-1
+      #   readOnly: false
+      # - name: custom-volume-2
+      #   mountPath: /custom/mount/path-2
+      # - name: nfs-volume
+      #   mountPath: /path/nfs
   replicaCount: 1
   resources:
     limits:
@@ -178,10 +177,11 @@ waconsole:
       initialDelaySeconds: 100
     pwdSecretName: wa-pwd-secret
     useCustomizedCert: false
+    tz:
   image:
     pullPolicy: Always
     repository: cp.icr.io/cp/ibm-workload-automation-console
-    tag: 9.5.0.05.20211217
+    tag: 10.1.0.00.20220304
   persistence:
     dataPVC:
       name: data
@@ -193,32 +193,27 @@ waconsole:
     enabled: true
     useDynamicProvisioning: true
     extraVolumes: []
-        # - name: custom-volume-1
-        #   persistentVolumeClaim:
-        #     claimName: pvc-name
-        # - name: custom-volume-2
-        #   configMap:
-        #      name: custom-configMap
-        #      defaultMode: 0755
-        # - name: custom-volume-3
-        #   secret:
-        #     secretName: custom-secret
-        #     defaultMode: 0744
-        # - name: nfs-volume
-        #   nfs: 
-        #     # URL for the NFS server
-        #     server: <nfs_server> # Change this!
-        #     path: /
+      # - name: custom-volume-1
+      #   configMap:
+      #      name: custom-configMap
+      #      defaultMode: 0755
+      # - name: custom-volume-2
+      #   secret:
+      #     secretName: custom-secret
+      #     defaultMode: 0744
+      # - name: nfs-volume
+      #   nfs: 
+      #     # URL for the NFS server
+      #     server: <nfs_server> # Change this!
+      #     path: /
     extraVolumeMounts: []
-        # - name: custom-volume-1
-        #   mountPath: /custom/mount/path-1
-        #   readOnly: false
-        # - name: custom-volume-2
-        #   mountPath: /custom/mount/path-2
-        # - name: custom-volume-3
-        #   mountPath: /custom/mount/path-3
-        # - name: nfs-volume
-        #   mountPath: /path/nfs
+      # - name: custom-volume-1
+      #   mountPath: /custom/mount/path-1
+      #   readOnly: false
+      # - name: custom-volume-2
+      #   mountPath: /custom/mount/path-2
+      # - name: nfs-volume
+      #   mountPath: /path/nfs
   replicaCount: 1
   resources:
     limits:
@@ -236,7 +231,7 @@ waserver:
   image:
     pullPolicy: Always
     repository: cp.icr.io/cp/ibm-workload-automation-server
-    tag: 9.5.0.05.20211217
+    tag: 10.1.0.00.20220304
   persistence:
     dataPVC:
       name: data
@@ -249,13 +244,10 @@ waserver:
     useDynamicProvisioning: true
     extraVolumes: []
       # - name: custom-volume-1
-      #   persistentVolumeClaim:
-      #     claimName: pvc-name
-      # - name: custom-volume-2
       #   configMap:
       #      name: custom-configMap
       #      defaultMode: 0755
-      # - name: custom-volume-3
+      # - name: custom-volume-2
       #   secret:
       #     secretName: custom-secret
       #     defaultMode: 0744
@@ -270,10 +262,16 @@ waserver:
       #   readOnly: false
       # - name: custom-volume-2
       #   mountPath: /custom/mount/path-2
-      # - name: custom-volume-3
-      #   mountPath: /custom/mount/path-3
       # - name: nfs-volume
       #   mountPath: /path/nfs
+  enableBmEventsLogging: false
+  bmEvents: |-
+    OPTIONS=MASTER
+    LOGGING=ALL
+    CHSCHED=HIGH
+    PIPE=/home/wauser/wadata/MAGENT.P
+    FILE=/home/wauser/wadata/event.log
+    JSON=/home/wauser/wadata/event.json
   replicaCount: 1
   resources:
     limits:
@@ -287,6 +285,8 @@ waserver:
     agentName: WA_SAGT
     certSecretName: waserver-cert-secret
     company: my-company
+    externalFileProxyEnabled: false
+    externalFileProxyURLs: ""
     containerDebug: false
     enableSSO: true
     enableSingleInstaceNetwork: false
@@ -357,4 +357,280 @@ waserver:
     startOfDay: "0700"
     timezone: null
     tz: null
+    useCustomizedCert: false  
+wafileproxy:
+  enableFileProxy: false
+  replicaCount: 1
+  image:
+    repository: cp.icr.io/cp/ibm-workload-automation-fileproxy
+    tag: 10.1.0.00.20220304
+    pullPolicy: Always
+  nameOverride: ""
+  fullnameOverride: ""
+  pwdSecretName: wa-pwd-secret-fp
+  fileProxy:
+    certSecretName: wa-fileproxy-cert
     useCustomizedCert: false
+    containerDebug: false
+    port: 44444
+    route:
+      enabled: false
+    exposeServiceType: Ingress
+    exposeServiceAnnotation: {}
+      #cert-manager.io/issuer: wa-ca-issuer
+      #service.beta.kubernetes.io/aws-load-balancer-backend-protocol: https
+      #service.beta.kubernetes.io/aws-load-balancer-type: "clb"
+      #service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+      #service.beta.kubernetes.io/aws-load-balancer-internal: "true"
+      #service.beta.kubernetes.io/azure-load-balancer-internal: "true"
+      #networking.gke.io/load-balancer-type: "Internal"
+  podAnnotations: {}
+  podSecurityContext: {}
+    # fsGroup: 2000
+  securityContext: 
+    capabilities:
+      drop:
+      - ALL
+    readOnlyRootFilesystem: false
+    runAsNonRoot: true
+    runAsUser: 999
+  ingress:
+    annotations: {}
+      # kubernetes.io/ingress.class: nginx
+      # kubernetes.io/tls-acme: "true"
+    hosts:
+      - host: 
+        paths: []
+    tls: []
+    #  - secretName: chart-example-tls
+    #    hosts:
+    #      - chart-example.local
+  resources: {}
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 100
+    targetCPUUtilizationPercentage: 80
+    # targetMemoryUtilizationPercentage: 80
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+waaida:
+  enableAIDA: false
+  aida-ad:
+    image:
+      repository: cp.icr.io/cp/ibm-aida-ad
+      tag: 10.1.0.00.20220304
+      pullPolicy: Always
+    serviceAccount:
+      create: false
+      annotations: {}
+      name: ""
+    resources:
+      limits:
+        cpu: 2
+        memory: 8Gi
+      requests:
+        cpu: 0.5
+        memory: 1Gi
+    autoscaling:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 10
+      targetMemoryUtilizationPercentage: 80
+  aida-es:
+    esDiscoveryType: "single-node"
+    #discoverySeedHosts: hostname,[::1]
+    #clusterInitialMasterNode: node-1
+    image:
+      repository: amazon/opendistro-for-elasticsearch
+      tag: "1.13.3"
+      pullPolicy: Always
+    serviceAccount:
+      create: false
+      annotations: {}
+      name: ""
+    persistence:
+      # Determine whether to use Persistent Volumes for the pods
+      enabled: true
+      # Determine whether to use Storage Classes to dynamically create Persistent Volumes for the pods
+      useDynamicProvisioning: true
+      #
+      # Settings for the pod Persistent Volume Claims,
+      # which each pod uses for data
+      dataPVC:
+        # Name of the Storage Class to use. If no Storage Class is used, leave an empty string
+        storageClassName: ""
+        # If your not using dynamic provisioning, you can use selectors to
+        # refine the binding process. You cannot specify a selector if you are using dynamic provisioning!
+        selector:
+          label: ""
+          value: ""
+        # Minimum size of the Persistent Volume
+        size: 10Gi
+    resources:
+      limits:
+        cpu: 4
+        memory: 8Gi
+      requests:
+        cpu: 0.5
+        memory: 1Gi
+  aida-exporter:
+    # specifiy the WA Server hostname (internal or external service/route)
+    waHostName: ""
+    waPort: 31116
+    httpAuthUsername: "wauser"
+    httpAuthPasswordSecretName: wa-pwd-secret
+    image:
+      repository: cp.icr.io/cp/ibm-aida-exporter
+      tag: 10.1.0.00.20220304
+      pullPolicy: Always
+    serviceAccount:
+      create: false
+      annotations: {}
+      name: ""
+    resources:
+      limits:
+        cpu: 2
+        memory: 4Gi
+      requests:
+        cpu: 0.5
+        memory: 0.5Gi
+  aida-email:
+    smtpServer: "smtp.server.com"
+    smtpPort: "587"
+    senderEmailId: "smtp@server.com"
+    senderEmailPwd: "smtpPassword"
+    recipientMailIds: "mail1@mail.com,mail2@mail.com"
+    image:
+      repository: cp.icr.io/cp/ibm-aida-email
+      tag: 10.1.0.00.20220304
+      pullPolicy: Always
+    serviceAccount:
+      create: false
+      annotations: {}
+      name: ""
+    resources:
+      limits:
+        cpu: 1
+        memory: 2Gi
+      requests:
+        cpu: 200m
+        memory: 0.5Gi
+  aida-nginx:
+    waConsoleCertSecretName: waconsole-cert-secret
+    image:
+      repository: cp.icr.io/cp/ibm-aida-nginx
+      tag: 10.1.0.00.20220304
+      pullPolicy: Always
+    serviceAccount:
+      create: false
+      annotations: {}
+      name: ""
+    routes:
+      enabled: true
+    ingress:
+      hostname:
+      secretName: wa-console-ingress-secret
+    exposeServiceType: LoadBalancer
+    exposeServiceAnnotation:
+      {}
+      #cert-manager.io/issuer: wa-ca-issuer
+      #service.beta.kubernetes.io/aws-load-balancer-backend-protocol: https
+      #service.beta.kubernetes.io/aws-load-balancer-type: "clb"
+      #service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+      #service.beta.kubernetes.io/aws-load-balancer-internal: "true"
+      #service.beta.kubernetes.io/azure-load-balancer-internal: "true"
+      #networking.gke.io/load-balancer-type: "Internal"
+    resources:
+      limits:
+        cpu: 1
+        memory: 1Gi
+      requests:
+        cpu: 200m
+        memory: 200Mi
+  aida-orchestrator:
+    image:
+      repository: cp.icr.io/cp/ibm-aida-orchestrator
+      tag: 10.1.0.00.20220304
+      pullPolicy: Always
+    serviceAccount:
+      create: false
+      annotations: {}
+      name: ""
+    resources:
+      limits:
+        cpu: 2
+        memory: 4Gi
+      requests:
+        cpu: 0.5
+        memory: 0.5Gi
+  aida-predictor:
+    image:
+      repository: cp.icr.io/cp/ibm-aida-predictor
+      tag: 10.1.0.00.20220304
+      pullPolicy: Always
+    serviceAccount:
+      create: false
+      annotations: {}
+      name: ""
+    resources:
+      limits:
+        cpu: 8
+        memory: 16Gi
+      requests:
+        cpu: 1
+        memory: 1Gi
+    autoscaling:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 10
+      targetMemoryUtilizationPercentage: 80
+  aida-redis:
+    image:
+      repository: cp.icr.io/cp/ibm-aida-redis
+      tag: 10.1.0.00.20220304
+      pullPolicy: Always
+    serviceAccount:
+      create: false
+      annotations: {}
+      name: ""
+    resources:
+      limits:
+        cpu: 1
+        memory: 500Mi
+      requests:
+        cpu: 200m
+        memory: 200Mi
+  aida-ui:
+    uiLogLevel: "ERROR:*,INFO:*,-TRACE:*"
+    image:
+      repository: cp.icr.io/cp/ibm-aida-ui
+      tag: 10.1.0.00.20220304
+      pullPolicy: Always
+    serviceAccount:
+      create: false
+      annotations: {}
+      name: ""
+    resources:
+      limits:
+        cpu: 1
+        memory: 2Gi
+      requests:
+        cpu: 0.3
+        memory: 0.5Gi
+    autoscaling:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 10
+      targetCPUUtilizationPercentage: 80

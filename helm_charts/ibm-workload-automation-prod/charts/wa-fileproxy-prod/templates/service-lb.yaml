@@ -1,0 +1,34 @@
+{{- if or (eq (.Values.fileProxy.exposeServiceType | upper )  "LOADBALANCER") (eq (.Values.fileProxy.exposeServiceType | upper )  "LOADBALANCER_SESSIONAFFINITY") }}
+####################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2021. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+####################################################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "wa-fileproxy-prod.fullname" . }}-lb
+  labels:
+{{ include "wa-fileproxy-prod.labels" . | indent 4 }}
+  annotations:
+{{- with .Values.podAnnotations }}
+{{ toYaml . | indent 4 }} 
+{{- end }}
+{{- with .Values.fileProxy.exposeServiceAnnotation }}
+{{ toYaml . | indent 4 }} 
+{{- end }}
+spec:
+  type: LoadBalancer 
+  ports:
+  - name: fileproxy-https-lb
+    protocol: TCP
+    port: {{ .Values.fileProxy.port }}
+    targetPort: {{ .Values.fileProxy.port }}
+  selector:
+    app.kubernetes.io/name: {{ include "wa-fileproxy-prod.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+{{- if (eq (.Values.fileProxy.exposeServiceType | upper )  "LOADBALANCER_SESSIONAFFINITY") }}
+  sessionAffinity: ClientIP
+{{ end -}}
+{{ end -}}

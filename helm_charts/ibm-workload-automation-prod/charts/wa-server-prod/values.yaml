@@ -10,6 +10,7 @@ global:
   serviceAccountName:
   enablePrometheus: true
   customPluginImageName: 
+  pluginImageName: cp.icr.io/cp/ibm-workload-automation-plugins:10.1.0.00.20220304
   configPlugins:
   language: "en"
   customLabels:
@@ -18,7 +19,7 @@ global:
 replicaCount: 1
 image:
   repository: cp.icr.io/cp/ibm-workload-automation-server
-  tag: 9.5.0.05.20211217
+  tag: 10.1.0.00.20220304
   pullPolicy: Always
 licenseType: "PVU"
 runAsUser: 999
@@ -33,6 +34,8 @@ server:
   timezone:
   tz:
   createPlan: true
+  externalFileProxyEnabled: false
+  externalFileProxyURLs: ""
   containerDebug: false
   enableSSO: true
   enableSingleInstaceNetwork: false
@@ -103,29 +106,32 @@ persistence:
     # Minimum size of the Persistent Volume
     size: 10Gi
   extraVolumes: []
-      # - name: custom-volume-1
-      #   persistentVolumeClaim:
-      #     claimName: pvc-name
-      # - name: custom-volume-2
-      #   configMap:
-      #      name: custom-configMap
-      #      defaultMode: 0755
-      # - name: custom-volume-3
-      #   secret:
-      #     secretName: custom-secret
-      #     defaultMode: 0744
-      # - name: nfs-volume
-      #   nfs: 
-      #     # URL for the NFS server
-      #     server: <nfs_server> # Change this!
-      #     path: /
+    # - name: custom-volume-1
+    #   configMap:
+    #      name: custom-configMap
+    #      defaultMode: 0755
+    # - name: custom-volume-2
+    #   secret:
+    #     secretName: custom-secret
+    #     defaultMode: 0744
+    # - name: nfs-volume
+    #   nfs: 
+    #     # URL for the NFS server
+    #     server: <nfs_server> # Change this!
+    #     path: /
   extraVolumeMounts: []
-      # - name: custom-volume-1
-      #   mountPath: /custom/mount/path-1
-      #   readOnly: false
-      # - name: custom-volume-2
-      #   mountPath: /custom/mount/path-2
-      # - name: custom-volume-3
-      #   mountPath: /custom/mount/path-3
-      # - name: nfs-volume
-      #   mountPath: /path/nfs
+    # - name: custom-volume-1
+    #   mountPath: /custom/mount/path-1
+    #   readOnly: false
+    # - name: custom-volume-2
+    #   mountPath: /custom/mount/path-2
+    # - name: nfs-volume
+    #   mountPath: /path/nfs
+enableBmEventsLogging: false
+bmEvents: |-
+  OPTIONS=MASTER
+  LOGGING=ALL
+  CHSCHED=HIGH
+  PIPE=/home/wauser/wadata/MAGENT.P
+  FILE=/home/wauser/wadata/event.log
+  JSON=/home/wauser/wadata/event.json

@@ -1,0 +1,116 @@
+# *******************************************************************************
+# Licensed Materials - Property of HCL
+# (c) Copyright HCL Technologies Ltd. 2022. All Rights Reserved.
+# 
+# Note to U.S. Government Users Restricted Rights:
+# Use, duplication or disclosure restricted by GSA ADP Schedule
+# *******************************************************************************
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "aida-es.fullname" . }}
+  labels:
+    {{- include "aida-es.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "aida-es.selectorLabels" . | nindent 6 }}
+  serviceName: {{ include "aida-es.fullname" . }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "aida-es.selectorLabels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "aida-es.serviceAccountName" . }}
+      securityContext:
+      {{- if not (.Capabilities.APIVersions.Has "security.openshift.io/v1") }} 
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      {{- end }}
+        supplementalGroups: [1000]
+        runAsNonRoot: true
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext:
+            privileged: false
+            readOnlyRootFilesystem: false
+            allowPrivilegeEscalation: false     
+            capabilities:
+              drop:
+              - ALL
+          env:          
+              - name: node.name
+                value: "node-1"
+              - name: NODE_MASTER
+                value: "true"
+              - name: discovery.type
+                value: {{ .Values.esDiscoveryType | quote }}
+              - name: network.host
+                value: "0.0.0.0"
+              # - name: discovery.seed_hosts
+              #   value: {{ .Values.discoverySeedHosts }}
+              # - name: cluster.initial_master_nodes
+              #   value: {{ .Values.clusterInitialMasterNode }}
+          ports:
+            - name: https
+              containerPort: 9200
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          {{- if .Values.persistence.enabled }}
+          volumeMounts:
+          - name: {{ include "aida-es.fullname" . }}
+            mountPath: /usr/share/elasticsearch/data/
+          {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- if .Values.persistence.enabled }}                 
+  volumeClaimTemplates:
+  - metadata:
+      name: {{ include "aida-es.fullname" . }}
+      labels: 
+{{ include "aida-es.labels" . | indent 8 }}      
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: {{ .Values.persistence.dataPVC.size | quote }}
+      {{- if .Values.persistence.useDynamicProvisioning }}
+      # if present, use the storageClassName from the values.yaml, else use the
+      # default storageClass setup by kube Administrator
+      # setting storageClassName to nil means use the default storage class
+      storageClassName: {{ default nil .Values.persistence.dataPVC.storageClassName | quote }}
+      {{- else }}
+      # bind to an existing pv.
+      # setting storageClassName to "" disables dynamic provisioning 
+      storageClassName: ""
+        {{- if .Values.persistence.dataPVC.selector.label }}
+      # use selectors in the binding process
+      selector:
+        matchLabels:
+          {{ .Values.persistence.dataPVC.selector.label }}: {{ .Values.persistence.dataPVC.selector.value }}
+        {{- end }}      
+      {{- end }}
+{{- end }}

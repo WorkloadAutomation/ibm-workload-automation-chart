@@ -1,0 +1,61 @@
+# *******************************************************************************
+# Licensed Materials - Property of HCL
+# (c) Copyright HCL Technologies Ltd. 2022. All Rights Reserved.
+#
+# Note to U.S. Government Users Restricted Rights:
+# Use, duplication or disclosure restricted by GSA ADP Schedule
+# *******************************************************************************
+global:
+  license: notaccepted
+  serviceAccountName: wauser
+  aidaEngineLogLevel: "INFO"
+  redisPwd: "default"
+  defaultShardCount: 1
+replicaCount: 1
+image:
+  repository: aida-nginx
+  pullPolicy: Never
+  tag: "latest"
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+serviceAccount:
+  create: false
+  annotations: {}
+  name: ""
+podAnnotations: {}
+podSecurityContext: {}
+securityContext: {}
+service:
+  type: ClusterIP
+  port: 9432
+routes:
+  enabled: true
+ingress:
+  hostname:
+  secretName: aida-nginx-ingress-secret
+exposeServiceType: Ingress
+exposeServiceAnnotation:
+  {}
+  #cert-manager.io/issuer: wa-ca-issuer
+  #service.beta.kubernetes.io/aws-load-balancer-backend-protocol: https
+  #service.beta.kubernetes.io/aws-load-balancer-type: "clb"
+  #service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+  #service.beta.kubernetes.io/aws-load-balancer-internal: "true"
+  #service.beta.kubernetes.io/azure-load-balancer-internal: "true"
+  #networking.gke.io/load-balancer-type: "Internal"
+resources:
+  limits:
+    cpu: 1
+    memory: 1Gi
+  requests:
+    cpu: 200m
+    memory: 200Mi
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+nodeSelector: {}
+tolerations: []
+affinity: {}

@@ -34,7 +34,8 @@ spec:
 {{ include "wa.console.labels" . | indent 8 }}
         affinity: wa-console
       annotations:
-{{ include "wa.metering" . | indent 8 }} 
+        productName: IBM Workload Automation Console
+        productVersion: "10.1"
         prometheus.io/scrape: {{ .Values.global.enablePrometheus | quote | default "true" }}
         prometheus.io/scheme: http
         prometheus.io/port: "9444"
@@ -105,7 +106,22 @@ spec:
           capabilities:
             drop:
             - ALL
-{{- end }}     
+{{- end }}
+      - name: init-copy-plugins
+        image: {{ .Values.global.pluginImageName }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        volumeMounts:
+        - name: {{ include "wa.fullName" . }}-plugins-volume
+          mountPath: /tmp/plugins
+        command: [/opt/wautils/copy_plugins.sh]
+        args: ["/opt/wa_cloud_plugins", "/tmp/plugins"]
+        securityContext:
+          privileged: false
+          readOnlyRootFilesystem: false
+          allowPrivilegeEscalation: false     
+          capabilities:
+            drop:
+            - ALL     
       containers:
       - name: {{ .Chart.Name }}
         readinessProbe:
@@ -200,6 +216,10 @@ spec:
         - name: ENGINE_PORT
           value: {{ .Values.console.enginePort | quote }} 
         {{- end }}
+        {{- if .Values.console.tz }}
+        - name: TZ
+          value: {{ .Values.console.tz | quote }}
+        {{- end }} 
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         securityContext:
@@ -216,7 +236,10 @@ spec:
         - name: {{ $persistentVolumeClaimName }}
           mountPath: /home/wauser
           subPath: wauser
-{{- end }}           
+{{- end }}
+        - name: {{ include "wa.fullName" . }}-plugins-volume
+          mountPath: /opt/wa_cloud_plugins
+          subPath: wa_cloud_plugins             
         - name: cert-bind-volume
           mountPath: /opt/wautils/certs
         - name: password-bind-volume
@@ -227,11 +250,13 @@ spec:
 {{- end }}
         - name: {{ include "wa.fullName" . }}-console-plugins-volume
           mountPath: /opt/wautils/config/plugins.properties
-          subPath: plugins.properties 
+          subPath: plugins.properties  
 {{- if ne (len .Values.persistence.extraVolumeMounts) 0 }}
 {{ toYaml .Values.persistence.extraVolumeMounts | indent 8 }}
-{{- end }}                
+{{- end }}               
       volumes:
+      - name: {{ include "wa.fullName" . }}-plugins-volume
+        emptyDir: {}
       - name: cert-bind-volume
         secret:
           defaultMode: 0664
@@ -259,7 +284,7 @@ spec:
 {{- end }}
 {{- if ne (len .Values.persistence.extraVolumes) 0 }}
 {{ toYaml .Values.persistence.extraVolumes | indent 6 }}
-{{- end }}          
+{{- end }}     
 {{- if .Values.persistence.enabled }}                                
   volumeClaimTemplates:
   - metadata:

@@ -38,20 +38,21 @@ release: {{ .Release.Name | quote }}
 {{/*
 Returns the metering information
 */}}
+{{- define "wa.pvu.metering" -}}
+productName: "IBM Workload Scheduler"
+productID: "c81f41563d584e3080bda3c5d7cef583"
+productVersion: "10.1"
+productMetric: "PROCESSOR_VALUE_UNIT"
+productChargedContainers: "All"
+{{- end -}}
+{{/*
+Returns the metering information
+*/}}
 {{- define "wa.metering" -}}
 productName: "IBM Workload Scheduler"
-{{ if (eq .Values.licenseType "PERJOB") }}
 productID: "24c3eb78bdc54b7bbe61dd03bba48fe2"
-{{ else }}
-productID: "c81f41563d584e3080bda3c5d7cef583"
-{{ end }}
-productVersion: "9.5"
-{{ if (eq .Values.licenseType "PERJOB") }}
+productVersion: "10.1"
 productMetric: "TEN_MONTHLY_JOBS"
-{{ else }} 
-productMetric: "PROCESSOR_VALUE_UNIT"
-{{ end }}
-productChargedContainers: "All"
 {{- end -}}
 {{/*
 Returns the node affinity
@@ -138,3 +139,4 @@ at the end of the name. Then, if the obtained name is still too long, also the r
     {{- $longName -}}   
   {{- end -}}
 {{- end -}}
+	

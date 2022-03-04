@@ -35,7 +35,11 @@ spec:
         affinity: wa-server
         waservertype: master
       annotations:
-{{ include "wa.metering" . | indent 8 }} 
+      {{- if eq (.Values.licenseType | upper )  "PVU" }} 
+{{ include "wa.pvu.metering" . | indent 8 }} 
+      {{- else }}
+{{ include "wa.metering" . | indent 8 }}      
+      {{- end }}
         prometheus.io/scrape: {{ .Values.global.enablePrometheus | quote | default "true" }}
         prometheus.io/scheme: http
         prometheus.io/port: "31115"
@@ -90,7 +94,7 @@ spec:
 {{ toYaml .Values.resources | indent 10 }}
 {{- end }}
 {{- if .Values.global.customPluginImageName }}
-      - name: init-copy-plugins
+      - name: init-copy-custom-plugins
         image: {{ .Values.global.customPluginImageName }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         volumeMounts:
@@ -106,7 +110,22 @@ spec:
           capabilities:
             drop:
             - ALL
-{{- end }}        
+{{- end }} 
+      - name: init-copy-plugins
+        image: {{ .Values.global.pluginImageName }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        volumeMounts:
+        - name: {{ include "wa.fullName" . }}-plugins-volume
+          mountPath: /tmp/plugins
+        command: [/opt/wautils/copy_plugins.sh]
+        args: ["/opt/wa_cloud_plugins", "/tmp/plugins"]
+        securityContext:
+          privileged: false
+          readOnlyRootFilesystem: false
+          allowPrivilegeEscalation: false     
+          capabilities:
+            drop:
+            - ALL      
       containers:
       - name: {{ .Chart.Name }}
         readinessProbe:
@@ -190,6 +209,14 @@ spec:
         - name: AGT_NAME
           value: {{ .Values.server.agentName | quote }}
         {{- end }}
+        {{- if .Values.server.fileProxyEnabled }}
+        - name: FP_ENABLED
+          value: {{ .Values.server.externalFileProxyEnabled | quote }}
+        {{- end }}
+        {{- if .Values.server.fileProxyEnabled }}
+        - name: FP_URLS
+          value: {{ .Values.server.externalFileURLs }}
+        {{- end }}
         {{- if .Values.server.startOfDay }}
         - name: START_OF_DAY
           value: {{ .Values.server.startOfDay | quote }}
@@ -218,7 +245,7 @@ spec:
       {{- end}}
         - name: DB_TYPE
           value: {{ .Values.server.db.type | quote }}
-        {{- if eq (.Values.server.db.type | upper) "IDS" }}
+      {{- if or (eq (.Values.server.db.type | upper) "IDS") (eq (.Values.server.db.type | upper) "ONEDB")  }}
         - name: DB_SERVER
           value: {{ .Values.server.db.server | quote }}    
         {{- end}}
@@ -294,7 +321,10 @@ spec:
         - name: {{ $persistentVolumeClaimName }}
           mountPath: /home/wauser
           subPath: wauser
-{{- end }}           
+{{- end }} 
+        - name: {{ include "wa.fullName" . }}-plugins-volume
+          mountPath: /opt/wa_cloud_plugins/
+          subPath: wa_cloud_plugins      
         - name: cert-bind-volume
           mountPath: /opt/wautils/certs
         - name: password-bind-volume
@@ -305,6 +335,9 @@ spec:
         - name: config-liberty-volume
           mountPath: /opt/wautils/dropins
 {{- end }}
+        - name: {{ include "wa.fullName" . }}-config-bm-events-volume
+          mountPath: /home/wauser/wadata/BmEvents.conf
+          subPath: BmEvents.conf
         - name: {{ include "wa.fullName" . }}-server-plugins-volume
           mountPath: /opt/wautils/config/plugins.properties
           subPath: plugins.properties
@@ -313,7 +346,56 @@ spec:
 {{- if ne (len .Values.persistence.extraVolumeMounts) 0 }}
 {{ toYaml .Values.persistence.extraVolumeMounts | indent 8 }}
 {{- end }}
+{{- if .Values.enableBmEventsLogging }}
+      - name: {{ .Chart.Name }}-bm-events
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        volumeMounts: 
+        - name: {{ $persistentVolumeClaimName }}
+          mountPath: /tmp/log
+        command: ['/bin/sh']
+        args: ['-c', 'while [ ! -f /tmp/log/wauser/wadata/event.json ] ; do echo waiting for BmEvent.json file to be created; sleep 300; done; tail -f /tmp/log/wauser/wadata/event.json']
+        securityContext:
+          privileged: false
+          readOnlyRootFilesystem: false
+          allowPrivilegeEscalation: false     
+          capabilities:
+            drop:
+            - ALL
+{{- end }}
+      - name: {{ .Chart.Name }}-db-auditing
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        volumeMounts: 
+        - name: {{ $persistentVolumeClaimName }}
+          mountPath: /tmp/log
+        command: ['/bin/sh']
+        args: ['-c', 'while [ ! -f /tmp/log/wauser/wadata/audit/database/current.json ] ; do echo waiting for current.json file to be created; sleep 300; done; tail -f /tmp/log/wauser/wadata/audit/database/current.json']
+        securityContext:
+          privileged: false
+          readOnlyRootFilesystem: false
+          allowPrivilegeEscalation: false     
+          capabilities:
+            drop:
+            - ALL
+      - name: {{ .Chart.Name }}-plan-auditing
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        volumeMounts: 
+        - name: {{ $persistentVolumeClaimName }}
+          mountPath: /tmp/log
+        command: ['/bin/sh']
+        args: ['-c', 'while [ ! -f /tmp/log/wauser/wadata/audit/plan/current.json ] ; do echo waiting for current.json file to be created; sleep 300; done; tail -f /tmp/log/wauser/wadata/audit/plan/current.json']
+        securityContext:
+          privileged: false
+          readOnlyRootFilesystem: false
+          allowPrivilegeEscalation: false     
+          capabilities:
+            drop:
+            - ALL
       volumes:
+      - name: {{ include "wa.fullName" . }}-plugins-volume
+        emptyDir: {}
       - name: cert-bind-volume
         secret:
           defaultMode: 0664
@@ -327,10 +409,18 @@ spec:
         secret:
           defaultMode: 0664
           secretName: "waagent-cert-secret-ext"
+          optional: true
       - name: password-bind-volume
         secret:
           defaultMode: 0664
           secretName: {{ .Values.server.pwdSecretName }}        
+      - name: {{ include "wa.fullName" . }}-config-bm-events-volume
+        configMap:
+          name: {{ include "wa.fullName" . }}-bm-events-config
+          items:
+          - key: BmEvents.conf
+            path: BmEvents.conf
+          optional: true
       - name: {{ include "wa.fullName" . }}-server-plugins-volume
         configMap:
           name: {{ .Values.global.configPlugins | default $pluginsConfiName }} 
@@ -350,7 +440,7 @@ spec:
 {{- end }}
 {{- if ne (len .Values.persistence.extraVolumes) 0 }}
 {{ toYaml .Values.persistence.extraVolumes | indent 6 }}
-{{- end }}                     
+{{- end }}                   
 {{- if .Values.persistence.enabled }}                 
   volumeClaimTemplates:
   - metadata:

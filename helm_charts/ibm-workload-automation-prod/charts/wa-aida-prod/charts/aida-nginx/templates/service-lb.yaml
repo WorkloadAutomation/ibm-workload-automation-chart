@@ -1,0 +1,31 @@
+{{- if or (eq (.Values.exposeServiceType | upper )  "LOADBALANCER") (eq (.Values.exposeServiceType | upper )  "LOADBALANCER_SESSIONAFFINITY") }}
+# *******************************************************************************
+# Licensed Materials - Property of HCL
+# (c) Copyright HCL Technologies Ltd. 2022. All Rights Reserved.
+# 
+# Note to U.S. Government Users Restricted Rights:
+# Use, duplication or disclosure restricted by GSA ADP Schedule
+# *******************************************************************************
+{{ $fullName := include "aida-nginx.fullname" . }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $fullName }}-lb
+  labels:
+{{ include "aida-nginx.labels" . | indent 4 }}
+{{- with .Values.exposeServiceAnnotation }}
+  annotations:
+{{ toYaml . | indent 4 }} 
+{{- end }}
+spec:
+  type: LoadBalancer 
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: https
+      protocol: TCP  
+  selector:
+    {{- include "aida-nginx.selectorLabels" . | nindent 4 }}
+{{- if (eq (.Values.exposeServiceType | upper )  "LOADBALANCER_SESSIONAFFINITY") }}
+  sessionAffinity: ClientIP
+{{- end }}
+{{- end }}

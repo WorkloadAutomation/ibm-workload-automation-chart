@@ -14,6 +14,10 @@ Create common master service name.
 {{- $name := default .Chart.Name .Release.Name -}}
 {{- printf "%s-%s-%s" $name "waconsole" "config" -}}
 {{- end -}}
+{{- define "waconsole.SecretName" -}}
+{{- $name := default .Chart.Name .Release.Name -}}
+{{- printf "%s-%s-%s" $name "waconsole" "secret" -}}
+{{- end -}}
 {{/*
 Create common master username.
 */}}

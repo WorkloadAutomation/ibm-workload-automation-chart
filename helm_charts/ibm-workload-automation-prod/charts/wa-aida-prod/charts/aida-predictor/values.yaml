@@ -1,0 +1,54 @@
+# *******************************************************************************
+# Licensed Materials - Property of HCL
+# (c) Copyright HCL Technologies Ltd. 2022. All Rights Reserved.
+#
+# Note to U.S. Government Users Restricted Rights:
+# Use, duplication or disclosure restricted by GSA ADP Schedule
+# *******************************************************************************
+global:
+  license: notaccepted
+  serviceAccountName: wauser
+  aidaEngineLogLevel: "INFO"
+  redisPwd: "default"
+  defaultShardCount: 1
+replicaCount: 1
+image:
+  repository: aida-predictor
+  pullPolicy: Never
+  tag: "latest"
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+serviceAccount:
+  create: false
+  annotations: {}
+  name: ""
+podAnnotations: {}
+podSecurityContext: {}
+securityContext: {}
+service:
+  type: ClusterIP
+  port: 5000
+ingress:
+  enabled: false
+  annotations: {}
+  hosts:
+    - host: chart-example.local
+      paths: []
+  tls: []
+# update memory limit as per predictor reqs
+resources:
+  limits:
+    cpu: 8
+    memory: 16Gi
+  requests:
+    cpu: 2
+    memory: 4Gi
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 10
+  targetMemoryUtilizationPercentage: 80
+nodeSelector: {}
+tolerations: []
+affinity: {}

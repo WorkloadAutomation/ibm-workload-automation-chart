@@ -4,7 +4,7 @@
 #
 # * Trademark of HCL Technologies Limited
 ####################################################################
-FROM registry.access.redhat.com/ubi8:8.3
+FROM registry.access.redhat.com/ubi8:8.4
 ENV WA_BASE_UID=999
 ENV WA_BASE_GID=0
 ENV WA_USER=wauser

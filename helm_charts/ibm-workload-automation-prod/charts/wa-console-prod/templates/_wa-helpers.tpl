@@ -38,12 +38,21 @@ release: {{ .Release.Name | quote }}
 {{/*
 Returns the metering information
 */}}
-{{- define "wa.metering" -}}
-productName: "IBM Workload Automation"
-productID: "24c3eb78bdc54b7bbe61dd03bba48fe2"
-productVersion: "9.5"
-productMetric: "TEN_MONTHLY_JOBS"
+{{- define "wa.pvu.metering" -}}
+productName: "IBM Workload Scheduler"
+productID: "c81f41563d584e3080bda3c5d7cef583"
+productVersion: "10.1"
+productMetric: "PROCESSOR_VALUE_UNIT"
 productChargedContainers: "All"
+{{- end -}}
+{{/*
+Returns the metering information
+*/}}
+{{- define "wa.metering" -}}
+productName: "IBM Workload Scheduler"
+productID: "24c3eb78bdc54b7bbe61dd03bba48fe2"
+productVersion: "10.1"
+productMetric: "TEN_MONTHLY_JOBS"
 {{- end -}}
 {{/*
 Returns the node affinity

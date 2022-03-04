@@ -1,4 +1,4 @@
-# IBM Workload Automation
+f# IBM Workload Automation
 
 ## Introduction
 To ensure a fast and responsive experience when using IBM Workload Automation, you can deploy IBM Workload Automation on a cloud infrastructure. A cloud deployment ensures access anytime anywhere and is a fast and efficient way to get up and running quickly. It also simplifies maintenance, lowers costs, provides rapid upscale and downscale, minimizes IT requirements and physical on-premises data storage.
@@ -18,7 +18,7 @@ The information in this README contains the steps for deploying the following IB
  > **IBM Workload Automation**, which comprises master domain manager and its backup, Dynamic Workload Console, and Dynamic Agent
  
  
- For more information about IBM Workload Automation, see the product documentation library in [IBM Documentation]( https://www.ibm.com/docs/en/workload-scheduler/9.5.0).
+ For more information about IBM Workload Automation, see the product documentation library in [IBM Documentation]( https://www.ibm.com/docs/workload-scheduler/10.1.0).
  
 ## Details
 
@@ -26,7 +26,7 @@ By default, a single  server (master domain manager), Dynamic Workload Console (
 
 To achieve high availability in an IBM Workload Automation environment, the minimum base configuration is composed of 2 Dynamic Workload Consoles and 2 servers (master domain managers). For more details about IBM Workload Automation and high availability, see: 
 
-[An active-active high availability scenario](https://www.ibm.com/docs/en/workload-scheduler/9.5.0?topic=scheduler-active-active-high-availability-scenario).
+[An active-active high availability scenario](https://www.ibm.com/docs/workload-scheduler/10.1.0?topic=scheduler-active-active-high-availability-scenario).
 
 
 IBM Workload Automation can be deployed across a single cluster, but you can add multiple instances of the product components by using a different namespace in the cluster. The product components can run in multiple failure zones in a single cluster.
@@ -69,9 +69,9 @@ In addition to the product components, the following objects are installed:
 You can access the IBM Workload Automation chart and container images from the Entitled Registry. See [Create the secret](#create-the-secret) for more information about accessing the registry. The images are as follows:
 
 
-* cp.icr.io/cp/ibm-workload-automation-agent-dynamic:9.5.0.03.20210326
-* cp.icr.io/cp/ibm-workload-automation-server:9.5.0.03.20210326
-* cp.icr.io/cp/ibm-workload-automation-console:9.5.0.03.20210326
+* cp.icr.io/cp/ibm-workload-automation-agent-dynamic:10.1.0.00.20220304
+* cp.icr.io/cp/ibm-workload-automation-server:10.1.0.00.20220304
+* cp.icr.io/cp/ibm-workload-automation-console:10.1.0.00.20220304
 
 
 
@@ -249,7 +249,6 @@ Create a secrets file to store passwords for the server, console and database, o
 	       WA_PASSWORD: <hidden_password>
 	       DB_ADMIN_PASSWORD: <hidden_password>
 	       DB_PASSWORD: <hidden_password>	
-	       SSL_PASSWORD: <hidden_password>
      
 where:
      
@@ -258,12 +257,10 @@ where:
    - **<hidden_password>** must be entered; to enter an encrypted password, run the following command in a UNIX shell and copy the output into the yaml file:
 	    `echo -n 'mypassword' | base64`
 
-> **Note a**: The `echo` command must be launched separately for each password that you want to enter as an encrypted password in the mysecret.yaml:
+> **Note**: The `echo` command must be launched separately for each password that you want to enter as an encrypted password in the mysecret.yaml:
    - WA_PASSWORD: \<hidden password>
    - DB_ADMIN_PASSWORD: \<hidden password>
    - DB_PASSWORD: \<hidden password>    
-   - SSL_PASSWORD: \<hidden password>
-> **Note b**: The SSL_PASSWORD parameter is required only if you use custom certificates in PEM format.
 
 2. Once the file has been created and filled in, it must be imported.
 
@@ -653,7 +650,7 @@ To manually verify that the installation was successfully installed, you can per
 	 
         optman ls
 		
-This command lists the current values of all IBM Workload Automation global options. For more information about the global options see [Global Options - detailed description](https://www.ibm.com/docs/en/workload-scheduler/9.5.0?topic=options-global-detailed-description).	
+This command lists the current values of all IBM Workload Automation global options. For more information about the global options see [Global Options - detailed description](https://www.ibm.com/docs/workload-scheduler/10.1.0?topic=options-global-detailed-description).	
 	
 * **Verify that the default engine connection is created from the Dynamic Workload Console**
 
@@ -702,13 +699,7 @@ Verifying the default engine connection depends on the network enablement config
  ![engine connection properties panel](images/dwcengcnxn.png)
 
 
-
-To ensure the Dynamic Workload Console logout page redirects to the login page, modify the value of the logout url entry available in file authentication_config.xml:
-
-
-       <jndiEntry value="${logout.url}" jndiName="logout.url" />
-
-where the logout.url string in jndiName should be replaced with the logout URL of the provider.
+			
 		
 
 ## Upgrading the Chart
@@ -783,7 +774,7 @@ The following table lists the configurable parameters of the chart relative to t
 | waagent.image.repository                         | IBM Workload Automation Agent image repository                                                                                                                                                                                                                                | yes            | @DOCKER.AGENT.IMAGE.NAME@        | @DOCKER.AGENT.IMAGE.NAME@        |
 | waagent.image.tag                                | IBM Workload Automation Agent image tag                                                                                                                                                                                                                                       | yes            | @VERSION@                        | @VERSION@                        |
 | waagent.image.pullPolicy                         | image pull policy                                                                                                                                                                                                                                                    | yes            | Always                           | Always                           |
-| waagent.licenseType                            | Product license type (IBM Workload Scheduler only)                                                                                                                                                                                                                                                            | yes           | PVU                           | PVU                       |
+| waagent.licenseType                            | Product license type (IBM Workload Scheduler only)                                                                                                                                                                                                                                                             | yes           | PVU                           | PVU                       |
 | waagent.agent.name                               | Agent display name                                                                                                                                                                                                                                                   | yes            | WA_AGT                           | WA_AGT                           |
 | waagent.agent.tz                                 | If used, it sets the TZ operating system environment variable                                                                                                                                                                                                        | no             | America/Chicago                  |                                  |
 | waagent.agent.networkpolicyEgress                                 | Customize egress policy. Controls network traffic and how a component pod is allowed to communicate with other pods. If empty, no egress policy is defined                                                                                                                                                                                                        | no             | See [Network enablement](#network-enablement)                  |                                  |
@@ -806,10 +797,12 @@ The following table lists the configurable parameters of the chart relative to t
 | waagent.persistence.dataPVC.selector.label       | Volume label to bind (only limited to single label)                                                                                                                                                                                                                  | no             | my-volume-label                  |                                  |
 | waagent.persistence.dataPVC.selector.value       | Volume label value to bind (only limited to single value)                                                                                                                                                                                                            | no             | my-volume-value                  |                                  |
 | waagent.persistence.dataPVC.size                 | The minimum size of the Persistent Volume                                                                                                                                                                                                                            | no             | 2Gi                              | 2Gi                              |
+| waserver.persistence.extraVolumes               | A list of additional extra volumes                                                                                                                                                                                                                             | no            | custom-volume-1                             |                                              |
+| waserver.persistence.extraVolumeMounts               | A list of additional extra volumes mounts                                                                                                                                                                                                                            | no            | custom-volume-1                             |                                              |
 
 
 >\(*) **Note:** for details about static agent workstation pools, see: 
-[Workstation](https://www.ibm.com/docs/en/workload-scheduler/9.5.0?topic=objects-workstation).
+[Workstation](https://www.ibm.com/docs/workload-scheduler/10.1.0?topic=objects-workstation).
 
 
 - #### Dynamic Workload Console parameters
@@ -828,7 +821,7 @@ The following table lists the configurable parameters of the chart relative to t
 | waconsole.console.db.hostname                       | The Hostname or the IP Address of the database server                                                                                                                                                                                                                  | yes           | \<dbhostname>                     |                                                    |
 | waconsole.console.db.port                           | The port of the database server                                                                                                                                                                                                                                        | yes           | 50000                            | 50000                                              |
 | waconsole.console.db.name                           | Depending on the database type, the name is different; enter the name of the Server's database for DB2/Informix/OneDB/MSSQL, enter the Oracle Service Name for Oracle                                                                                                        | yes           | TWS                              | TWS                                                |
-| waconsole.console.db.server                           | The name of the Informix or OneDB database server                                                                                                               | yes only for IDS or ONEDB           | IDS                              | 
+| waconsole.console.db.server                           | The name of the Informix or OneDB database server                                                                                                               | yes only for IDS or ONEDB           | IDS                              |  
 | waconsole.console.db.tsName                         | The name of the DATA table space                                                                                                                                                                                                                                       | no            | TWS_DATA                         |                                                    |
 | waconsole.console.db.tsPath                         | The path of the DATA table space                                                                                                                                                                                                                                       | no            | TWS_DATA                         |                                                    |
 | waconsole.console.db.tsTempName                     | The name of the TEMP table space (Valid only for Oracle)                                                                                                                                                                                                               | no            | TEMP                             | leave it blank                                     |
@@ -842,6 +835,7 @@ The following table lists the configurable parameters of the chart relative to t
 | waconsole.console.pwdSecretName                     | The name of the secret to store all passwords                                                                                                                                                                                                                          | yes           | wa-pwd-secret                    | wa-pwd-secret                                      |
 | waconsole.console.livenessProbe.initialDelaySeconds | The number of seconds after which the liveness probe starts checking if the server is running                                                                                                                                                                          | yes           | 100                              | 100                                                | 
 | waconsole.console.useCustomizedCert                 | If true, customized SSL certificates are used to connect to the Dynamic Workload Console                                                                                                                                                                               | no            | false                            | false                                              |
+| waconsole.console.tz                                | If used, it sets the TZ operating system environment variable                                                                                                                                                                                                           | no            | America/Chicago                  |                                                  |
 | waconsole.console.certSecretName                    | The name of the secret to store customized SSL certificates                                                                                                                                                                                                            | no            | waconsole-cert-secret            |                                                    |
 | waconsole.console.libConfigName                     | The name of the ConfigMap to store all custom liberty configuration                                                                                                                                                                                                    | no            | libertyConfigMap                 |                                                    |
 | waconsole.console.routes.enabled                   | If true, the ingress controller rules is enabled                                                                                                                                                                                                                       | no            | true                             | true                                               |
@@ -856,6 +850,8 @@ The following table lists the configurable parameters of the chart relative to t
 | waconsole.persistence.dataPVC.selector.label        | Volume label to bind (only limited to single label)                                                                                                                                                                                                                    | no            | my-volume-label                  |                                                    |
 | waconsole.persistence.dataPVC.selector.value        | Volume label value to bind (only limited to single label)                                                                                                                                                                                                              | no            | my-volume-value                  |                                                    |
 | waconsole.persistence.dataPVC.size                  | The minimum size of the Persistent Volume                                                                                                                                                                                                                              | no            | 5Gi                              | 5Gi                                                |
+| waserver.persistence.extraVolumes               | A list of additional extra volumes                                                                                                                                                                                                                             | no            | custom-volume-1                             |                                              |
+| waserver.persistence.extraVolumeMounts               | A list of additional extra volumes mounts                                                                                                                                                                                                                            | no            | custom-volume-1                             |                                              |
 | waconsole.console.exposeServiceType            | The network enablement configuration implemented. Valid values: LOAD BALANCER or INGRESS   | yes           |     INGRESS                          |                                                | 
 | waconsole.console.exposeServiceAnnotation      | Annotations of either the resource of the service or the resource of the ingress, customized in accordance with the cloud provider   | yes           |                               |                     |
 | waconsole.console.networkpolicyEgress      | Customize egress policy. Controls network traffic and how a component pod is allowed to communicate with other pods. If empty, no egress policy is defined | no | See [Network enablement](#network-enablement)|
@@ -872,8 +868,8 @@ The following table lists the configurable parameters of the chart and an exampl
 | waserver.replicaCount                             | Number of replicas to deploy                                                                                                                                                                                                                                                   | yes           | 1                                | 1                                                |
 | waserver.image.repository                         | IBM Workload Automation server image repository                                                                                                                                                                                                                                        | yes           | <*repository_url*>       | The name of the image server repository                      |
 | waserver.image.tag                                | IBM Workload Automation server image tag                                                                                                                                                                                                                                               | yes           | 1.0.0                        | the server image tag                                        |
-| waserver.image.pullPolicy                         | Image pull policy                                                                                                                                                                                                                                                             | yes           | Always                           | Always                |
-| waserver.licenseType                            | Product license type (IBM Workload Scheduler only)                                                                                                                                                                                                                                                            | yes           | PVU                           | PVU                                           |
+| waserver.image.pullPolicy                         | Image pull policy                                                                                                                                                                                                                                                             | yes           | Always                           | Always                                           |
+| waserver.licenseType                            | Product license type (IBM Workload Scheduler only)                                                                                                                                                                                                                                                            | yes           | PVU                           | PVU                       |
 | waserver.fsGroupId                                | The secondary group ID of the user                                                                                                                                                                                                                                            | no            | 999                              |                                                  |
 | waserver.server.company                           | The name of your Company                                                                                                                                                                                                                                                      | no            | my-company                       | my-company                                       |
 | waserver.server.agentName                         | The name to be assigned to the dynamic agent of the Server                                                                                                                                                                                                                    | no            | WA_SAGT                          | WA_AGT                                           |
@@ -887,8 +883,8 @@ The following table lists the configurable parameters of the chart and an exampl
 | waserver.server.db.type                           | The preferred remote database server type (e.g. DERBY, DB2, ORACLE, MSSQL, IDS)                                                                                                                                                                                               | yes           | DB2                              | DB2                                              |
 | waserver.server.db.hostname                       | The Hostname or the IP Address of the database server                                                                                                                                                                                                                         | yes           | \<dbhostname>                     |                                                  |
 | waserver.server.db.port                           | The port of the database server                                                                                                                                                                                                                                               | yes           | 50000                            | 50000                                            |
-| waserver.server.db.name                           | Depending on the database type, the name is different; enter the name of the Server's database for DB2/Informix/OneDB/MSSQL, enter the Oracle Service Name for Oracle                                                                                                               | yes           | TWS                              | TWS                                              |
 | waserver.server.db.server                           | The name of the Informix or OneDB database server                                                                                                               | yes only for IDS or ONEDB           | IDS                              |  
+| waserver.server.db.name                           | Depending on the database type, the name is different; enter the name of the Server's database for DB2/Informix/OneDB/MSSQL, enter the Oracle Service Name for Oracle                                                                                                               | yes           | TWS                              | TWS                                              |
 | waserver.server.db.tsName                         | The name of the DATA table space                                                                                                                                                                                                                                              | no            | TWS_DATA                         |                                                  |
 | waserver.server.db.tsPath                         | The path of the DATA table space                                                                                                                                                                                                                                              | no            | TWS_DATA                         |                                                  |
 | waserver.server.db.tsLogName                      | The name of the LOG table space                                                                                                                                                                                                                                               | no            | TWS_LOG                          |                                                  |
@@ -920,6 +916,8 @@ The following table lists the configurable parameters of the chart and an exampl
 | waserver.persistence.dataPVC.selector.label       | Volume label to bind (only limited to single label)                                                                                                                                                                                                                           | no            | my-volume-label                  |                                                  |
 | waserver.persistence.dataPVC.selector.value       | Volume label value to bind (only limited to single value)                                                                                                                                                                                                                     | no            | my-volume-value                  |                                                  |
 | waserver.persistence.dataPVC.size                 | The minimum size of the Persistent Volume                                                                                                                                                                                                                                     | no            | 5Gi                              | 5Gi                                              |
+| waserver.persistence.extraVolumes               | A list of additional extra volumes                                                                                                                                                                                                                             | no            | custom-volume-1                             |                                              |
+| waserver.persistence.extraVolumeMounts               | A list of additional extra volumes mounts                                                                                                                                                                                                                            | no            | custom-volume-1                             |                                              |
 | waserver.server.exposeServiceType            | The network enablement configuration implemented. Valid values: LOAD BALANCER or INGRESS   | yes           |     INGRESS                          |                                                | 
 | waserver.server.exposeServiceAnnotation      | Annotations of either the resource of the service or the resource of the ingress, customized in accordance with the cloud provider   | yes           |                               |                     |
 | waserver.server.networkpolicyEgress                                | Controls network traffic and how a component pod is allowed to communicate with other pods. Customize egress policy. If empty, no egress policy is defined                                                                                                                                                                                                                  | no            | See [Network enablement](#network-enablement)                  |                     |
@@ -928,6 +926,44 @@ The following table lists the configurable parameters of the chart and an exampl
 | waserver.server.nodeAffinityRequired                 | A set of rules that determines on which nodes a server can be deployed using custom labels on nodes and label selectors specified in pods.                                                                                                                                                                                                                           | no             |   See [Network enablement](#network-enablement)              |                               |
 | waserver.server.ftaName         |  The name of the Workload Automation workstation for this installation.                                                                                                                                                                                                                           | no             |     WA-SERVER                    |                               |
 	
+
+
+
+-  #### FileProxy parameters
+The following table lists the configurable parameters of the chart relative to the FileProxy and an example of their values:
+
+| **Parameter**                                    | **Description**                                                                                                                                                                                                                                                      | **Mandatory**  | **Example**                      | **Default**                      |
+| ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------  | -------------  | -------------------------------- | -------------------------------- |
+| wafileproxy.replicaCount                             | Number of replicas to deploy                                                                                                                                                                                                                                         | yes            | 1                                | 1                                |
+| wafileproxy.image.repository                         | HCL Workload Automation fileProxy image repository                                                                                                                                                                                                                                | yes            |         |        |
+| wafileproxy.image.tag                                | HCL Workload Automation fileProxy image tag                                                                                                                                                                                                                                       | yes            |                        |                  |
+| wafileproxy.image.pullPolicy                         | image pull policy                                                                                                                                                                                                                                                    | yes            | Always                           | Always                           |
+| wafileproxy.affinity               | A set of rules that determines on which nodes an fileProxy can be deployed using custom labels on nodes and label selectors specified in pods.                                                                                                                                                                                                                           | no             |                 |                               |
+| wafileproxy.nameOverride        | override the name of the release                                                                                                                                                                                                            | no          | workload-automation                  |                                  |
+| wafileproxy.fullnameOverride               | override the fullname of the release                                                                                                                                                                                 | no             | full-wa                            |                             |
+| wafileproxy.fileProxy.pwdSecretName                     | The name of the secret to store all passwords                                                                                                                                                                                                             | no             | Pool1, Pool2                     |                                  |
+| wafileproxy.fileProxy.fileProxy.useCustomizedCert          | If true, customized SSL certificates are used                                                                                                                                                                           | no             | no                            | no                            |
+| wafileproxy.fileProxy.fileProxy.certSecretName             | The name of the secret to store customized SSL certificates                                                                                                                                                                                                          | no             | wafileproxy-cert-secret              |                                  |
+| wafileproxy.fileProxy.containerDebug                     | The container is executed in debug mode                                                                                                                                                                                                                              | no             | no                               | no                               |
+| wafileproxy.fileProxy.port | The port of the fileProxy deployment                                                                                                                                                                      | yes            | 60                               | 60                               | 
+| wafileproxy.fileProxy.route.enabled |     enable or disable route resource in OpenShift                                                                                                                                                                                                                                                        | no           |                                  |     false                            |
+| wafileproxy.fileProxy.route.exposeServiceType |    The network enablement configuration implemented. Valid values: LOAD BALANCER or INGRESS                                                                                                                                                                                                                                                       | true           |         LOAD_BALANCER                         |                                 |
+| wafileproxy.fileProxy.route.exposeServiceAnnotation |        Annotations of either the resource of the service or the resource of the ingress, customized in accordance with the cloud provider                                                                                                                                                                                                                                                      | no           |                                  |                                 |
+| wafileproxy.podAnnotations |        You can use Kubernetes annotations to attach arbitrary non-identifying metadata to objects                                                                                                                                                                                                                                                     | no           |                                  |                                 |
+| wafileproxy.podSecurityContext |    defines privilege and access control settings for a Pod or Container                                                                                                                                                                                                                                                         | no           |                                  |                                 |
+| wafileproxy.ingress.annotations |     Defines annotations for ingress objects                                                                                                                                                                                                                                                        | no           |                                  |                                 |
+| wafileproxy.ingress.hosts.host |       Ingress hostname                                                                                                                                                                                                                                                      | no           |                                  |                                 |
+| wafileproxy.ingress.hosts.paths |       Ingress paths                                                                                                                                                                                                                                                 | no           |                                  |                                 |
+| wafileproxy.ingress.tls |                  Ingress certificate                                                                                                                                                                                                                                           | yes           |                                  |                                 |
+| wafileproxy.resources                  | The resources requested to run every instances                                                                                                                                                                                                                                   | yes            | 200m                             | 200m                             | 
+| wafileproxy.autoscaling.enabled                  | Enabling autoscaling                                                                                                                                                                                                                                  | yes            | true                            | false                          | 
+| wafileproxy.autoscaling.minReplicas                  | The minimum number of replicas of the deployment                                                                                                                                                                                                                                   | no            | 1                            | 1                           | 
+| wafileproxy.autoscaling.maxReplicas                  | The maximum number of replicas of the deployment                                                                                                                                                                                                                                      | no            | 100                             | 100                             | 
+| wafileproxy.autoscaling.targetCPUUtilizationPercentage                  | The number of CPU to use expressed in percentage                                                                                                                                                                                                                              | yes            | 80                            | 80                           | 
+| wafileproxy.nodeSelector                | specifies a map of key-value pairs. For the pod to be eligible to run on a node, the node must have each of the indicated key-value pairs as labels                                                                                                                                                                                                                                    | no            |                          |                       | 
+| wafileproxy.tolerations                | Tolerations are applied to pods, and allow (but do not require) the pods to schedule onto nodes with matching taints                                                                                                                                                                                                                                   | no            |                           |                      | 
+
+  
 
 ## Configuring
 
@@ -1133,7 +1169,7 @@ To configure an on-premises agent to communicate with components in the cloud:
 3. Replace the files on the on-premises agent in the same path.
 
 **On-premises console engine connection (connection between an on-premises console with a server in the cloud):**
-1. Copy the public CA root certificate from the server. Refer to the IBM Workload Automation product documentation for details about creating custom certificates for communication between the server and the console: [Customizing certificates](https://www.ibm.com/docs/en/workload-scheduler/9.5.0?topic=scbdwcwsc-customizing-certificates-master-domain-manager-dynamic-workload-console-communication).
+1. Copy the public CA root certificate from the server. Refer to the IBM Workload Automation product documentation for details about creating custom certificates for communication between the server and the console: [Customizing certificates](https://www.ibm.com/docs/workload-scheduler/10.1.0?topic=scbdwcwsc-customizing-certificates-master-domain-manager-dynamic-workload-console-communication).
 
 2. To enable the changes, restart the Console workstation.
 
@@ -1184,9 +1220,6 @@ The IBM Workload Automation Helm chart does not support automatic scaling to zer
 
 If you use customized certificates, `useCustomizedCert:true`, you must create a secret containing the customized files that will replace the Server default ones in the \<workload_automation_namespace>. Customized files must have the same name as the default ones.
 
-    
-### Managing custom .JKS certificates
-
   * TWSClientKeyStoreJKS.sth
   * TWSClientKeyStore.kdb
   * TWSClientKeyStore.sth
@@ -1216,7 +1249,8 @@ For the Dynamic Workload Console, type the following command:
     
    where, TWSClientKeyStoreJKS.sth, TWSClientKeyStore.kdb, TWSClientKeyStore.sth, TWSClientKeyStoreJKS.jks, TWSServerTrustFile.jks and TWSServerKeyFile.jks are the Container keystore and stash file containing your customized certificates.
    
-   For details about custom certificates, see [Connection security overview](https://www.ibm.com/docs/en/workload-scheduler/9.5.0?topic=configuration-connection-security-overview).
+   For details about custom certificates, see [Connection security overview](https://www.ibm.com/docs/workload-scheduler/10.1.0?topic=configuration-connection-security-overview).
+    
 
 > **Note**: Passwords for "TWSServerTrustFile.jks" and "TWSServerKeyFile.jks" files must be entered in the respective "TWSServerTrustFile.jks.pwd" and "TWSServerKeyFile.jks.pwd" files.
  
@@ -1234,49 +1268,6 @@ If you want to use SSL connection to DB, set `db.sslConnection:true` and `useCus
       bash
       $ kubectl create secret generic release_name-secret --from-file=TWSServerTrustFile.jks --from-file=TWSServerKeyFile.jks --from-file=TWSServerTrustFile.jks.pwd --from-file=TWSServerKeyFile.jks.pwd --namespace=<workload_automation_namespace>
         
-### Managing custom .PEM certificates
-
-  * ca.crt
-  * tls.key
-  * tls.crt
-      
-  If you want to use custom certificates, set `useCustomizedCert:true` and use kubectl to apply the secret in the \<workload_automation_namespace>.
- For the master domain manager, type the following command:
- 
- ```
-kubectl create secret generic waserver-cert-secret --from-file=ca.crt --from-file=tls.key --from-file=tls.crt -n <workload-automation-namespace>   
- ``` 
-For the Dynamic Workload Console, type the following command:
-
- ```
-  kubectl create secret generic waconsole-cert-secret --from-file=ca.crt --from-file=tls.key --from-file=tls.crt -n <workload_automation_namespace>   
-    
-  ``` 
- For the dynamic agent, type the following command:
- ```
- kubectl create secret generic waagent-cert-secret --from-file=ca.crt --from-file=tls.key --from-file=tls.crt -n <workload_automation_namespace>    
- ```   
-    
-   where, ca.crt, tls.key, and tls.crt are the Container keystore and stash file containing your customized certificates.
-   
-   For details about custom certificates, see [Connection security overview](https://www.ibm.com/docs/en/workload-scheduler/9.5.0?topic=configuration-connection-security-overview).
-
-<!-- > **Note**: Passwords for "TWSServerTrustFile.jks" and "TWSServerKeyFile.jks" files must be entered in the respective "TWSServerTrustFile.jks.pwd" and "TWSServerKeyFile.jks.pwd" files. -->
- 
-> (**) **Note:** if you set `db.sslConnection:true`, you must also set the `useCustomizeCert` setting to true (on both server and console charts) and, in addition, you must add the following certificates in the customized SSL certificates secret on both the server and console charts:
-
-  * ca.crt
-  * tls.key
-  * tls.crt
-  
- Customized files must have the same name as the ones listed above.
-         
-If you want to use SSL connection to DB, set `db.sslConnection:true` and `useCustomizedCert:true`, then use kubectl to create the secret in the same namespace where you want to deploy the chart:
-
-      bash
-      $ kubectl create secret generic release_name-secret --from-file=ca.crt --from-file=tls.key --from-file=tls.crt -n --namespace=<workload_automation_namespace>
-        
-
 If you define custom certificates, you are in charge of keeping them up to date, therefore, ensure you check their duration and plan to rotate them as necessary. To rotate custom certificates, delete the previous secret and upload a new secret, containing new certificates. The pod restarts automatically and the new certificates are applied.
 
 
@@ -1454,7 +1445,7 @@ For more information about using Grafana dashboards see [Dashboards overview](ht
 
 ## Documentation
 
-To access the complete product documentation library for IBM Workload Automation, see https://www.ibm.com/docs/en/workload-scheduler/9.5.0  .
+To access the complete product documentation library for IBM Workload Automation, see https://www.ibm.com/docs/workload-scheduler/10.1.0  .
 
 
 ## Troubleshooting
@@ -1462,16 +1453,16 @@ To access the complete product documentation library for IBM Workload Automation
 
 In the event a problem should occur while using IBM Workload Automation, Customer Support might ask you to supply information about your system and environment to perform problem determination. The following utilities are available:
 
--   A general data capture utility command that extracts information about IBM Workload Automation  and related agent workstations, system-specific information, and data related to WebSphere Application Server Liberty Base; see [Data capture utility](https://www.ibm.com/docs/en/workload-scheduler/9.5.0?topic=data-capture-utility).
+-   A general data capture utility command that extracts information about IBM Workload Automation  and related agent workstations, system-specific information, and data related to WebSphere Application Server Liberty Base; see [Data capture utility](https://www.ibm.com/docs/workload-scheduler/10.1.0?topic=data-capture-utility).
 
--   A first failure data capture (ffdc) facility built into **batchman** and **mailman** that automatically runs the data capture utility when failures occur in **jobman**, **mailman**, or **batchman** and collects products logs, traces and configuration files; see [First failure data capture (ffdc)](https://www.ibm.com/docs/en/workload-scheduler/9.5.0?topic=data-first-failure-capture-ffdc).
+-   A first failure data capture (ffdc) facility built into **batchman** and **mailman** that automatically runs the data capture utility when failures occur in **jobman**, **mailman**, or **batchman** and collects products logs, traces and configuration files; see [First failure data capture (ffdc)](https://www.ibm.com/docs/workload-scheduler/10.1.0?topic=data-first-failure-capture-ffdc).
 
--   The data capture utility script, wa_pull_info, is also used to collect data related to the Dynamic Workload Console to assist in problem determination; see [Data capture utility](https://www.ibm.com/docs/en/workload-scheduler/9.5.0?topic=data-capture-utility).
+-   The data capture utility script, wa_pull_info, is also used to collect data related to the Dynamic Workload Console to assist in problem determination; see [Data capture utility](https://www.ibm.com/docs/workload-scheduler/10.1.0?topic=data-capture-utility).
 
--   WebSphere Application Server Liberty Base javadump command to create the heap dump for WebSphere Application Server Liberty Base that runs on the Dynamic Workload Console and the master domain manager; see [Creating application server dumps](https://www.ibm.com/docs/en/workload-scheduler/9.5.0?topic=data-creating-application-server-dumps).
+-   WebSphere Application Server Liberty Base javadump command to create the heap dump for WebSphere Application Server Liberty Base that runs on the Dynamic Workload Console and the master domain manager; see [Creating application server dumps](https://www.ibm.com/docs/workload-scheduler/10.1.0?topic=data-creating-application-server-dumps).
 
 
-In case of problems related to deploying the product with containers, see [Troubleshooting](https://www.ibm.com/docs/en/workload-scheduler/9.5.0?topic=containers-troubleshooting).
+In case of problems related to deploying the product with containers, see [Troubleshooting](https://www.ibm.com/docs/workload-scheduler/10.1.0?topic=containers-troubleshooting).
 
 ### Known problems
 
@@ -1493,9 +1484,13 @@ In case of problems related to deploying the product with containers, see [Troub
 
 ### Change history
 
-## Added November 2021
+## Added Dicember 2021
 
+* Official support for Openshift 4.2 or later by using helm charts deployment.
+* Workload Automation 9.5.0.05 support released.
+* RFE: support for custom volume and custom volumemounts inside Workload Automation pods.
 * licenseType attribute for managing product licenses (IBM Workload Scheduler only)
+
 
 ## Added June 2021
 

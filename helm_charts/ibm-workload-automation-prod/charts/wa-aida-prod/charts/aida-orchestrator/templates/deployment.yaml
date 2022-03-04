@@ -1,0 +1,80 @@
+# *******************************************************************************
+# Licensed Materials - Property of HCL
+# (c) Copyright HCL Technologies Ltd. 2022. All Rights Reserved.
+# 
+# Note to U.S. Government Users Restricted Rights:
+# Use, duplication or disclosure restricted by GSA ADP Schedule
+# *******************************************************************************
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "aida-orchestrator.fullname" . }}
+  labels:
+    {{- include "aida-orchestrator.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "aida-orchestrator.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "aida-orchestrator.selectorLabels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "aida-orchestrator.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext:
+            privileged: false
+            readOnlyRootFilesystem: false
+            allowPrivilegeEscalation: false     
+            capabilities:
+              drop:
+              - ALL
+          env:          
+              - name: LOG_LEVEL
+                value: {{ .Values.global.aidaEngineLogLevel | quote }}
+              - name: ESCONFIG
+                value: '["https://admin:admin@{{ include "aida-es.fullname" . }}:9200"]'
+              - name: REDIS_HOST
+                value: {{ include "aida-redis.fullname" . | quote }}
+              - name: REDIS_PORT
+                value: "6379"
+              - name: REDIS_PSWD
+                value: {{ .Values.global.redisPwd | quote }}
+              - name: PROPHET_URL
+                value: "http://{{ include "aida-predictor.fullname" . }}:5000"
+              - name: ALERT_URL
+                value: "http://{{ include "aida-ad.fullname" . }}:5000"
+              - name: PROPHET_ORCHESTRATOR
+                value: '{"schedule":120}'
+          ports:
+            - name: http
+              containerPort: 5000
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
