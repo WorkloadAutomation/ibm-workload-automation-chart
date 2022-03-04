@@ -463,6 +463,9 @@ The following procedure describes how you can create and customize a *configMap*
 	
 Proceed to deploy the product components. After the deployment, you can include jobs related to these integrations when defining your workload.	
 
+### AIDA configuration
+To configure AIDA, please see the following readme: [AIDA](aida/readme.md)
+
 ### Installing custom integrations
 
 In addition to the integrations available on Automation Hub, you can extend Workload Automation with custom plug-ins that you create. For information about creating a custom plug-in, see [Workload Automation Lutist Development Kit](https://www.yourautomationhub.io/toolkit) on Automation Hub.
