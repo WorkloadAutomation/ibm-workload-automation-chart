@@ -579,7 +579,7 @@ To deploy the IBM Workload Automation components, ensure you have first download
         helm pull <repo_name>/workload-automation-prod
 
 
-
+>**Note:** If you want if you want to download a specific version of the chart use the --version option in the helm pull command. You will find the list of all charts with their versions inside the directory ibm-workload-automation-chart/stable
 
       
      
