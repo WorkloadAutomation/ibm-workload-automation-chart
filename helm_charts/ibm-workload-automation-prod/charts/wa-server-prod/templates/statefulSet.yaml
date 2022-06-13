@@ -161,7 +161,7 @@ spec:
         - name: FTA_FORCE_SSL
           value: "FALSE"
         {{- end }}
-        {{- if or (.Values.server.routes.enabled) (eq (.Values.server.exposeServiceType | upper )  "ROUTES")  }}
+        {{- if (eq (.Values.server.exposeServiceType | upper )  "ROUTES")  }}
         - name: EXPOSE_SERVICE_TYPE
           value: "ROUTES"
         {{- else if .Values.server.exposeServiceType }}

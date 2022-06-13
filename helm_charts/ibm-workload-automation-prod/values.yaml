@@ -13,7 +13,7 @@ global:
   defaultShardCount: 1
   enablePrometheus: true
   customPluginImageName: 
-  pluginImageName: cp.icr.io/cp/ibm-workload-automation-plugins:10.1.0.00.20220304
+  pluginImageName: cp.icr.io/cp/ibm-workload-automation-plugins:10.1.0.00.20220512
   configPlugins:
   customLabels:
     - name: "environment"
@@ -68,7 +68,7 @@ waagent:
   image:
     pullPolicy: Always
     repository: cp.icr.io/cp/ibm-workload-automation-agent-dynamic
-    tag: 10.1.0.00.20220304
+    tag: 10.1.0.00.20220512
   persistence:
     dataPVC:
       name: data
@@ -141,6 +141,7 @@ waconsole:
       enabled: true
     ingress:
       hostname:
+      className:
       secretName: wa-console-ingress-secret
     exposeServiceType: Ingress
     exposeServiceAnnotation: {}
@@ -181,7 +182,7 @@ waconsole:
   image:
     pullPolicy: Always
     repository: cp.icr.io/cp/ibm-workload-automation-console
-    tag: 10.1.0.00.20220304
+    tag: 10.1.0.00.20220512
   persistence:
     dataPVC:
       name: data
@@ -231,7 +232,7 @@ waserver:
   image:
     pullPolicy: Always
     repository: cp.icr.io/cp/ibm-workload-automation-server
-    tag: 10.1.0.00.20220304
+    tag: 10.1.0.00.20220512
   persistence:
     dataPVC:
       name: data
@@ -318,9 +319,11 @@ waserver:
       hostname:
     ingress:
       hostname:
+      className:
       secretName: wa-server-ingress-secret
     exposeServiceType: Ingress
     exposeServiceAnnotation: {}
+      #cert-manager.io/issuer: wa-ca-issuer
       #service.beta.kubernetes.io/aws-load-balancer-type: nlb
       #service.beta.kubernetes.io/aws-load-balancer-internal: "true"
       #service.beta.kubernetes.io/azure-load-balancer-internal: "true"
@@ -363,7 +366,7 @@ wafileproxy:
   replicaCount: 1
   image:
     repository: cp.icr.io/cp/ibm-workload-automation-fileproxy
-    tag: 10.1.0.00.20220304
+    tag: 10.1.0.00.20220512
     pullPolicy: Always
   nameOverride: ""
   fullnameOverride: ""
@@ -395,6 +398,7 @@ wafileproxy:
     runAsNonRoot: true
     runAsUser: 999
   ingress:
+    className:
     annotations: {}
       # kubernetes.io/ingress.class: nginx
       # kubernetes.io/tls-acme: "true"

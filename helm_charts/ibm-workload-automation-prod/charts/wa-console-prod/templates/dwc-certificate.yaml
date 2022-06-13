@@ -7,9 +7,13 @@
 {{- if not .Values.console.useCustomizedCert }}
 {{- include "wa.init" (list . "waconsole") }}
 {{ $statefulSetName := include "wa.fullName" . }}
-{{- if .Capabilities.APIVersions.Has "cert-manager.io/v1alpha2" }}
+{{- if .Capabilities.APIVersions.Has "cert-manager.io/v1"}}
+apiVersion: cert-manager.io/v1
+{{- else if .Capabilities.APIVersions.Has "certmanager.k8s.io/v1"}}
+apiVersion: certmanager.k8s.io/v1
+{{- else if .Capabilities.APIVersions.Has "cert-manager.io/v1alpha2" }}
 apiVersion: cert-manager.io/v1alpha2
-{{- else }}
+{{- else if .Capabilities.APIVersions.Has "certmanager.k8s.io/v1alpha1"}}
 apiVersion: certmanager.k8s.io/v1alpha1
 {{- end }}
 kind: Certificate
@@ -24,22 +28,37 @@ spec:
   secretName: {{ .Values.console.certSecretName | quote }}
   duration: 2160h # 90d
   renewBefore: 360h # 15d
+{{- if or ( .Capabilities.APIVersions.Has "cert-manager.io/v1" ) ( .Capabilities.APIVersions.Has "certmanager.k8s.io/v1" ) }}
+  subject:
+    organizations:
+      - IBM
+{{- else if or ( .Capabilities.APIVersions.Has "certmanager.k8s.io/v1alpha1" ) ( .Capabilities.APIVersions.Has "cert-manager.io/v1alpha2" ) }}
   organization:
   - IBM
+{{- end }}
   commonName: waconsole
   isCA: false
+{{- if or ( .Capabilities.APIVersions.Has "certmanager.k8s.io/v1alpha1" ) ( .Capabilities.APIVersions.Has "cert-manager.io/v1alpha2" ) }}
+{{- if not ( .Capabilities.APIVersions.Has "cert-manager.io/v1" )  }}
   keySize: 2048
   keyAlgorithm: rsa
   keyEncoding: pkcs1
+{{- end }}
+{{- end }}
   usages:
     - server auth
     - client auth
   dnsNames:
   - waconsole
- {{- if .Capabilities.APIVersions.Has "cert-manager.io/v1alpha2" }}
+{{- if or ( .Capabilities.APIVersions.Has "cert-manager.io/v1alpha2") ( .Capabilities.APIVersions.Has "cert-manager.io/v1")  }}
   privateKey:
     rotationPolicy: Always
- {{- end }}
+{{- if ( .Capabilities.APIVersions.Has "cert-manager.io/v1")  }}
+    size: 2048
+    algorithm: RSA
+    encoding: PKCS1
+{{- end }}
+{{- end }}
   issuerRef:
     name: wa-ca-issuer
     kind: Issuer

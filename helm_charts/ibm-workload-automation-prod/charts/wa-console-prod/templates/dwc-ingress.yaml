@@ -8,7 +8,13 @@
 {{- include "wa.init" (list . "waconsole") }}
 {{ $fullName := include "wa.fullName" . }}
 {{ $dwcServiceName := include "wa.fullName" . }}
+{{- if semverCompare ">=1.19-0" .Capabilities.KubeVersion.GitVersion }}
+apiVersion: networking.k8s.io/v1
+{{- else if semverCompare ">=1.14-0" .Capabilities.KubeVersion.GitVersion }}
 apiVersion: networking.k8s.io/v1beta1
+{{- else }}
+apiVersion: extensions/v1beta1
+{{- end }}
 kind: Ingress
 metadata:
   name: {{ $dwcServiceName }}
@@ -31,6 +37,9 @@ metadata:
 {{ toYaml . | indent 4 }} 
 {{- end }}  
 spec:
+{{- if and .Values.console.ingress.className (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion) }}
+  ingressClassName: {{ .Values.console.ingress.className }}
+{{- end }}
   tls:
     - hosts:
       {{- if .Values.console.ingress.hostname }}
@@ -50,7 +59,17 @@ spec:
     http:
       paths:
       - path: /
+        {{- if  (semverCompare ">=1.18-0" $.Capabilities.KubeVersion.GitVersion) }}
+        pathType: Prefix
+	      {{- end }}
         backend:
+        {{- if semverCompare ">=1.19-0" $.Capabilities.KubeVersion.GitVersion }}
+          service:
+            name: {{ $dwcServiceName }}
+            port:
+              number: 9443
+        {{- else }} 
           serviceName: {{ $dwcServiceName }}
           servicePort: 9443
+        {{- end }}
 {{- end }}             

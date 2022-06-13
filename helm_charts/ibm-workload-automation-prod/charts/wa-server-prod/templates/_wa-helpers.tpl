@@ -62,7 +62,7 @@ nodeAffinity:
   preferredDuringSchedulingIgnoredDuringExecution:
   - preference:
       matchExpressions:
-      - key: beta.kubernetes.io/arch
+      - key: kubernetes.io/arch
         operator: In
         values:
         - amd64
@@ -70,7 +70,7 @@ nodeAffinity:
   requiredDuringSchedulingIgnoredDuringExecution:
     nodeSelectorTerms:
     - matchExpressions:
-      - key: beta.kubernetes.io/arch
+      - key: kubernetes.io/arch
         operator: In
         values:
         - amd64
