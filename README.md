@@ -1545,7 +1545,13 @@ In case of problems related to deploying the product with containers, see [Troub
    
 3. Save the changes to the file.   
 
+
 ### Change history
+
+## Added June 2022
+* Vulnerabilities fixes
+* Support for Kubernetes 1.22
+
 ## Added March 2022
 * Workload Automation 10.1 official support released.
 * New Workload Designer for Workload Automation Dynamic Console.
