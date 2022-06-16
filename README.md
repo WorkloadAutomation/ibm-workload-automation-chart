@@ -209,8 +209,14 @@ Cert-manager is a Kubernetes addon that automates the management and issuance of
 2. Install cert-manager using a Helm chart by running the following commands:
 
    a. `helm repo add jetstack https://charts.jetstack.io`
+   
+   If you are using k8s 1.22 or later:
     
-   b. `helm install cert-manager jetstack/cert-manager --namespace cert-manager --version v0.15.1 --set installCRDs=true`		
+   b. `helm install cert-manager jetstack/cert-manager --namespace cert-manager --set installCRDs=true`	
+   
+   Otherwise if you are on k8s 1.21 or below:
+   
+   b. `helm install cert-manager jetstack/cert-manager --namespace cert-manager --version v0.15.1 --set installCRDs=true`	
 	
 3. Create the Certificate Authority (CA) by running the following commands:
 
