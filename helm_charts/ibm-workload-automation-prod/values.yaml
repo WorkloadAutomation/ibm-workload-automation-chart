@@ -1,6 +1,6 @@
 ####################################################################
 # Licensed Materials Property of HCL*
-# (c) Copyright HCL Technologies Ltd. 2020. All rights reserved.
+# (c) Copyright HCL Technologies Ltd. 2022. All rights reserved.
 #
 # * Trademark of HCL Technologies Limited
 ####################################################################
@@ -64,7 +64,7 @@ waagent:
   image:
     pullPolicy: Always
     repository: cp.icr.io/cp/ibm-workload-automation-agent-dynamic
-    tag: 9.5.0.05.20211217
+    tag: 9.5.0.06.20220617
   persistence:
     dataPVC:
       name: data
@@ -142,6 +142,7 @@ waconsole:
       enabled: true
     ingress:
       hostname:
+      className:
       secretName: wa-console-ingress-secret
     exposeServiceType: Ingress
     exposeServiceAnnotation: {}
@@ -178,10 +179,11 @@ waconsole:
       initialDelaySeconds: 100
     pwdSecretName: wa-pwd-secret
     useCustomizedCert: false
+    tz:
   image:
     pullPolicy: Always
     repository: cp.icr.io/cp/ibm-workload-automation-console
-    tag: 9.5.0.05.20211217
+    tag: 9.5.0.06.20220617
   persistence:
     dataPVC:
       name: data
@@ -236,7 +238,7 @@ waserver:
   image:
     pullPolicy: Always
     repository: cp.icr.io/cp/ibm-workload-automation-server
-    tag: 9.5.0.05.20211217
+    tag: 9.5.0.06.20220617
   persistence:
     dataPVC:
       name: data
@@ -318,6 +320,7 @@ waserver:
       hostname:
     ingress:
       hostname:
+      className:
       secretName: wa-server-ingress-secret
     exposeServiceType: Ingress
     exposeServiceAnnotation: {}

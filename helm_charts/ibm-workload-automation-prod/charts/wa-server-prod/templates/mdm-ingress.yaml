@@ -1,13 +1,19 @@
 {{- if eq (.Values.server.exposeServiceType | upper )  "INGRESS" }} 
 ####################################################################
 # Licensed Materials Property of HCL*
-# (c) Copyright HCL Technologies Ltd. 2019. All rights reserved.
+# (c) Copyright HCL Technologies Ltd. 2022. All rights reserved.
 #
 # * Trademark of HCL Technologies Limited
 ####################################################################
 {{- include "wa.init" (list . "waserver") }}
 {{ $fullName := include "wa.fullName" . }}
+{{- if semverCompare ">=1.19-0" .Capabilities.KubeVersion.GitVersion }}
+apiVersion: networking.k8s.io/v1
+{{- else if semverCompare ">=1.14-0" .Capabilities.KubeVersion.GitVersion }}
 apiVersion: networking.k8s.io/v1beta1
+{{- else }}
+apiVersion: extensions/v1beta1
+{{- end }}
 kind: Ingress
 metadata:
   name: {{ template "waMdm.ServiceName" . }}
@@ -15,11 +21,20 @@ metadata:
 {{ include "wa.server.labels" . | indent 4 }}
   annotations:
     ingress.kubernetes.io/ssl-passthrough: "true"
+    ingress.kubernetes.io/backend-protocol: HTTPS
+    ingress.kubernetes.io/force-ssl-redirect: 'true'
+    ingress.kubernetes.io/secure-backends: 'true'
     nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+    nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+    nginx.ingress.kubernetes.io/force-ssl-redirect: 'true'
+    nginx.ingress.kubernetes.io/secure-backends: 'true'
 {{- with .Values.server.exposeServiceAnnotation }}
 {{ toYaml . | indent 4 }} 
 {{- end }}
 spec:
+  {{- if and .Values.server.ingress.className (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion) }}
+  ingressClassName: {{ .Values.server.ingress.className }}
+  {{- end }}
   tls:
     - hosts:
       {{- if .Values.server.ingress.hostname }}
@@ -39,9 +54,19 @@ spec:
     http:
       paths:
       - path: /
+  {{- if  (semverCompare ">=1.18-0" $.Capabilities.KubeVersion.GitVersion) }}
+        pathType: Prefix
+	{{- end }}
         backend:
+	  {{- if semverCompare ">=1.19-0" $.Capabilities.KubeVersion.GitVersion }}
+              service:
+                name: {{ template "waMdm.ServiceName" . }}
+                port:
+                  number: 31116
+	  {{- else }}
           serviceName: {{ template "waMdm.ServiceName" . }}
           servicePort: 31116
+	  {{- end }} 
 {{- if  (.Values.server.enableSingleInstaceNetwork  )  }} 
 {{- $root := . -}}
 {{range $i, $e := until (.Values.replicaCount |int)}}
@@ -50,9 +75,19 @@ spec:
     http:
       paths:
       - path: /
+      {{- if and .pathType (semverCompare ">=1.18-0" $.Capabilities.KubeVersion.GitVersion) }}
+        pathType: /
+      {{- end }}
         backend:
+    {{- if semverCompare ">=1.19-0" $.Capabilities.KubeVersion.GitVersion }}
+              service:
+                name: {{ template "waMdm.ServiceName" . }}
+                port:
+                  number: 31116
+	  {{- else }}
           serviceName: "{{ template "waMdm.ServiceName" $root }}-{{ $i }}"
           servicePort: 31113
+	  {{- end }}
 {{end}}
 {{- end }}  
 {{- end }}           

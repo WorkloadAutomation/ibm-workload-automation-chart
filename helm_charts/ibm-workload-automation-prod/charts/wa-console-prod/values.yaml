@@ -18,7 +18,7 @@ global:
 replicaCount: 1
 image:
   repository: cp.icr.io/cp/ibm-workload-automation-console
-  tag: 9.5.0.05.20211217
+  tag: 9.5.0.06.20220617
   pullPolicy: Always
 licenseType: "PVU"
 runAsUser: 999
@@ -53,6 +53,7 @@ console:
   # Variable to specify the customized certificates for SSL communication
   useCustomizedCert: false
   certSecretName:  waconsole-cert-secret
+  tz:
   routes:
     enabled: true
   exposeServiceType: None

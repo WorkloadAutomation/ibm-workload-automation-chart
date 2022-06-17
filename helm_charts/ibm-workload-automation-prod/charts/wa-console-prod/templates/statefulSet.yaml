@@ -200,6 +200,10 @@ spec:
         - name: ENGINE_PORT
           value: {{ .Values.console.enginePort | quote }} 
         {{- end }}
+        {{- if .Values.console.tz }}
+        - name: TZ
+          value: {{ .Values.console.tz | quote }}
+        {{- end }} 
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         securityContext:
