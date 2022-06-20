@@ -232,7 +232,7 @@ Cert-manager is a Kubernetes addon that automates the management and issuance of
 
     a. Create the issuer.yaml as follows, specifying the namespace and CA key pair:
 	
-        apiVersion: cert-manager.io/v1alpha2
+        apiVersion: cert-manager.io/v1
         kind: Issuer
         metadata:
           labels:
