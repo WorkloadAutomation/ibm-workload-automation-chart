@@ -230,9 +230,22 @@ Cert-manager is a Kubernetes addon that automates the management and issuance of
 
 5. Create the Issuer under the namespace. Edit the issuer.yaml file with the namespace and CA key pair.
 
-    a. Create the issuer.yaml as follows, specifying the namespace and CA key pair:
+    a. If you are using k8s 1.22 or later, create the issuer.yaml as follows, specifying the namespace and CA key pair:
 	
         apiVersion: cert-manager.io/v1
+        kind: Issuer
+        metadata:
+          labels:
+            app.kubernetes.io/name: cert-manager
+          name: wa-ca-issuer
+          namespace: <workload_automation_namespace>
+        spec:
+          ca:
+            secretName: ca-key-pair
+	    
+    a. Otherwise if you are on k8s 1.21 or below:
+	
+        apiVersion: cert-manager.io/v1alpha2
         kind: Issuer
         metadata:
           labels:
