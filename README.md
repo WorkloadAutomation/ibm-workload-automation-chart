@@ -1416,6 +1416,24 @@ On Kubernetes native, UID 999 is used.
 
 IBM Workload Automation supports only ReadWriteOnce (RWO) access mode. The volume can be mounted as read-write by a single node.
 
+## Report CLI 	
+
+To run reports in batch mode, perform the following steps:
+
+1. Browse to `/home/wauser/wadata/config/report`
+2. Open the **common.properties** file in a flat-text editor.
+3. Edit the file inserting the information for your database. Instructions on editing the file are provided in the file itself. 
+
+The Report CLI is now ready for running. To start the Report CLI, browse to `/opt/wa/report` and run the following command: `./reportcli.sh`
+
+Consider the following example:
+
+`./reportcli.sh -p reports/templates/jrh.properties -r my_report -commonPropsFile /home/wauser/wadata/config/report`
+
+For more information, see: 
+
+[Running batch reports from the command line interface](https://www.ibm.com/docs/en/workload-automation/10.1.0?topic=reports-running-batch-from-command-line-interface)
+
 ## Metrics monitoring 
 
 IBM Workload Automation uses Grafana to display performance data related to the product. This data includes metrics related to the server and console application servers (WebSphere Application Server Liberty Base), your workload, your workstations, critical jobs, message queues, the database connection status, and more. Grafana is an open source tool for visualizing application metrics. Metrics provide insight into the state, health, and performance of your deployments and infrastructure. IBM Workload Automation cloud metric monitoring uses an opensource Cloud Native Computing Foundation (CNCF) project called Prometheus. It is particularly useful for collecting time series data that can be easily queried. Prometheus integrates with Grafana to visualize the metrics collected.
