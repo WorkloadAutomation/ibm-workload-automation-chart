@@ -13,7 +13,7 @@ global:
   defaultShardCount: 1
   enablePrometheus: true
   customPluginImageName: 
-  pluginImageName: cp.icr.io/cp/ibm-workload-automation-plugins:10.1.0.00.20220512
+  pluginImageName: cp.icr.io/cp/ibm-workload-automation-plugins:10.1.0.00.20220722
   configPlugins:
   customLabels:
     - name: "environment"
@@ -68,7 +68,7 @@ waagent:
   image:
     pullPolicy: Always
     repository: cp.icr.io/cp/ibm-workload-automation-agent-dynamic
-    tag: 10.1.0.00.20220512
+    tag: 10.1.0.00.20220722
   persistence:
     dataPVC:
       name: data
@@ -182,7 +182,7 @@ waconsole:
   image:
     pullPolicy: Always
     repository: cp.icr.io/cp/ibm-workload-automation-console
-    tag: 10.1.0.00.20220512
+    tag: 10.1.0.00.20220722
   persistence:
     dataPVC:
       name: data
@@ -232,7 +232,7 @@ waserver:
   image:
     pullPolicy: Always
     repository: cp.icr.io/cp/ibm-workload-automation-server
-    tag: 10.1.0.00.20220512
+    tag: 10.1.0.00.20220722
   persistence:
     dataPVC:
       name: data
@@ -282,6 +282,9 @@ waserver:
       cpu: 1
       memory: 4Gi
   server:
+    jobLog:
+      type: memory
+      corePoolSize: 50
     ftaName: 
     agentName: WA_SAGT
     certSecretName: waserver-cert-secret
@@ -366,7 +369,7 @@ wafileproxy:
   replicaCount: 1
   image:
     repository: cp.icr.io/cp/ibm-workload-automation-fileproxy
-    tag: 10.1.0.00.20220512
+    tag: 10.1.0.00.20220722
     pullPolicy: Always
   nameOverride: ""
   fullnameOverride: ""

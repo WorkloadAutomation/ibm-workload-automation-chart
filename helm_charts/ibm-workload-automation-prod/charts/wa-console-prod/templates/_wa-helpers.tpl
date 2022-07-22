@@ -139,4 +139,3 @@ at the end of the name. Then, if the obtained name is still too long, also the r
     {{- $longName -}}   
   {{- end -}}
 {{- end -}}
-	
