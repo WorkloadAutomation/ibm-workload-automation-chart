@@ -78,9 +78,9 @@ From `LoadBalancer` to `Routes`
 You can access the IBM Workload Automation chart and container images from the Entitled Registry. See [Create the secret](#create-the-secret) for more information about accessing the registry. The images are as follows:
 
 
-* cp.icr.io/cp/ibm-workload-automation-agent-dynamic:10.1.0.00.20220512
-* cp.icr.io/cp/ibm-workload-automation-server:10.1.0.00.20220512
-* cp.icr.io/cp/ibm-workload-automation-console:10.1.0.00.20220512
+* cp.icr.io/cp/ibm-workload-automation-agent-dynamic:10.1.0.00.20220722
+* cp.icr.io/cp/ibm-workload-automation-server:10.1.0.00.20220722
+* cp.icr.io/cp/ibm-workload-automation-console:10.1.0.00.20220722
 
 
 
@@ -1415,6 +1415,24 @@ On Kubernetes native, UID 999 is used.
 ### Persistent volume storage access modes
 
 IBM Workload Automation supports only ReadWriteOnce (RWO) access mode. The volume can be mounted as read-write by a single node.
+
+## Report CLI 	
+
+To run reports in batch mode, perform the following steps:
+
+1. Browse to `/home/wauser/wadata/config/report`
+2. Open the **common.properties** file in a flat-text editor.
+3. Edit the file inserting the information for your database. Instructions on editing the file are provided in the file itself. 
+
+The Report CLI is now ready for running. To start the Report CLI, browse to `/opt/wa/report` and run the following command: `./reportcli.sh`
+
+Consider the following example:
+
+`./reportcli.sh -p reports/templates/jrh.properties -r my_report -commonPropsFile /home/wauser/wadata/config/report`
+
+For more information, see: 
+
+[Running batch reports from the command line interface](https://www.ibm.com/docs/en/workload-automation/10.1.0?topic=reports-running-batch-from-command-line-interface)
 
 ## Metrics monitoring 
 

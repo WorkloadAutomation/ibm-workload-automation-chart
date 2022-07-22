@@ -1,4 +1,4 @@
-{{- if eq (.Values.server.exposeServiceType | upper )  "LOADBALANCER" }} 
+{{- if eq (.Values.server.exposeServiceType | upper )  "LOADBALANCER" }}
 ####################################################################
 # Licensed Materials Property of HCL*
 # (c) Copyright HCL Technologies Ltd. 2019. All rights reserved.

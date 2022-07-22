@@ -1,4 +1,4 @@
-f# IBM Workload Automation
+# IBM Workload Automation
 
 ## Introduction
 To ensure a fast and responsive experience when using IBM Workload Automation, you can deploy IBM Workload Automation on a cloud infrastructure. A cloud deployment ensures access anytime anywhere and is a fast and efficient way to get up and running quickly. It also simplifies maintenance, lowers costs, provides rapid upscale and downscale, minimizes IT requirements and physical on-premises data storage.
@@ -873,6 +873,8 @@ The following table lists the configurable parameters of the chart and an exampl
 | waserver.fsGroupId                                | The secondary group ID of the user                                                                                                                                                                                                                                            | no            | 999                              |                                                  |
 | waserver.server.company                           | The name of your Company                                                                                                                                                                                                                                                      | no            | my-company                       | my-company                                       |
 | waserver.server.agentName                         | The name to be assigned to the dynamic agent of the Server                                                                                                                                                                                                                    | no            | WA_SAGT                          | WA_AGT                                           |
+| waserver.server.jobLog.type                         | If used, it sets how to save the joblog, possible values: memory or file                                                                                                                                                                                                                     | no            | memory                          | memory                                           |
+| waserver.server.jobLog.corePoolSize                         | If used, it sets how many core threads to allocate to process jobLogs                                                                                                                                                                                                                    | no            | 50                          | 50                                           |
 | waserver.server.dateFormat                        | The date format defined in the plan                                                                                                                                                                                                                                           | no            | MM/DD/YYYY                       | MM/DD/YYYY                                       |
 | waserver.server.timezone                          | The timezone used in the create plan command                                                                                                                                                                                                                                  | no            | America/Chicago                  |                                                  |
 | waserver.server.startOfDay                        | The start time of the plan processing day in 24 hour format: hhmm                                                                                                                                                                                                             | no            | 0000                       	  | 0700                                             |
@@ -1483,6 +1485,18 @@ In case of problems related to deploying the product with containers, see [Troub
 3. Save the changes to the file.   
 
 ### Change history
+
+## Added June 2022
+
+* Vulnerabilities fixes
+* Support for Kubernetes 1.22
+
+## Added March 2022
+
+* Workload Automation 10.1 official support released.
+* New Workload Designer for Dynamic Workload Console.
+* File Proxy standalone support.
+* New Artificial Intelligence features with AIDA.
 
 ## Added Dicember 2021
 
