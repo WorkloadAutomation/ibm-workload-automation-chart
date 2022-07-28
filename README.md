@@ -469,7 +469,7 @@ The following procedure describes how you can create and customize a *configMap*
 
 		name: <configmap_name>
 		
-5) Assign this same name to the `Global.customPlugins` parameter in the **values.yaml file**. See [Global parameters](#global-parameters) for more information about this global parameter.		
+5) Assign this same name to the `Global.pluginImageName` parameter in the **values.yaml file**. See [Global parameters](#global-parameters) for more information about this global parameter.		
 
 6) Delete the lines related to the integrations you do not want to make available in your environment. The remaining integrations will be integrated into Workload Automation at deployment time. Save your changes to the file.
 
