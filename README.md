@@ -1238,7 +1238,9 @@ Access the master (server or pod) and extract the CA root certificate and, to ad
 		  tls.crt: <base64_encoded_certificate>
 		type: Opaque
 
+### Defining a z/OS engine in the Z connector from a Dynamic Workload Console deployed on Cloud
 
+To perform this operation, see the information available at [Defining a z/OS engine in the Z connector](https://www.ibm.com/docs/en/workload-automation/10.1.0?topic=console-defining-zos-engine-in-z-connector). The information at this link also applies to the cloud environment.
 
 ### Scaling the product 
 
