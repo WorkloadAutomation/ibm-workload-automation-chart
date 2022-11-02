@@ -315,7 +315,8 @@ The following table lists the global configurable parameters of the chart and th
 |serviceAccountName|The name of the serviceAccount to use. The IBM Workload Automation default service account (wauser) and not the default cluster account| no | wauser | default
 |aidaEngineLogLevel |Log level in AIDA. It can be DEBUG, INFO, ERROR, WARNING, CRITICAL | yes |"INFO"  |"INFO"  |
 |redisPwd|aida-redis passowrd  | yes |"foobared"  |"foobared" |
-
+|defaultShardCount | The default number of OpenSearch shards |yes | 1 |1  |	
+|defaultReplicaCount | The default number of OpenSearch replicas |yes | 0 |0  |
 
 - ### AIDA parameters
 The following tables list the configurable parameters of the chart relative to each service and their default values:
@@ -338,12 +339,14 @@ The following tables list the configurable parameters of the chart relative to e
 |autoscaling.minReplicas |The minimum number of Pods | no  | 1 |1 |
 |autoscaling.maxReplicas |The maximum number of Pods | no  | 10 |10 |
 |autoscaling.targetMemoryUtilizationPercentage |The value in percentage of memory utilization that each Pod should have | no  | 80 |80 |
+|pastMillis |The number of milliseconds that AIDA waits before analyzing predictions to generate alerts  | yes  | 86400000 |86400000 |
+|toleranceMillis |The maximum number of milliseconds between a real data point and a predicted data point in oder to consider them close and therefore usable by the alert detection algorithm   | yes  | 240000 |240000 |
+|webConcurrency |Number of workers of the web server. The more they are, the more there is parallelism (and the more RAM is consumed). Suggested value: 2 x <number of cores> + 1 | yes  | 6 |6 |	
 	
  ### [aida-es parameters](#aida-es-parameters)
  	
 | **Parameter** | **Description** | **Mandatory** | **Example** | **Default** |
 | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | -------------------------------- | -------------------------------- |
-|esDiscoveryType| Set this to "single-node" for single node clusters and leave unset for multi-node. | yes | single-node |  single-node |
 |image.repository|aida-es image repository  |yes  |@DOCKER.AGENT.IMAGE.NAME@  |  amazon/opendistro-for-elasticsearch |
 |image.tag | aida-es image tag | yes |@VERSION@  | 1.13.3 |
 |image.pullPolicy | image pull policy |yes  |Always | Always |
@@ -379,6 +382,8 @@ The following tables list the configurable parameters of the chart relative to e
 |resources.limits.memory |The maximum memory requested to run | yes  |4Gi  |4Gi |
 |resources.requests.cpu |The minimum CPU requested to run | yes  | 0.5 |0.5 |
 |resources.requests.memory |The minimum memory requested to run | yes  |0.5Gi  |0.5Gi |
+|maximumDaysOfOlderPredictions |How many days of predictions to keep in the past | yes  |14 |14 |
+|maximumDaysOfOlderData |How many days of metrics data to keep in the past | yes  |400 |400|
 
 ### [aida-email parameters](#aida-email-parameters)
  	
@@ -435,6 +440,8 @@ The following tables list the configurable parameters of the chart relative to e
 |resources.limits.memory |The maximum memory requested to run | yes  |4Gi  |4Gi |
 |resources.requests.cpu |The minimum CPU requested to run | yes  | 0.5 |0.5 |
 |resources.requests.memory |The minimum memory requested to run | yes  |0.5Gi  |0.5Gi |
+|prophetOrchestrator | The number of minutes between subsequent training(s) | yes  | "{\"schedule\": 1440}" | "{\"schedule\": 1440}"|
+|daysOfPrediction |How many days to predict in the future| yes  |1  |1 |	
 
 ### [aida-predictor parameters](#aida-predictor-parameters)
 	
@@ -455,6 +462,7 @@ The following tables list the configurable parameters of the chart relative to e
 |autoscaling.minReplicas |The minimum number of Pods | no  |1  |1 |
 |autoscaling.maxReplicas |The maximum number of Pods | no  | 10 |10 |
 |autoscaling.targetMemoryUtilizationPercentage |The value in percentage of memory utilization that each Pod should have | no  |80  |80 |
+|webConcurrency |Number of workers of the web server. The more they are, the more there is parallelism (and the more RAM is consumed). Suggested value: 2 x <number of cores> + 1 | yes  | 6 |6 |
 
 ### [aida-redis parameters](#aida-redis-parameters)
  	
