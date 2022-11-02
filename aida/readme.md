@@ -43,8 +43,6 @@ AIDA can be deployed into the following supported third-party cloud provider inf
 
 For more information about AIDA, see AIDA User's Guide in the [IBM Workload Automation documentation](https://www.ibm.com/docs/en/workload-automation/10.1.0).
 
-For information about IBM Workload Automation exposed metrics, see "Monitoring with Prometheus" in the [IBM Workload Automation documentation](https://www.ibm.com/docs/en/workload-automation/10.1.0) User's Guide.  
-
 This readme provides the steps for deploying AIDA, using helm charts and container images. Deploy AIDA after deploying IBM Workload Automation. For details about  IBM Workload Automation deployment, refer to IBM Workload Automation readme file. 
 
 
@@ -148,9 +146,9 @@ You can access AIDA subcharts and container images from the Entitled Registry. S
 ##  Prerequisites
 AIDA requires:
 
- -  IBM Workload Automation V101 exposed metrics
+ -  IBM Workload Automation V10.1 exposed metrics. For information about IBM Workload Automation exposed metrics, see "Exposing metrics to monitor your workload" in the [IBM Workload Automation documentation](https://www.ibm.com/docs/en/workload-automation/10.1.0) User's Guide.  
  -  API key for accessing the Entitled Registry: cp.icr.io
- -  External container image for Elasticsearch (Open Distro for Elasticsearch V1.3.3)
+ -  External container image for OpenSearch 2.3.0 (an Elasticsearch based technology)
  -  Supported browsers are: 
 	- Google Chrome 67.0.3396.99 or higher
     - Mozilla Firefox 61.0.1 or higher 
@@ -178,7 +176,7 @@ AIDA prerequisites are inherited by IBM Workload Automation V10.1.
 
 Before installing AIDA, run the following steps: 
 
-1.  Accept the product license by setting the global.license parameter to "accept" (default value is "notaccepted") in the values.yaml file.
+1.  Accept the product license by setting the global.license parameter to **accept** (default value is **notaccepted**) in the values.yaml file.
 2.  To use custom SSL certificates for AIDA, in the <install_path>/nginx/cert folder replace aida.crt e aida.key with your own files (do not change the default names).
 3.  Verify that aida-exporter.waHostName parameter in the values.yaml file is set to the host name used to reach the WA server. This parameter is not required if AIDA is deployed in the same helm chart as WA.
 4.  Verify that aida-exporter.waPort parameter in the values.yaml file is set to the port used to reach the WA server. Its default value is "3116".   
@@ -313,11 +311,12 @@ The following table lists the global configurable parameters of the chart and th
 
 | **Parameter** | **Description** | **Mandatory** | **Example** | **Default** |
 | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | -------------------------------- | -------------------------------- |
-|license |Use "accept" to agree to the license agreement | yes |notaccepted   | notaccepted |
+|license |Use **accept** to agree to the license agreement | yes |notaccepted   | notaccepted |
 |serviceAccountName|The name of the serviceAccount to use. The IBM Workload Automation default service account (wauser) and not the default cluster account| no | wauser | default
-|aidaEngineLogLevel |Log level in AIDA. Can be DEBUG, INFO, ERROR, WARNING, CRITICAL | yes |"INFO"  |"INFO"  |
+|aidaEngineLogLevel |Log level in AIDA. It can be DEBUG, INFO, ERROR, WARNING, CRITICAL | yes |"INFO"  |"INFO"  |
 |redisPwd|aida-redis passowrd  | yes |"foobared"  |"foobared" |
-|defaultShardCount | The default number of Elasticsearch shards |yes | 1 |1  |
+|defaultShardCount | The default number of OpenSearch shards |yes | 1 |1  |	
+|defaultReplicaCount | The default number of OpenSearch replicas |yes | 0 |0  |
 
 - ### AIDA parameters
 The following tables list the configurable parameters of the chart relative to each service and their default values:
@@ -340,12 +339,14 @@ The following tables list the configurable parameters of the chart relative to e
 |autoscaling.minReplicas |The minimum number of Pods | no  | 1 |1 |
 |autoscaling.maxReplicas |The maximum number of Pods | no  | 10 |10 |
 |autoscaling.targetMemoryUtilizationPercentage |The value in percentage of memory utilization that each Pod should have | no  | 80 |80 |
+|pastMillis |The number of milliseconds that AIDA waits before analyzing predictions to generate alerts  | yes  | 86400000 |86400000 |
+|toleranceMillis |The maximum number of milliseconds between a real data point and a predicted data point in oder to consider them close and therefore usable by the alert detection algorithm   | yes  | 240000 |240000 |
+|webConcurrency |Number of workers of the web server. The more they are, the more there is parallelism (and the more RAM is consumed). Suggested value: 2 x <number of cores> + 1 | yes  | 6 |6 |	
 	
  ### [aida-es parameters](#aida-es-parameters)
  	
 | **Parameter** | **Description** | **Mandatory** | **Example** | **Default** |
 | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | -------------------------------- | -------------------------------- |
-|esDiscoveryType| Set this to "single-node" for single node clusters and leave unset for multi-node. | yes | single-node |  single-node |
 |image.repository|aida-es image repository  |yes  |@DOCKER.AGENT.IMAGE.NAME@  |  amazon/opendistro-for-elasticsearch |
 |image.tag | aida-es image tag | yes |@VERSION@  | 1.13.3 |
 |image.pullPolicy | image pull policy |yes  |Always | Always |
@@ -381,6 +382,8 @@ The following tables list the configurable parameters of the chart relative to e
 |resources.limits.memory |The maximum memory requested to run | yes  |4Gi  |4Gi |
 |resources.requests.cpu |The minimum CPU requested to run | yes  | 0.5 |0.5 |
 |resources.requests.memory |The minimum memory requested to run | yes  |0.5Gi  |0.5Gi |
+|maximumDaysOfOlderPredictions |How many days of predictions to keep in the past | yes  |14 |14 |
+|maximumDaysOfOlderData |How many days of metrics data to keep in the past | yes  |400 |400|
 
 ### [aida-email parameters](#aida-email-parameters)
  	
@@ -437,6 +440,8 @@ The following tables list the configurable parameters of the chart relative to e
 |resources.limits.memory |The maximum memory requested to run | yes  |4Gi  |4Gi |
 |resources.requests.cpu |The minimum CPU requested to run | yes  | 0.5 |0.5 |
 |resources.requests.memory |The minimum memory requested to run | yes  |0.5Gi  |0.5Gi |
+|prophetOrchestrator | The number of minutes between subsequent training(s) | yes  | "{\"schedule\": 1440}" | "{\"schedule\": 1440}"|
+|daysOfPrediction |How many days to predict in the future| yes  |1  |1 |	
 
 ### [aida-predictor parameters](#aida-predictor-parameters)
 	
@@ -457,6 +462,7 @@ The following tables list the configurable parameters of the chart relative to e
 |autoscaling.minReplicas |The minimum number of Pods | no  |1  |1 |
 |autoscaling.maxReplicas |The maximum number of Pods | no  | 10 |10 |
 |autoscaling.targetMemoryUtilizationPercentage |The value in percentage of memory utilization that each Pod should have | no  |80  |80 |
+|webConcurrency |Number of workers of the web server. The more they are, the more there is parallelism (and the more RAM is consumed). Suggested value: 2 x <number of cores> + 1 | yes  | 6 |6 |
 
 ### [aida-redis parameters](#aida-redis-parameters)
  	
@@ -677,9 +683,3 @@ AIDA supports only ReadWriteOnce (RWO) access mode. The volume can be mounted as
 ##  Documentation
 
 For more information about AIDA, see AIDA User's Guide in the [IBM Workload Automation documentation](https://www.ibm.com/docs/en/workload-automation/10.1.0).
-
-
-
-
-
-
