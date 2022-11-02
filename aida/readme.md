@@ -148,7 +148,7 @@ AIDA requires:
 
  -  IBM Workload Automation V10.1 exposed metrics. For information about IBM Workload Automation exposed metrics, see "Exposing metrics to monitor your workload" in the [IBM Workload Automation documentation](https://www.ibm.com/docs/en/workload-automation/10.1.0) User's Guide.  
  -  API key for accessing the Entitled Registry: cp.icr.io
- -  External container image for OpenSearch 2.3.0 ( an Elasticsearch based technology)
+ -  External container image for OpenSearch 2.3.0 (an Elasticsearch based technology)
  -  Supported browsers are: 
 	- Google Chrome 67.0.3396.99 or higher
     - Mozilla Firefox 61.0.1 or higher 
