@@ -659,7 +659,6 @@ See the following example:
 		metadata: 
 		  name: <namespace>-waagent-secret
 		  namespace: <namespace>
-		  namespace: <namespace>
 		type: "Opaque"
 		data:  
   		  WA_USER_ENGINE: <engineUserBase64>
