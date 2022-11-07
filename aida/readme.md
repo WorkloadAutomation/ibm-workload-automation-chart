@@ -341,7 +341,7 @@ The following tables list the configurable parameters of the chart relative to e
 |autoscaling.targetMemoryUtilizationPercentage |The value in percentage of memory utilization that each Pod should have | no  | 80 |80 |
 |pastMillis |The number of milliseconds that AIDA waits before analyzing predictions to generate alerts  | yes  | 86400000 |86400000 |
 |toleranceMillis |The maximum number of milliseconds between a real data point and a predicted data point in oder to consider them close and therefore usable by the alert detection algorithm   | yes  | 240000 |240000 |
-|webConcurrency |Number of workers of the web server. The more they are, the more there is parallelism (and the more RAM is consumed). Suggested value: 2 x <number of cores> + 1 | yes  | 6 |6 |	
+|webConcurrency |Number of workers of the web server. The more they are, the more there is parallelism (and the more RAM is consumed). Suggested value: 2 x number_of_cores + 1 | yes  | 6 |6 |	
 	
  ### [aida-es parameters](#aida-es-parameters)
  	
@@ -462,7 +462,7 @@ The following tables list the configurable parameters of the chart relative to e
 |autoscaling.minReplicas |The minimum number of Pods | no  |1  |1 |
 |autoscaling.maxReplicas |The maximum number of Pods | no  | 10 |10 |
 |autoscaling.targetMemoryUtilizationPercentage |The value in percentage of memory utilization that each Pod should have | no  |80  |80 |
-|webConcurrency |Number of workers of the web server. The more they are, the more there is parallelism (and the more RAM is consumed). Suggested value: 2 x <number of cores> + 1 | yes  | 6 |6 |
+|webConcurrency |Number of workers of the web server. The more they are, the more there is parallelism (and the more RAM is consumed). Suggested value: 2 x number_of_cores + 1 | yes  | 6 |6 |
 
 ### [aida-redis parameters](#aida-redis-parameters)
  	
