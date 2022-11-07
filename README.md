@@ -635,7 +635,8 @@ The following are some useful Helm commands:
 
         helm uninstall <workload_automation_release_name> -n <workload_automation_namespace>
 	
-	
+### Enabling communication with the server using JWT 
+
 If you want to install the agents without using certificates and also enable communication with the server through the JWT Token, add a secret with the engine credentials.
 Ensure the following parameters are set in the secret: 
 
