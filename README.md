@@ -634,7 +634,37 @@ The following are some useful Helm commands:
 * To delete the Helm release: 
 
         helm uninstall <workload_automation_release_name> -n <workload_automation_namespace>
-		
+	
+	
+If you want to install the agents without using certificates and also enable communication with the server through the JWT Token, add a secret with the engine credentials.
+Ensure the following parameters are set in the secret: 
+
+WA_USER_ENGINE
+
+WA_USER_ENGINE_PASSWORD
+
+Where
+
+WA_USER_ENGINE is the engine user encoded in base64 encoding
+
+WA_USER_ENGINE_PASSWORD is the engine password encoded in base64 encoding
+
+Ensure the name of the secret is  < namespace >-waagent-secret.
+
+See the following example:
+
+		apiVersion: v1 
+		kind: Secret 
+		metadata: 
+		  name: <namespace>-waagent-secret
+		  namespace: <namespace>
+		  namespace: <namespace>
+		type: "Opaque"
+		data:  
+  		  WA_USER_ENGINE: <engineUserBase64>
+  		  WA_USER_ENGINE_PASSWORD: <engineUserPasswordBase64>
+
+  
 
 ### Verifying the installation
 
