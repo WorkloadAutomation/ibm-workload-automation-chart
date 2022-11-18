@@ -342,6 +342,7 @@ The following tables list the configurable parameters of the chart relative to e
 |pastMillis |The number of milliseconds that AIDA waits before analyzing predictions to generate alerts  | yes  | 86400000 |86400000 |
 |toleranceMillis |The maximum number of milliseconds between a real data point and a predicted data point in oder to consider them close and therefore usable by the alert detection algorithm   | yes  | 240000 |240000 |
 |webConcurrency |Number of workers of the web server. The more they are, the more there is parallelism (and the more RAM is consumed). Suggested value: 2 x number_of_cores + 1 | yes  | 6 |6 |	
+|minimumSeverityForMail |Minimum level of severity above which an alert will be sent by email. Can be high, medium or low| yes  | high |high |
 	
  ### [aida-es parameters](#aida-es-parameters)
  	
@@ -384,6 +385,7 @@ The following tables list the configurable parameters of the chart relative to e
 |resources.requests.memory |The minimum memory requested to run | yes  |0.5Gi  |0.5Gi |
 |maximumDaysOfOlderPredictions |How many days of predictions to keep in the past | yes  |14 |14 |
 |maximumDaysOfOlderData |How many days of metrics data to keep in the past | yes  |400 |400|
+|resolveAlertsAfterDays |Number of days after which alerts will automatically go in "resolved" status | yes  |1 |1|
 
 ### [aida-email parameters](#aida-email-parameters)
  	
