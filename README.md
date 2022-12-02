@@ -1194,7 +1194,34 @@ For more information about these configurable parameters, see the **[Server para
 		#networking.gke.io/load-balancer-type: "Internal"
 
 		
+ ### Enabling communication from a K8s agents without using certificates: 
 
+If you want to install the agents without using certificates and also enable communication with the server through the JWT Token, add a secret with the engine credentials. This applies if the agent is connected to a distributed server, Also ensure to enable the enableJWT parameter in the agent configuration section.
+Ensure the following parameters are set in the secret: 
+
+**WA_USER_ENGINE**
+
+**WA_USER_ENGINE_PASSWORD**
+
+Where
+
+**WA_USER_ENGINE** is the engine user encoded in base64 encoding
+
+**WA_USER_ENGINE_PASSWORD** is the engine password encoded in base64 encoding
+
+Ensure the name of the secret is  < namespace >-waagent-secret.
+
+See the following example:
+
+		apiVersion: v1 
+		kind: Secret 
+		metadata: 
+		  name: <namespace>-waagent-secret
+		  namespace: <namespace>
+		type: "Opaque"
+		data:  
+  		  WA_USER_ENGINE: <engineUserBase64>
+  		  WA_USER_ENGINE_PASSWORD: <engineUserPasswordBase64>
 		
 ### Enabling communication between product components in an on-premises offering with components in the Cloud
 
