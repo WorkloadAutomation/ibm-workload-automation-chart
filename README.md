@@ -10,6 +10,7 @@ To respond to the growing request to make automation opportunities more accessib
 - ![Amazon EKS](images/tagawseks.png "Amazon EKS") Amazon Web Services (AWS) Elastic Kubernetes Service (EKS)
 - ![Microsoft Azure](images/tagmsa.png "Microsoft Azure") Microsoft&reg; Azure Kubernetes Service (AKS)
 - ![Google GKE](images/taggke.png "Google GKE") Google Kubernetes Engine (GKE)
+- ![OpenShift](images/tagOpenShift.png "OpenShift") OpenShift (OCP)
 
 IBM Workload Automation is a complete, modern solution for batch and real-time workload management. It enables organizations to gain complete visibility and control over attended or unattended workloads. From a single point of control, it supports multiple platforms and provides advanced integration with enterprise applications including ERP, Business Analytics, File Transfer, Big Data, and Cloud applications.
 
@@ -63,6 +64,7 @@ In addition to the product components, the following objects are installed:
 - ![Amazon EKS](images/tagawseks.png "Amazon EKS") Amazon Elastic Kubernetes Service (EKS) on amd64: 64-bit Intel/AMD x86
 - ![Microsoft Azure](images/tagmsa.png "Microsoft Azure") Azure Kubernetes Service (AKS) on amd64: 64-bit Intel/AMD x86
 - ![Google GKE](images/taggke.png "Google GKE") Google Kubernetes Engine (GKE) on amd64: 64-bit Intel/AMD x86
+- ![OpenShift](images/tagOpenShift.png "OpenShift") OpenShift (OCP)
 
 ### Openshift support
 You can deploy IBM Workload Automation on Openshift 4.2 or later version by following the instruction in this documentation and using helm charts. 
@@ -138,6 +140,11 @@ For additional details about Microsoft Azure storage settings, see [Azure Files 
 
 
 For more details about the storage requirements for your persistent volume claims, see the **[Storage](#storage)** section of this README file.
+
+![OpenShift](images/tagOpenShift.png "OpenShift") OpenShift (OCP)
+
+Ensure your PVC Access Mode is ReadWriteOnce.
+For more information about supported storage types, see [Storage overview | Storage | OpenShift Container Platform 4.10](https://docs.openshift.com/container-platform/4.10/storage/index.html).
 
 ## Resources Required
   
@@ -1187,7 +1194,34 @@ For more information about these configurable parameters, see the **[Server para
 		#networking.gke.io/load-balancer-type: "Internal"
 
 		
+ ### Enabling communication from a K8s agents without using certificates: 
 
+If you want to install the agents without using certificates and also enable communication with the server through the JWT Token, add a secret with the engine credentials. This applies if the agent is connected to a distributed server, Also ensure to enable the enableJWT parameter in the agent configuration section.
+Ensure the following parameters are set in the secret: 
+
+**WA_USER_ENGINE**
+
+**WA_USER_ENGINE_PASSWORD**
+
+Where
+
+**WA_USER_ENGINE** is the engine user encoded in base64 encoding
+
+**WA_USER_ENGINE_PASSWORD** is the engine password encoded in base64 encoding
+
+Ensure the name of the secret is  < namespace >-waagent-secret.
+
+See the following example:
+
+		apiVersion: v1 
+		kind: Secret 
+		metadata: 
+		  name: <namespace>-waagent-secret
+		  namespace: <namespace>
+		type: "Opaque"
+		data:  
+  		  WA_USER_ENGINE: <engineUserBase64>
+  		  WA_USER_ENGINE_PASSWORD: <engineUserPasswordBase64>
 		
 ### Enabling communication between product components in an on-premises offering with components in the Cloud
 
@@ -1231,7 +1265,9 @@ Access the master (server or pod) and extract the CA root certificate and, to ad
 		  tls.crt: <base64_encoded_certificate>
 		type: Opaque
 
+### Defining a z/OS engine in the Z connector from a Dynamic Workload Console deployed on Cloud
 
+To perform this operation, see the information available at [Defining a z/OS engine in the Z connector](https://www.ibm.com/docs/en/workload-automation/10.1.0?topic=console-defining-zos-engine-in-z-connector). The information at this link also applies to the cloud environment. If you want to apply the same configuration to all instances, create a configMap containing all xml files and use the `waconsole.console.libConfigName` parameter to provide the name of your  configMap.
 
 ### Scaling the product 
 
