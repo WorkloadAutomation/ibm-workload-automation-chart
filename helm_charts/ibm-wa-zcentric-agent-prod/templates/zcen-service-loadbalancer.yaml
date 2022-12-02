@@ -1,0 +1,58 @@
+####################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2022. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+####################################################################
+{{- include "wa.init" (list . "wagent") }}
+{{ $fullName := include "wa.fullName" . }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "waAgt.ServiceName" . }}
+  labels:
+{{ include "wa.zcentric-agent.labels" . | indent 4 }}
+  annotations:
+    prometheus.io/scrape: {{ .Values.global.enablePrometheus | quote | default "true" }}
+    prometheus.io/scheme: http
+    prometheus.io/port: "31115"
+    prometheus.io/path: /metrics
+spec:
+  type: ClusterIP
+  ports:
+  - name: zcentric-https
+    protocol: TCP
+    port: 31114
+    targetPort: 31114
+  - name: zcentric-monitoring
+    protocol: TCP
+    port: 31115
+    targetPort: 31115      
+  selector:
+    app.kubernetes.io/name: "{{ include "wa.appName" . }}"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+  sessionAffinity: ClientIP
+---
+{{- if eq (.Values.agent.zcentric.exposeServiceType | upper )  "LOADBALANCER" }} 
+#  Licensed Materials Property of HCL
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ template "waAgt.ServiceName" . }}-lb"
+  labels:
+{{ include "wa.zcentric-agent.labels" . | indent 4 }}
+  annotations:
+{{- with .Values.agent.zcentric.exposeServiceAnnotation }}
+{{ toYaml . | indent 4 }} 
+{{- end }}
+spec:
+  type: LoadBalancer
+  ports:
+  - name: ita-port
+    port: 443
+    protocol: TCP
+    targetPort: 31114
+  selector:
+    app.kubernetes.io/name: "{{ include "wa.appName" . }}"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+{{- end }}  

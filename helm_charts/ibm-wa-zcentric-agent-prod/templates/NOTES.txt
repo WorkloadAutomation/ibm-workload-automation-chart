@@ -1,0 +1,8 @@
+Your IBM Workload Automation Agent is starting.
+{{ if .Values.agent.zcentric.ingress.hostname }}
+To verify if the agent is running:
+curl https://{{ .Values.agent.zcentric.ingress.hostname}}/ita/JobManager --key client.key.pem --cert client.crt.pem
+To connect to the Z Workload Scheduler:
+1. Add the Destination ROUTOPTS HTTPS('{{ .Values.agent.zcentric.ingress.hostname}}'/442).
+2. Add a corresponding zcentric Workstation to the plan. 
+{{- end }}

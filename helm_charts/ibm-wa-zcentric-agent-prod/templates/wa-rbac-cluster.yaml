@@ -1,0 +1,32 @@
+####################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2020. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+####################################################################
+{{ $waUserName := include "wa.agent.waUser" .}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ .Release.Namespace }}-wa-pod-cluster-role-get-routes
+  labels:
+{{ include "wa.zcentric-agent.labels" . | indent 4 }}
+rules:
+- apiGroups: ["route.openshift.io"]
+  resources: ["routes"]
+  verbs: ["get", "list"]
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ .Release.Namespace }}-wa-pod-cluster-role-get-routes-binding
+  labels:
+{{ include "wa.zcentric-agent.labels" . | indent 4 }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Values.global.serviceAccountName | default $waUserName }}
+    namespace: {{ .Release.Namespace }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ .Release.Namespace }}-wa-pod-cluster-role-get-routes

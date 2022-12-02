@@ -1,0 +1,64 @@
+{{- if eq (.Values.agent.zcentric.exposeServiceType | upper )  "INGRESS" }} 
+####################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2022. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+####################################################################
+{{- include "wa.init" (list . "wagent") }}
+{{ $fullName := include "wa.fullName" . }}
+apiVersion: networking.k8s.io/v1 
+kind: Ingress
+metadata:
+  name: {{ template "waAgt.ServiceName" . }}
+  labels:
+{{ include "wa.zcentric-agent.labels" . | indent 4 }}
+  annotations:
+    ingress.kubernetes.io/ssl-passthrough: "true"
+    nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+{{- with .Values.agent.zcentric.exposeServiceAnnotation }}
+{{ toYaml . | indent 4 }} 
+{{- end }}
+spec:
+  ingressClassName: {{ .Values.agent.zcentric.ingress.className }} 
+  tls:
+    - hosts:
+      {{- if .Values.agent.zcentric.ingress.hostname }}
+       - {{ .Values.agent.zcentric.ingress.hostname }}
+      {{- else }}  
+       - {{ $fullName }}.{{ .Release.Name }}.{{ .Release.Namespace }}.mycluster.proxy
+      {{- end }}    
+      {{- if .Values.agent.zcentric.ingress.secretName }}       
+      secretName: {{ .Values.agent.zcentric.ingress.secretName }}    
+      {{- end }}         
+  rules:
+  {{- if .Values.agent.zcentric.ingress.hostname }}
+  - host: {{ .Values.agent.zcentric.ingress.hostname }}
+  {{- else }}  
+  - host: {{ $fullName }}.{{ .Release.Name }}.{{ .Release.Namespace }}.mycluster.proxy
+  {{- end }} 
+    http:
+      paths:      
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: "{{ template "waAgt.ServiceName" . }}"
+            port:
+              number: 31114
+{{- if  (.Values.agent.zcentric.enableSingleInstaceNetwork  )  }} 
+{{- $root := . -}}
+{{range $i, $e := until (.Values.replicaCount |int)}}
+  - host: "{{ $root.Release.Name }}-wagent-{{$i}}.{{ $root.Release.Namespace }}"
+    http:
+      paths:      
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: "{{ template "waAgt.ServiceName" $root }}-{{ $i }}"
+            port:
+              number: 31114
+{{end}}
+{{- end }}  
+{{- end }}           

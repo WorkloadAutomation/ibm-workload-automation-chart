@@ -1,0 +1,253 @@
+## Metadata for WA configuration
+## This metadata is used to augment the value.yaml to drive UI for configuration of the Helm chart installation
+global: 
+  __metadata:
+    label: "Global options"
+    description: "Options defined for all applications"
+  license:
+    __metadata:
+      label: "License"
+      description: "Accept or not accept the license agreement"
+      type: "string"
+      required: true
+      options:
+      - label: "not accepted"
+        value: "not accepted"    
+      - label: "accept"
+        value: "accept"
+  enableServer:
+    __metadata: 
+      label: "Deploy Server application" 
+      description: "Enable the deployment of the Server application"
+      type: "boolean"
+      required: false  
+  enableConsole:
+    __metadata: 
+      label: "Deploy Console application" 
+      description: "Enable the deployment of the Console application"
+      type: "boolean"
+      required: false 
+  enableAgent:
+    __metadata: 
+      label: "Deploy Agent application" 
+      description: "Enable the deployment of the Agent application"
+      type: "boolean"
+      required: false          
+  serviceAccountName:
+    __metadata:
+      label: "Service account name"
+      description: "The name of the service account to use. Leave blank for default"
+      type: string
+      required: false  
+  language:
+    __metadata:
+      label: "Language"
+      description: "The language of the operating system and application"
+      type: string
+      required: true  
+      options:
+        - label: "English"
+          value: "en"
+        - label: "German"
+          value: "de"
+        - label: "Spanish"
+          value: "es"   
+        - label: "French"
+          value: "fr"  
+        - label: "Italian"
+          value: "it"
+        - label: "Japanese"
+          value: "ja"
+        - label: "Korean"
+          value: "ko"   
+        - label: "Portuguese (BR)"
+          value: "pt_BR"
+        - label: "Russian"
+          value: "ru"  
+        - label: "Chinese (China)"
+          value: "zh_CN"
+        - label: "Chinese (Taiwan)"
+          value: "zh_TW"
+###################### AGENT ############################
+waagent:   
+  __metadata:
+    label: "Agent deployment"
+    description: "Configuration of Agent application"    
+  ## Image configuration metadata
+  image:
+    repository:
+      __metadata:
+        label: "Docker repository"
+        description: "A repository is a set of images. The different images in the repository can be labeled using tags."
+        type: "string"
+        required: true
+    tag:
+      __metadata:
+        label: "Docker image tag"
+        description: "A tag is a label applied to a image in a repository. Tags are how various images in a repository are distinguished from each other."
+        type: "string"
+        required: true
+    pullPolicy:
+      __metadata:
+        label: "Docker image pull policy"
+        description: "The default pull policy is Always which causes the Kubelet to pull an image even if it already exists."
+        type: "string"
+        required: true
+        options:
+        - label: "IfNotPresent"
+          value: "IfNotPresent"
+        - label: "Always"
+          value: "Always"
+        - label: "Never"
+          value: "Never"
+  replicaCount:
+    __metadata:
+      label: "Replica Count"
+      description: "Number of replicas to deploy. Default is 1"
+      type: "number"
+      required: true
+  fsGroupId:
+    __metadata:
+      label: "Secondary group id of the user"
+      description: "user group id (gid) for the secondary group the containers should run in. If blank the default is 999"
+      type: "string"
+      required: false    
+  supplementalGroupId:
+    __metadata:
+      label: "Supplemental gid of the user"
+      description: "Supplemental group id of the user"
+      type: "string"
+      required: false        
+  ## Input parameters configuration metadata AGENT
+  agent:
+    name: 
+      __metadata: 
+        label: "Agent name" 
+        description: "Agent display name"
+        type: "string"
+        required: true
+    tz:    
+      __metadata: 
+        label: "Operating Sytem TZ variable" 
+        description: "Used to set the TZ operating system environment variable"
+        type: "string"
+        required: false          
+    containerDebug:  
+      __metadata: 
+        label: "Container debug for support only troubleshooting" 
+        description: "It executes the container in a debug mode so it will not be stopped in case of errors"
+        type: "boolean"
+        required: false    
+    livenessProbe:        
+      initialDelaySeconds:
+        __metadata: 
+          label: "Liveness probe initial delay" 
+          description: "Number of seconds for liveness probe initial delay"
+          type: "number"
+          required: true          
+    dynamic:
+      server:
+        mdmhostname:
+          __metadata: 
+            label: "Master hostname" 
+            description: "Hostname or IP address of the master domain manager. If blank the agent will be connected to the internal master service on default port."
+            type: "string"
+            required: false
+        port:
+          __metadata: 
+            label: "Master port" 
+            description: "Port number of the master domain manager"
+            type: "string"
+            required: false                       
+      pools:
+        __metadata: 
+          label: "Workstation pools" 
+          description: "A comma separated list of static workstation pools with which you want to register this agent"
+          type: "string"
+          required: false       
+      useCustomizedCert: 
+        __metadata: 
+          label: "Use customized SSL certificates" 
+          description: "Determine whether to use customized certificates for SSL connection"
+          type: "boolean"
+          required: false
+      certSecretName:          
+          __metadata: 
+            label: "Name of the Secret for the SSL certificates" 
+            description: "The name of the secret used to store all the customized certificates. See Readme file for more info."
+            type: "string"
+            required: false           
+  ## Input parameter configuration metadata AGENT
+  persistence:
+    enabled: 
+      __metadata: 
+        label: "Agent persistence enabled" 
+        description: "Determine whether to use Persistent Volumes for the pods"
+        type: "boolean"
+        required: false
+    useDynamicProvisioning:
+      __metadata: 
+        label: "Agent dynamic persistence enabled" 
+        description: "Determine whether to use Storage Classes to dynamically create Persistent Volumes for the pods"
+        type: "boolean"
+        required: false  
+    dataPVC:
+      name:
+        __metadata: 
+          label: "Prefix pvc" 
+          description: "Prefix for names of the Persistent Volume Claim"
+          type: "string"
+          required: false       
+      storageClassName:
+        __metadata: 
+          label: "Storage Class" 
+          description: "Name of the Storage Class to use. If no Storage Class is used, leave it empty"
+          type: "string"
+          required: false    
+      selector:
+        label:
+           __metadata: 
+            label: "Volume label name" 
+            description: "Volume label to bind"
+            type: "string"
+            required: false      
+        value:
+           __metadata: 
+            label: "Volume label value" 
+            description: "Volume label value to bind"
+            type: "string"
+            required: false           
+      size:
+        __metadata: 
+          label: "PV minimum size" 
+          description: "Minimum size of the Persistent Volume"
+          type: "string"
+          required: false
+  ## Resource limits configuration metadata AGENT
+  resources:
+    requests:
+      cpu: 
+        __metadata: 
+          label: "Agent CPU request"
+          description: "The minimum CPU requested to run"
+          type: "string"
+          required: true   
+      memory: 
+        __metadata: 
+          label: "Agent memory request"
+          description: "The minimum memory requested to run"
+          type: "string"
+          required: true      
+    limits:
+      cpu: 
+        __metadata: 
+          label: "Agent CPU limit"
+          description: "The maximum CPU requested to run"
+          type: "string"
+          required: true   
+      memory: 
+        __metadata: 
+          label: "Agent memory limit"
+          description: "The maximum memory requested to run"
+          type: "string"
+          required: true                    

@@ -1,0 +1,21 @@
+####################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2022. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+####################################################################
+{{- include "wa.init" (list . "waagent") }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "wa.fullName" . }}-agent-scripts
+  labels:
+{{ include "wa.zcentric-agent.labels" . | indent 4 }}
+data:
+  beforeAgentStart.sh: |
+    #!/bin/sh
+  afterAgentStart.sh: |
+    #!/bin/sh
+  initContainer.sh: |
+    #!/bin/sh
+      

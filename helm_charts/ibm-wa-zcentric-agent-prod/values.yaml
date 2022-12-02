@@ -1,0 +1,136 @@
+####################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2022. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+####################################################################
+global:
+  license: "not accepted" # Set to accept
+  serviceAccountName: # Use your serviceAccountName
+  enablePrometheus: false # Do not delete this line
+  language: "en" # Language
+  customLabels:
+    - name: "environment"
+      value: "prod"
+image:
+  repository: cp.icr.io/cp/ibm-workload-automation-agent-dynamic
+  tag: 10.1.0.01.20221130
+  pullPolicy: Always
+# User info
+licenseType: "PVU"
+runAsUser: 999
+fsGroupId: 999
+supplementalGroupId:
+agent:
+  # Agent name
+  name: "WA_AGT"
+  # Workload Automaiton User nname
+  waUser: ""
+  # Timezone
+  tz:
+  # Activate container debug traces
+  containerDebug: false
+  zcentric:
+    # Additional zcentric information to open Agent port  outside the cluster
+    # The Z Workload Scheduler will contact it
+    # Type of Service to expose the agent
+    exposeServiceType: Ingress # LoadBalancer Route
+    # Relevant if exposeServiceType is Ingress
+    ingress:
+      hostname: 
+      className: nginx
+      secretName: wa-ingress-secret
+    enableSingleInstaceNetwork: true
+    exposeServiceAnnotation: 
+      #cert-manager.io/issuer: wa-ca-issuer
+      #service.beta.kubernetes.io/aws-load-balancer-backend-protocol: https
+      #service.beta.kubernetes.io/aws-load-balancer-type: "clb"
+      #service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+      #service.beta.kubernetes.io/aws-load-balancer-internal: "true"
+      #service.beta.kubernetes.io/azure-load-balancer-internal: "true"
+      #networking.gke.io/load-balancer-type: "Internal"
+    # Dynamic Workload Console Z Connector to download plug-ins
+    # URL format is https://zconn_hostname:zconn_port/twsz/v1/plugin
+    zconn: 
+    # Optional Master Domain Manager to connect to. Leave it empty for Z Workload Scheduler
+    server:
+      mdmhostname:
+      # Optional variable to specify the hostname of the backup master to use. If no backup master is used, leave it empty
+      bkmhostname:
+      port: "31116"
+    # Variable to specify the customized certificates for SSL communication
+    useCustomizedCert: false
+    certSecretName: waagent-cert-secret
+  networkpolicyEgress: {}
+  # Allows all  Egress to mdm.
+  #  - name: to-mdm
+  #    egress:
+  #    - to:
+  #      - podSelector:
+  #          matchLabels:
+  #            app.kubernetes.io/name: waserver
+  #    
+  #  - name: dns
+  #    egress:
+  #    - to:
+  #        - namespaceSelector:
+  #            matchLabels:
+  #              name: kube-system
+  #    - ports:
+  #        - port: 53
+  #          protocol: UDP
+  #        - port: 53
+  #          protocol: TCP 
+  nodeAffinityRequired: {}
+  livenessProbe:
+    initialDelaySeconds: 60
+replicaCount: 1
+resources:
+  requests:
+    cpu: 200m
+    memory: 200Mi
+  limits:
+    cpu: 1
+    memory: 2Gi
+persistence:
+  # Determine whether to use Persistent Volumes for the pods
+  enabled: true
+  # Determine whether to use Storage Classes to dynamically create Persistent Volumes for the pods
+  useDynamicProvisioning: true
+  #
+  # Settings for the pod Persistent Volume Claims,
+  # which each pod uses for data in stdlist
+  dataPVC:
+    # Prefix for names of this Persistent Volume Claim
+    name: "data"
+    # Name of the Storage Class to use. If no Storage Class is used, leave an empty string
+    storageClassName: ""
+    # If your not using dynamic provisioning, you can use selectors to
+    # refine the binding process. You cannot specify a selector if you are using dynamic provisioning!
+    selector:
+      label: ""
+      value: ""
+    # Minimum size of the Persistent Volume
+    size: 2Gi
+  extraVolumes: []
+      # - name: custom-volume-1
+      #   configMap:
+      #      name: custom-configMap
+      #      defaultMode: 0755
+      # - name: custom-volume-2
+      #   secret:
+      #     secretName: custom-secret
+      #     defaultMode: 0744
+      # - name: nfs-volume
+      #   nfs: 
+      #     # URL for the NFS server
+      #     server: <nfs_server> # Change this!
+      #     path: /
+  extraVolumeMounts: []
+      # - name: custom-volume-1
+      #   mountPath: /custom/mount/path-1
+      #   readOnly: false
+      # - name: custom-volume-2
+      #   mountPath: /custom/mount/path-2
+      # - name: nfs-volume
+      #   mountPath: /path/nfs

@@ -1,0 +1,30 @@
+{{- if (eq (.Values.agent.zcentric.exposeServiceType | upper )  "ROUTE")  }} 
+####################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2022. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+####################################################################
+{{ $fullName := include "waAgt.ServiceName" . }}
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: wa-zcen-agent-route
+  labels:
+{{ include "wa.zcentric-agent.labels" . | indent 4 }}
+  annotations:
+    openshift.io/host.generated: 'true'
+    haproxy.router.openshift.io/cookie_name: wa-zcen-agent-cookie
+spec:
+  host: 
+  to:
+    kind: Service
+    name: {{ $fullName }}
+    weight: 100
+  port:
+    targetPort: 31114
+  tls:
+    termination: passthrough
+    insecureEdgeTerminationPolicy: None
+  wildcardPolicy: None
+{{- end }}

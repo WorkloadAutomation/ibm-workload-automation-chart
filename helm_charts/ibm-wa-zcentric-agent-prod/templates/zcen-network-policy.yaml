@@ -1,0 +1,23 @@
+####################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2022. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+####################################################################
+{{- include "wa.init" (list . "waagent") }}
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: da-network-policy
+  labels:
+{{ include "wa.zcentric-agent.labels" . | indent 5 }}
+spec:
+  policyTypes:
+  - Ingress
+  podSelector:
+    matchLabels:
+{{ include "wa.zcentric-agent.labels" . | indent 7 }}
+  ingress:
+  - ports:
+      - protocol: TCP
+        port: 31114

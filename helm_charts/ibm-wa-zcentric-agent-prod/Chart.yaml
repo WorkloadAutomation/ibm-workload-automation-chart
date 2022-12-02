@@ -1,0 +1,21 @@
+####################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2022. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+####################################################################
+apiVersion: v2
+kubeVersion: ">=1.14.0 || >=1.14.0-0"
+name: wa-zcen-agent-prod 
+version: 1.0.0
+appVersion: 10.1.0.01
+description: Helm chart for configuring IBM Workload Automation Agent.
+keywords:
+- Commercial
+- amd64
+- Workload Scheduler
+- Workload Automation
+- Automation
+- DevOps
+maintainers:
+- name: IBM Workload Automation
