@@ -160,7 +160,11 @@ spec:
         {{- if .Values.agent.dynamic.pools }}
         - name: POOLS
           value: {{ .Values.agent.dynamic.pools | quote }}
-        {{- end }}        
+        {{- end }}
+        {{- if .Values.agent.enableJWT }}
+        - name: WA_JWT
+          value: {{ .Values.agent.enableJWT | quote }}
+        {{- end }}         
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         securityContext:
@@ -189,6 +193,7 @@ spec:
         secret:
           defaultMode: 0664
           secretName: {{ .Values.agent.dynamic.certSecretName }}
+          optional: true
       - name: {{ include "wa.fullName" . }}-dyn-agent-scripts-volume
         configMap:
           name: {{ include "wa.fullName" . }}-dyn-agent-scripts

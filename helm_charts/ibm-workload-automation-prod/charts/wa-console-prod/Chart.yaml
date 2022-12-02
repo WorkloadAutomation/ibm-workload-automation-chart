@@ -5,8 +5,8 @@
 # * Trademark of HCL Technologies Limited
 ####################################################################
 name: wa-console-prod
-version: 1.6.2
-appVersion: 10.1.0.00
+version: 1.6.3
+appVersion: 10.1.0.01
 description: Helm chart for configuring IBM Workload Automation.
 keywords:
 - Commercial

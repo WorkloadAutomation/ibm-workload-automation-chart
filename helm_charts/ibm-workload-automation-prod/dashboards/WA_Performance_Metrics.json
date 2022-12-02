@@ -2076,7 +2076,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum (rate (container_cpu_usage_seconds_total{image!=\"\",name=~\"^k8s_.*\",pod=~\".*-(waserver|waconsole|waagent)-.*\", namespace=~\"[[Namespace]]\", pod=~\"[[POD]]\"}[1m])) by (namespace, pod)",
+              "expr": "sum (rate (container_cpu_usage_seconds_total{image!=\"\", pod=~\".*-(waserver|waconsole|waagent)-.*\", namespace=~\"[[Namespace]]\", pod=~\"[[POD]]\"}[1m])) by (namespace, pod)",
               "format": "time_series",
               "interval": "10s",
               "intervalFactor": 1,

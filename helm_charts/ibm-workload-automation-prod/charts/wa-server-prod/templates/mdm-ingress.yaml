@@ -20,8 +20,10 @@ metadata:
   labels:
 {{ include "wa.server.labels" . | indent 4 }}
   annotations:
+{{- if .Values.server.ingress.enableSSLPassthrough }}  
     ingress.kubernetes.io/ssl-passthrough: "true"
     nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+{{- end }} 
 {{- with .Values.server.exposeServiceAnnotation }}
 {{ toYaml . | indent 4 }} 
 {{- end }}

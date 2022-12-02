@@ -9,5 +9,5 @@ apiVersion: v2
 name: aida-ui
 description: AIDA UI
 type: application
-version: 1.0.0
-appVersion: "10.1.0.00"
+version: 1.0.2
+appVersion: "10.1.0.01"

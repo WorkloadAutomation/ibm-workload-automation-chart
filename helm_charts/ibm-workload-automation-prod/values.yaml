@@ -13,7 +13,7 @@ global:
   defaultShardCount: 1
   enablePrometheus: true
   customPluginImageName: 
-  pluginImageName: cp.icr.io/cp/ibm-workload-automation-plugins:10.1.0.00.20220722
+  pluginImageName: cp.icr.io/cp/ibm-workload-automation-plugins:10.1.0.01.20221130
   configPlugins:
   customLabels:
     - name: "environment"
@@ -43,6 +43,7 @@ waagent:
     livenessProbe:
       initialDelaySeconds: 60
     name: WA_AGT
+    enableJWT: true
     networkpolicyEgress: {}
     # Allows all  Egress to mdm.
     #  - name: to-mdm
@@ -68,7 +69,7 @@ waagent:
   image:
     pullPolicy: Always
     repository: cp.icr.io/cp/ibm-workload-automation-agent-dynamic
-    tag: 10.1.0.00.20220722
+    tag: 10.1.0.01.20221130
   persistence:
     dataPVC:
       name: data
@@ -182,7 +183,7 @@ waconsole:
   image:
     pullPolicy: Always
     repository: cp.icr.io/cp/ibm-workload-automation-console
-    tag: 10.1.0.00.20220722
+    tag: 10.1.0.01.20221130
   persistence:
     dataPVC:
       name: data
@@ -232,7 +233,7 @@ waserver:
   image:
     pullPolicy: Always
     repository: cp.icr.io/cp/ibm-workload-automation-server
-    tag: 10.1.0.00.20220722
+    tag: 10.1.0.01.20221130
   persistence:
     dataPVC:
       name: data
@@ -324,6 +325,7 @@ waserver:
       hostname:
       className:
       secretName: wa-server-ingress-secret
+      enableSSLPassthrough: false
     exposeServiceType: Ingress
     exposeServiceAnnotation: {}
       #cert-manager.io/issuer: wa-ca-issuer
@@ -369,7 +371,7 @@ wafileproxy:
   replicaCount: 1
   image:
     repository: cp.icr.io/cp/ibm-workload-automation-fileproxy
-    tag: 10.1.0.00.20220722
+    tag: 10.1.0.01.20221130
     pullPolicy: Always
   nameOverride: ""
   fullnameOverride: ""
