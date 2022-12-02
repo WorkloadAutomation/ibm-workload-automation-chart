@@ -10,7 +10,7 @@ To respond to the growing request to make automation opportunities more accessib
 - ![Amazon EKS](images/tagawseks.png "Amazon EKS") Amazon Web Services (AWS) Elastic Kubernetes Service (EKS)
 - ![Microsoft Azure](images/tagmsa.png "Microsoft Azure") Microsoft&reg; Azure Kubernetes Service (AKS)
 - ![Google GKE](images/taggke.png "Google GKE") Google Kubernetes Engine (GKE)
-- ![OpenShift](images/tagOpenShift.png "OpenShift") OpenShift (OPC)
+- ![OpenShift](images/tagOpenShift.png "OpenShift") OpenShift (OCP)
 
 IBM Workload Automation is a complete, modern solution for batch and real-time workload management. It enables organizations to gain complete visibility and control over attended or unattended workloads. From a single point of control, it supports multiple platforms and provides advanced integration with enterprise applications including ERP, Business Analytics, File Transfer, Big Data, and Cloud applications.
 
@@ -64,7 +64,7 @@ In addition to the product components, the following objects are installed:
 - ![Amazon EKS](images/tagawseks.png "Amazon EKS") Amazon Elastic Kubernetes Service (EKS) on amd64: 64-bit Intel/AMD x86
 - ![Microsoft Azure](images/tagmsa.png "Microsoft Azure") Azure Kubernetes Service (AKS) on amd64: 64-bit Intel/AMD x86
 - ![Google GKE](images/taggke.png "Google GKE") Google Kubernetes Engine (GKE) on amd64: 64-bit Intel/AMD x86
-- ![OpenShift](images/tagOpenShift.png "OpenShift") OpenShift (OPC)
+- ![OpenShift](images/tagOpenShift.png "OpenShift") OpenShift (OCP)
 
 ### Openshift support
 You can deploy IBM Workload Automation on Openshift 4.2 or later version by following the instruction in this documentation and using helm charts. 
@@ -141,7 +141,7 @@ For additional details about Microsoft Azure storage settings, see [Azure Files 
 
 For more details about the storage requirements for your persistent volume claims, see the **[Storage](#storage)** section of this README file.
 
-![OpenShift](images/tagOpenShift.png "OpenShift") OpenShift (OPC)
+![OpenShift](images/tagOpenShift.png "OpenShift") OpenShift (OCP)
 
 Ensure your PVC Access Mode is ReadWriteOnce.
 For more information about supported storage types, see [Storage overview | Storage | OpenShift Container Platform 4.10](https://docs.openshift.com/container-platform/4.10/storage/index.html).
