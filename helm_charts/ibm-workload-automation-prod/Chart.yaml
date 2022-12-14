@@ -32,6 +32,6 @@ dependencies:
     alias: wafileproxy
     condition: wafileproxy.enableFileProxy
   - name: wa-aida-prod
-    version: 1.0.0
+    version: 1.0.2
     alias: waaida
     condition: waaida.enableAIDA
