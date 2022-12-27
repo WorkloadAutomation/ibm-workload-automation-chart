@@ -64,7 +64,7 @@ waagent:
   image:
     pullPolicy: Always
     repository: cp.icr.io/cp/ibm-workload-automation-agent-dynamic
-    tag: 9.5.0.06.20220617
+    tag: 9.5.0.06.20221216
   persistence:
     dataPVC:
       name: data
@@ -183,7 +183,7 @@ waconsole:
   image:
     pullPolicy: Always
     repository: cp.icr.io/cp/ibm-workload-automation-console
-    tag: 9.5.0.06.20220617
+    tag: 9.5.0.06.20221216
   persistence:
     dataPVC:
       name: data
@@ -238,7 +238,7 @@ waserver:
   image:
     pullPolicy: Always
     repository: cp.icr.io/cp/ibm-workload-automation-server
-    tag: 9.5.0.06.20220617
+    tag: 9.5.0.06.20221216
   persistence:
     dataPVC:
       name: data

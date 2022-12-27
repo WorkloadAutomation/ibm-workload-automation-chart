@@ -6,7 +6,7 @@
 ####################################################################
 apiVersion: v2
 name: wa-server-prod
-version: 1.5.15
+version: 1.5.16
 appVersion: 9.5.0.06
 description: Helm chart for configuring IBM Workload Automation.
 keywords:
