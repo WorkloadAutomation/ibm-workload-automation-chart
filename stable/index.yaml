@@ -3,7 +3,43 @@ entries:
   workload-automation-prod:
   - apiVersion: v2
     appVersion: 9.5.0.06
-    created: "2022-06-17T12:29:49.9690769+02:00"
+    created: "2023-01-02T11:34:54.132516272+01:00"
+    dependencies:
+    - alias: waserver
+      condition: waserver.enableServer
+      name: wa-server-prod
+      repository: ""
+      version: 1.5.16
+    - alias: waconsole
+      condition: waconsole.enableConsole
+      name: wa-console-prod
+      repository: ""
+      version: 1.5.16
+    - alias: waagent
+      condition: waagent.enableAgent
+      name: wa-dyn-agent-prod
+      repository: ""
+      version: 1.5.16
+    description: Helm chart for configuring IBM Workload Automation.
+    digest: 32e374fa15632dc78956fb53f05a32145daa7efb1b26925069774dac437e72f7
+    keywords:
+    - Commercial
+    - amd64
+    - Workload Scheduler
+    - Workload Automation
+    - Automation
+    - DevOps
+    - ICP
+    kubeVersion: '>=1.14.0 || >=1.14.0-0'
+    maintainers:
+    - name: IBM Workload Automation
+    name: workload-automation-prod
+    urls:
+    - workload-automation-prod-1.5.16.tgz
+    version: 1.5.16
+  - apiVersion: v2
+    appVersion: 9.5.0.06
+    created: "2023-01-02T11:34:54.110119959+01:00"
     dependencies:
     - alias: waserver
       condition: waserver.enableServer
@@ -39,7 +75,7 @@ entries:
     version: 1.5.15
   - apiVersion: v2
     appVersion: 9.5.0.05
-    created: "2022-06-17T12:29:49.955512+02:00"
+    created: "2023-01-02T11:34:54.055407023+01:00"
     dependencies:
     - alias: waserver
       condition: waserver.enableServer
@@ -75,7 +111,7 @@ entries:
     version: 1.5.14
   - apiVersion: v2
     appVersion: 9.5.0.4
-    created: "2022-06-17T12:29:49.9449981+02:00"
+    created: "2023-01-02T11:34:53.991792481+01:00"
     dependencies:
     - alias: waserver
       condition: waserver.enableServer
@@ -111,7 +147,7 @@ entries:
     version: 1.5.12
   - apiVersion: v2
     appVersion: 9.5.0.03
-    created: "2022-06-17T12:29:49.9354919+02:00"
+    created: "2023-01-02T11:34:53.939372346+01:00"
     dependencies:
     - alias: waserver
       condition: waserver.enableServer
@@ -147,7 +183,7 @@ entries:
     version: 1.4.3
   - apiVersion: v2
     appVersion: 9.5.0.03
-    created: "2022-06-17T12:29:49.9128434+02:00"
+    created: "2023-01-02T11:34:53.802042194+01:00"
     dependencies:
     - alias: waserver
       condition: waserver.enableServer
@@ -183,7 +219,7 @@ entries:
     version: 1.4.2
   - apiVersion: v2
     appVersion: 9.5.0.03
-    created: "2022-06-17T12:29:49.8900552+02:00"
+    created: "2023-01-02T11:34:53.642430475+01:00"
     dependencies:
     - alias: waserver
       condition: waserver.enableServer
@@ -219,7 +255,7 @@ entries:
     version: 1.4.1
   - apiVersion: v2
     appVersion: 9.5.0.02
-    created: "2022-06-17T12:29:49.8690175+02:00"
+    created: "2023-01-02T11:34:53.535034064+01:00"
     dependencies:
     - alias: waserver
       condition: waserver.enableServer
@@ -255,7 +291,7 @@ entries:
     version: 1.4.0
   - apiVersion: v2
     appVersion: 9.5.0.02
-    created: "2022-06-17T12:29:49.8458519+02:00"
+    created: "2023-01-02T11:34:53.416751456+01:00"
     dependencies:
     - alias: waserver
       condition: waserver.enableServer
@@ -289,4 +325,4 @@ entries:
     urls:
     - workload-automation-prod-1.1.0.tgz
     version: 1.1.0
-generated: "2022-06-17T12:29:49.8211004+02:00"
+generated: "2023-01-02T11:34:53.30402395+01:00"
