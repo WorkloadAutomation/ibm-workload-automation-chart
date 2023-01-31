@@ -661,7 +661,7 @@ To manually verify that the installation was successfully installed, you can per
    
            kubectl get pods -n <workload_automation_namespace>
 	   
-2. Locate the master pod name that is in the format `<workload_automation_release_name>-wauser-0`.   
+2. Locate the master pod name that is in the format `<workload_automation_release_name>-waserver-0`.   
 		   
 3. To access the master pod, open a bash shell and run the following command:
 	
