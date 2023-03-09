@@ -9,7 +9,7 @@ global:
   license: "not accepted"
   serviceAccountName:
   customPluginImageName: 
-  pluginImageName: cp.icr.io/cp/ibm-workload-automation-plugins:10.1.0.01.20221130
+  pluginImageName: cp.icr.io/cp/ibm-workload-automation-plugins:10.1.0.02.20230301
   configPlugins:
   language: "en"
   enablePrometheus: true
@@ -19,7 +19,7 @@ global:
 replicaCount: 1
 image:
   repository: cp.icr.io/cp/ibm-workload-automation-console
-  tag: 10.1.0.01.20221130
+  tag: 10.1.0.02.20230301
   pullPolicy: Always
 licenseType: "PVU"
 runAsUser: 999
@@ -42,6 +42,7 @@ console:
     name: "DWC"
     adminUser: db2inst1
     user: db2inst1
+    skipCheck: false
     tsName:
     tsPath:
     tsTempName:

@@ -23,6 +23,13 @@ metadata:
 {{- if .Values.server.ingress.enableSSLPassthrough }}  
     ingress.kubernetes.io/ssl-passthrough: "true"
     nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+{{- else }} 
+    ingress.kubernetes.io/backend-protocol: HTTPS
+    ingress.kubernetes.io/force-ssl-redirect: "true"
+    ingress.kubernetes.io/secure-backends: "true"
+    nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/secure-backends: "true"
 {{- end }} 
 {{- with .Values.server.exposeServiceAnnotation }}
 {{ toYaml . | indent 4 }} 

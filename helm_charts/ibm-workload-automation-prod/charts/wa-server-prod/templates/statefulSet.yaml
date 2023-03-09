@@ -264,7 +264,11 @@ spec:
         - name: DB_USER
           value: {{ .Values.server.db.user | quote }} 
         - name: DB_ADMIN_USER
-          value: {{ .Values.server.db.adminUser | quote }}                          
+          value: {{ .Values.server.db.adminUser | quote }}  
+        {{- if eq (.Values.server.db.type | upper) "ORACLE" }}    
+        - name: DB_SKIP_CHECK
+          value: {{ .Values.server.db.skipCheck | quote }} 
+        {{- end }}                    
         {{- if .Values.server.db.tsName }}
         - name: DB_TS_NAME
           value: {{ .Values.server.db.tsName | quote }}

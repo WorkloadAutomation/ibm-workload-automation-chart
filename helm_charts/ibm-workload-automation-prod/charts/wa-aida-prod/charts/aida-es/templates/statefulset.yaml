@@ -51,18 +51,8 @@ spec:
               drop:
               - ALL
           env:          
-              - name: node.name
-                value: "node-1"
-              - name: NODE_MASTER
+              - name: DISABLE_INSTALL_DEMO_CONFIG
                 value: "true"
-              - name: discovery.type
-                value: {{ .Values.esDiscoveryType | quote }}
-              - name: network.host
-                value: "0.0.0.0"
-              # - name: discovery.seed_hosts
-              #   value: {{ .Values.discoverySeedHosts }}
-              # - name: cluster.initial_master_nodes
-              #   value: {{ .Values.clusterInitialMasterNode }}
           ports:
             - name: https
               containerPort: 9200
@@ -72,8 +62,35 @@ spec:
           {{- if .Values.persistence.enabled }}
           volumeMounts:
           - name: {{ include "aida-es.fullname" . }}
-            mountPath: /usr/share/elasticsearch/data/
+            mountPath: /usr/share/opensearch/data/
           {{- end }}
+          - name: config
+            mountPath: /usr/share/opensearch/config/opensearch.yml
+            subPath: opensearch.yml
+            readOnly: true
+          - name: config
+            mountPath: /usr/share/opensearch/config/jvm.options
+            subPath: jvm.options
+            readOnly: true
+          - name: certs
+            mountPath: /usr/share/opensearch/config/node-key.pem
+            subPath: node-key.pem
+            readOnly: true
+          - name: certs
+            mountPath: /usr/share/opensearch/config/node.pem
+            subPath: node.pem
+            readOnly: true
+          - name: certs
+            mountPath: /usr/share/opensearch/config/root-ca.pem
+            subPath: root-ca.pem
+            readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "aida-es.fullname" . }}-config
+        - name: certs
+          secret:
+            secretName: {{ include "aida-es.fullname" . }}-certs
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

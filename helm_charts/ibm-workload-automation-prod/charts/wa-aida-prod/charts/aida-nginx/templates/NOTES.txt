@@ -1,3 +1,10 @@
+#/*******************************************************************************
+#* Licensed Materials - Property of HCL 
+#* (c) Copyright HCL Technologies Ltd. 2023. All Rights Reserved. 
+#
+#* Note to U.S. Government Users Restricted Rights:
+#* Use, duplication or disclosure restricted by GSA ADP Schedule
+#**************************************************************/
 1. Get the application URL by running these commands:
 {{- if .Values.ingress.enabled }}
 {{- range $host := .Values.ingress.hosts }}

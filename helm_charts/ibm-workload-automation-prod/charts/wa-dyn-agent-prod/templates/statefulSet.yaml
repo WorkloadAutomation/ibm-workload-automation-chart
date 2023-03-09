@@ -137,7 +137,13 @@ spec:
             secretKeyRef:
               name: {{ include "wa.fullName" . }}-secret
               key: SSL_PASSWORD
-              optional: true       
+              optional: true
+        - name: WA_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "wa.fullName" . }}-secret
+              key: WA_API_KEY
+              optional: true      
         {{- if .Values.agent.tz }}
         - name: TZ
           value: {{ .Values.agent.tz | quote }}

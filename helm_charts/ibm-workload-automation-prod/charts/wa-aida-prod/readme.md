@@ -11,8 +11,9 @@
 - [Resources Required](#resources-required) 
 - [Preparing for installation](#preparing-for-installation)
 - [Installing](#installing) 
-	 -  [Creating the Secret](#creating-the-secret)  	 
-	 -  [ Verifying the installation](#verifying-the-installation)
+	 -  [Creating the Secret](#creating-the-secret) 
+	 -  [Modify the Secret files](#modify-the-secret-files) 		
+	 -  [Verifying the installation](#verifying-the-installation)
 -  [Upgrading the Chart](#upgrading-the-chart)   
 -  [Rolling Back the Chart](#rolling-back-the-chart)   
 -  [Uninstalling the Chart](#uninstalling-the-chart)
@@ -31,7 +32,6 @@ AIDA can be deployed into the following supported third-party cloud provider inf
 -   ![Microsoft Azure](images/tagmsa.png "Microsoft Azure")
 -   ![Google GKE](images/taggke.png "Google GKE")
 For more information about AIDA, see [AIDA User's Guide](https://help.hcltechsw.com/workloadautomation/v101/common/src_ai/awsaimst_welcome.html).
-For information about HCL Workload Automation exposed metrics, see [Monitoring with Prometheus](https://help.hcltechsw.com/workloadautomation/v101/distr/src_ref/awsrgmonprom.html).   
 This readme provides the steps for deploying AIDA, using helm charts and container images. Deploy AIDA after deploying HCL Workload Automation. For details about  HCL Workload Automation deployment, refer to HCL Workload Automation readme file. 
 ##  Limitations
 * Limited to amd64 platforms.
@@ -71,6 +71,10 @@ Each sub-chart defines a ServiceAccount named
 `{{ .Release.Name }}-{{ .Chart.Name }}` if `serviceAccount.create` is true, otherwise an existing  `global.serviceAccountName` will be used.
 **Ingress or Load Balancer or Route**
 Depends on the type of network enablement that is configured. See [ Network enablement](#network-enablement).
+**Secrets**
+The following secrets are defined and contain some default passwords that can be changed. See [Modify the Secret files](#modify-the-secret-files) : 
+    - redis-pwd-secret 
+    - email-pwd-secret 
 ##  Supported Platforms
 -   ![Amazon EKS](images/tagawseks.png "Amazon EKS") Amazon Elastic Kubernetes Service (EKS) on amd64: 64-bit Intel/AMD x86
 -   ![Microsoft Azure](images/tagmsa.png "Microsoft Azure") Azure Kubernetes Service (AKS) on amd64: 64-bit Intel/AMD x86
@@ -81,19 +85,23 @@ You can deploy AIDA on Openshift 4.2 or later version by following the instructi
 from `LoadBalancer` to `Routes`
 ##  Accessing the container images
 You can access AIDA subcharts and container images from the Entitled Registry. See [Creating the Secret](#creating-the-secret) for more information about accessing the registry. The images are as follows:
- - ``wa-registry.prod.hclpnp.com/wa-aida/aida-hcl/aida-ad:10.1.0.00`` 
- - ``wa-registry.prod.hclpnp.com/wa-aida/aida-hcl/aida-exporter:10.1.0.00``
- - ``wa-registry.prod.hclpnp.com/wa-aida/aida-hcl/aida-email:10.1.0.00``
- - ``wa-registry.prod.hclpnp.com/wa-aida/aida-hcl/aida-nginx:10.1.0.00``
- - ``wa-registry.prod.hclpnp.com/wa-aida/aida-hcl/aida-orchestrator:10.1.0.00``
- - ``wa-registry.prod.hclpnp.com/wa-aida/aida-hcl/aida-predictor:10.1.0.00``
- - ``wa-registry.prod.hclpnp.com/wa-aida/aida-hcl/aida-redis:10.1.0.00``
- - ``wa-registry.prod.hclpnp.com/wa-aida/aida-hcl/aida-ui:10.1.0.00``
+ - ``hclcr.io/wa/aida-ad:10.1.0.1`` 
+ - ``hclcr.io/wa/aida-exporter:10.1.0.1``
+ - ``hclcr.io/wa/aida-email:10.1.0.1``
+ - ``hclcr.io/wa/aida-nginx:10.1.0.1``
+ - ``hclcr.io/wa/aida-orchestrator:10.1.0.1``
+ - ``hclcr.io/wa/aida-predictor:10.1.0.1``
+ - ``hclcr.io/wa/aida-redis:10.1.0.1``
+ - ``hclcr.io/wa/aida-ui:10.1.0.1``
 ##  Prerequisites
 AIDA requires:
- -  HCL Workload Automation V101 exposed metrics
- -  API key for accessing the Entitled Registry: wa-registry.prod.hclpnp.com
- -  Open Distro for ElasticSearch V1.3.3
+ -  HCL Workload Automation V10.1 exposed metrics. For information about HCL Workload Automation exposed metrics, see [Exposing metrics to monitor your workload](https://help.hcltechsw.com/workloadautomation/v101/distr/src_ref/awsrgmonprom.html).   
+ -  API key for accessing the Entitled Registry: hclcr.io
+ -  External container image for Elasticsearch (OpenSearch 2.3.0)
+ -  Supported browsers are: 
+	- Google Chrome 67.0.3396.99 or higher
+    - Mozilla Firefox 61.0.1 or higher 
+    - Microsoft Edge 79 or higher
 AIDA prerequisites are inherited by HCL Workload Automation V10.1. 
 ##  Resources Required
  The following resources correspond to the default values required to manage a production environment. These numbers might vary depending on the environment.
@@ -110,7 +118,7 @@ AIDA prerequisites are inherited by HCL Workload Automation V10.1.
 |**aida-ui** |CPU: 1, Memory: 2Gi |CPU: 0.3, Memory: 0.5Gi, Storage: n/a  |
 ##  Preparing for installation
 Before installing AIDA, run the following steps: 
-1.  Accept the product license by setting the global.license parameter to "accept" (default value is "notaccepted") in the values.yaml file.
+1.  Accept the product license by setting the global.license parameter to **accept** (default value is **notaccepted**) in the values.yaml file.
 2.  To use custom SSL certificates for AIDA, in the <install_path>/nginx/cert folder replace aida.crt e aida.key with your own files (do not change the default names).
 3.  Verify that aida-exporter.waHostName parameter in the values.yaml file is set to the host name used to reach the WA server. This parameter is not required if AIDA is deployed in the same helm chart as WA.
 4.  Verify that aida-exporter.waPort parameter in the values.yaml file is set to the port used to reach the WA server. Its default value is "3116".   
@@ -120,23 +128,52 @@ Before installing AIDA, run the following steps:
 Refer to HCL Workload Automation readme file for the general installation procedure that  includes AIDA as an HCL Workload Automation component.
 In addition, run the following AIDA specific steps: 
 1. [Creating the  Secret](#creating-the-secret) by accessing the entitled registry to store an entitlement key for AIDA offering on your cluster.
-2. [Verifying the installation](#verifying-the-installation).
+2. [Modify the Secret files](#modify-the-secret-files) to change the passwords for aida-redis and aida-email.
+3. [Verifying the installation](#verifying-the-installation).
 ### Creating the Secret
 If you already have a license, then you can proceed to obtain your entitlement key. To learn more about acquiring an HCL Workload Automation license, contact [HWAinfo@hcl.com](mailto:HWAinfo@hcl.com).
 Obtain your entitlement key and store it on your cluster by creating a [Kubernetes Secret](https://kubernetes.io/docs/concepts/configuration/secret/). Using a Kubernetes secret allows you to securely store the key on your cluster and access the registry to download the chart and product images.
-1.  Access the entitled registry. Contact your HCL sales representative for the login details required to access the HCL Entitled Registry: wa-registry.prod.hclpnp.com.
-3.  To create a pull secret for your entitlement key that enables access to the entitled registry, run the following command:
+1.  Access the entitled registry. Contact your HCL sales representative for the login details required to access the HCL Entitled Registry: hclcr.io.
+2.  To create a pull secret for your entitlement key that enables access to the entitled registry, run the following command:
     ``      kubectl create secret docker-registry -n <workload_automation_namespace> sa-<workload_automation_namespace> --docker-server=<registry_server> --docker-username=<user_name> --docker-password=<password>    ``
     where,
     -   `<workload_automation_namespace>` represents the namespace where the product components are installed
-    -   `<registry_server>` is `wa-registry.prod.hclpnp.com`
+    -   `<registry_server>` is `hclcr.io`
     -   `<user_name>` is the user name provided by your HCL representative
     -   `<password>` is the entitled key copied from the entitled registry `<api_key>`
+###  Modify the Secret files
+If needed, modify the Secrets files to store the passwords for aida-redis and aida-email.
+ 1.	Modify the `aida-helm/templates/redis-pwd-secret.yaml` file that stores aida-redis password. The `redis-pwd-secret.yaml` file has the following content: 
+	`apiVersion: v1` 
+	`kind: Secret`
+	`metadata:`
+			name: redis-pwd-secret
+	`type: Opaque`
+	`data:`
+			REDIS_PASSWORD: <hidden_password>
+	where: 
+    -	`redis-pwd-secret` is the value of the `global. redisPwdSecretName` parameter defined in the [Configuration Parameters](#configuration-parameters) section; 
+    -	`<hidden_password>` can be changed; to enter an encrypted password, run the following command in a UNIX shell and copy the output into the yaml file:
+		`echo -n 'mypassword' | base64v`
+		The default password is â€œfoobaredâ€?.
+ 2.	Modify the `aida-helm/charts/aida-email/templates/email-pwd-secret.yaml` file that stores aida-email sender email password. The `email-pwd-secret.yaml file` has the following content: 
+	`apiVersion: v1` 
+	`kind: Secret` 
+	`metadata:` 
+			name: email-pwd-secret 
+	`type: Opaque` 
+	`data:` 
+			EMAIL_PASSWORD: <hidden_password>
+	where:
+	-	`email-pwd-secret` is the value of the `global.senderEmailPwdSecretName` parameter defined in the  [Configuration Parameters](#configuration-parameters) section; 
+	-	`<hidden_password>` can be changed; to enter an encrypted password, run the following command in a UNIX shell and copy the output into the yaml file:
+		`echo -n 'mypassword' | base64v`
+		The default password is â€œsmtpPasswordâ€?. 
 ###  Verifying the installation
 After the deployment procedure is complete, you can validate the deployment to ensure that AIDA is working. 
 To manually verify that AIDA was successfully installed, you can perform the following checks: 
 1. Run the following command to verify the AIDA pods (see [Details](#details)) installed in the <workload_automation_namespace>:
-           kubectl get pods -n <workload_automation_namespace>
+          kubectl get pods -n <workload_automation_namespace>
 2. Verify that AIDA UI is accessible using the AIDA widget on the Workload Dashboard of the Dynamic Workload Console. 	
  ![aida widget](images/AIDA_widget.png)	   
 ##  Upgrading the Chart
@@ -154,17 +191,16 @@ The following tables list the configurable parameters of the chart **values.yaml
 The following table lists the global configurable parameters of the chart and their default values:
 | **Parameter** | **Description** | **Mandatory** | **Example** | **Default** |
 | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | -------------------------------- | -------------------------------- |
-|license |Use "accept" to agree to the license agreement | yes |notaccepted   | notaccepted |
+|license |Use **accept** to agree to the license agreement | yes |notaccepted   | notaccepted |
 |serviceAccountName|The name of the serviceAccount to use. The HCL Workload Automation default service account (wauser) and not the default cluster account| no | wauser | default
-|aidaEngineLogLevel |Log level in AIDA. Can be DEBUG, INFO, ERROR, WARNING, CRITICAL | yes |"INFO"  |"INFO"  |
+|aidaEngineLogLevel |Log level in AIDA. It can be DEBUG, INFO, ERROR, WARNING, CRITICAL | yes |"INFO"  |"INFO"  |
 |redisPwd|aida-redis passowrd  | yes |"foobared"  |"foobared" |
-|defaultShardCount | The default number of Elasticsearch shards |yes | 1 |1  |
 - ### AIDA parameters
 The following tables list the configurable parameters of the chart relative to each service and their default values:
  ### [aida-ad parameters](#aida-ad-parameters)
 | **Parameter** | **Description** | **Mandatory** | **Example** | **Default** |
 | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | -------------------------------- | -------------------------------- |
-|image.repository|aida-ad image repository  |yes  | @DOCKER.AGENT.IMAGE.NAME@ |  wa-registry.prod.hclpnp.com/wa-aida/aida-hcl/aida-ad |
+|image.repository|aida-ad image repository  |yes  | @DOCKER.AGENT.IMAGE.NAME@ |  hclcr.io/wa/aida-ad |
 |image.tag | aida-ad image tag | yes |@VERSION@  | 10.1 |
 |image.pullPolicy | image pull policy |yes  |Always | Always |
 |serviceAccount.create | If true, a new ServiceAccount will be created, if false will be used an existing one with name global.serviceAccountName |  no | false |false |
@@ -182,8 +218,8 @@ The following tables list the configurable parameters of the chart relative to e
 | **Parameter** | **Description** | **Mandatory** | **Example** | **Default** |
 | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | -------------------------------- | -------------------------------- |
 |esDiscoveryType| Set this to "single-node" for single node clusters and leave unset for multi-node. | yes | single-node |  single-node |
-|image.repository|aida-es image repository  |yes  |@DOCKER.AGENT.IMAGE.NAME@  |  wa-registry.prod.hclpnp.com/wa-aida/aida-hcl/aida-es |
-|image.tag | aida-es image tag | yes |@VERSION@  | 10.1 |
+|image.repository|aida-es image repository  |yes  |@DOCKER.AGENT.IMAGE.NAME@  |  amazon/opendistro-for-elasticsearch |
+|image.tag | aida-es image tag | yes |@VERSION@  | 1.13.3 |
 |image.pullPolicy | image pull policy |yes  |Always | Always |
 |serviceAccount.create |If true, a new ServiceAccount will be created, if false will be used an existing one with name global.serviceAccountName | no|false  |false |
 |serviceAccount.annotations | Annotations to add to the created ServiceAccount | no | kubernetes.io/service-account.name: sa-name |{} |
@@ -205,7 +241,7 @@ The following tables list the configurable parameters of the chart relative to e
 |waPort|The port used to reach the WA server   |yes  |31116  | 31116  |
 |httpAuthUsername| The username of WA basic authentication.  | yes | wauser | wauser |
 |httpAuthPasswordSecretName| The name of the secret that stores the password of WA basic authentication.  | yes | wa-pwd-secret | wa-pwd-secret  |
-|image.repository|aida-exporter image repository  |yes  | @DOCKER.AGENT.IMAGE.NAME@ |  wa-registry.prod.hclpnp.com/wa-aida/aida-hcl/aida-exporter |
+|image.repository|aida-exporter image repository  |yes  | @DOCKER.AGENT.IMAGE.NAME@ |  hclcr.io/wa/aida-exporter |
 |image.tag | aida-exporter image tag | yes |@VERSION@  | 10.1 |
 |image.pullPolicy | image pull policy |yes  |Always | Always |
 |serviceAccount.create |If true, a new ServiceAccount will be created, if false will be used an existing one with name global.serviceAccountName |no   |false  |false |
@@ -223,7 +259,7 @@ The following tables list the configurable parameters of the chart relative to e
 |senderEmailId| The email account of the alert sender   | yes |`"john@outlook.com"`  |  `"smtp@server.com"` |
 |senderEmailPwd|The email password of the alert sender   | yes |"pwd"  |  "smtpPassword" |
 |recipientMailIds|The list of recipient emails   | yes |`"jack@gmail.com,jessie@live.com"`  | `"mail1@mail.com,mail2@mail.com"` |
-|image.repository|aida-email image repository  |yes  |@DOCKER.AGENT.IMAGE.NAME@  |  wa-registry.prod.hclpnp.com/wa-aida/aida-hcl/aida-exporter |
+|image.repository|aida-email image repository  |yes  |@DOCKER.AGENT.IMAGE.NAME@  |  hclcr.io/wa/aida-email |
 |image.tag | aida-exporter image tag | yes |@VERSION@  | 10.1 |
 |image.pullPolicy | image pull policy |yes  |Always | Always |
 |serviceAccount.create |If true, a new ServiceAccount will be created, if false will be used an existing one with name global.serviceAccountName | no|false|false |
@@ -237,7 +273,7 @@ The following tables list the configurable parameters of the chart relative to e
 | **Parameter** | **Description** | **Mandatory** | **Example** | **Default** |
 | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | -------------------------------- | -------------------------------- |
 |waConsoleCertSecretName|The name of the WA console secret to store customized SSL certificates  |yes  |waconsole-cert-secret  | waconsole-cert-secret |
-|image.repository|aida-nginx image repository  |yes  |@DOCKER.AGENT.IMAGE.NAME@  |  wa-registry.prod.hclpnp.com/wa-aida/aida-hcl/aida-nginx |
+|image.repository|aida-nginx image repository  |yes  |@DOCKER.AGENT.IMAGE.NAME@  |  hclcr.io/wa/aida-nginx |
 |image.tag | aida-nginx image tag | yes |@VERSION@  | 10.1 |
 |image.pullPolicy | image pull policy |yes  |Always | Always |
 |serviceAccount.create |If true, a new ServiceAccount will be created, if false will be used an existing one with name global.serviceAccountName |no |false|false |
@@ -255,7 +291,7 @@ The following tables list the configurable parameters of the chart relative to e
 ### [aida-orchestrator parameters](#aida-orchestrator-parameters)
 | **Parameter** | **Description** | **Mandatory** | **Example** | **Default** |
 | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | -------------------------------- | -------------------------------- |
-|image.repository|aida-orchestrator image repository  |yes  |@DOCKER.AGENT.IMAGE.NAME@  |  wa-registry.prod.hclpnp.com/wa-aida/aida-hcl/aida-orchestrator |
+|image.repository|aida-orchestrator image repository  |yes  |@DOCKER.AGENT.IMAGE.NAME@  |  hclcr.io/wa/aida-orchestrator |
 |image.tag | aida-ad image tag | yes |@VERSION@  | 10.1 |
 |image.pullPolicy | image pull policy |yes  |Always | Always |
 |serviceAccount.create |If true, a new ServiceAccount will be created, if false will be used an existing one with name global.serviceAccountName |no |false|false |
@@ -268,7 +304,7 @@ The following tables list the configurable parameters of the chart relative to e
 ### [aida-predictor parameters](#aida-predictor-parameters)
 | **Parameter** | **Description** | **Mandatory** | **Example** | **Default** |
 | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | -------------------------------- | -------------------------------- |
-|image.repository|aida-predictor image repository  |yes  |@DOCKER.AGENT.IMAGE.NAME@  |  wa-registry.prod.hclpnp.com/wa-aida/aida-hcl/aida-predictor |
+|image.repository|aida-predictor image repository  |yes  |@DOCKER.AGENT.IMAGE.NAME@  |  hclcr.io/wa/aida-predictor |
 |image.tag | aida-ad image tag | yes |@VERSION@  | 10.1 |
 |image.pullPolicy | image pull policy |yes  |Always | Always |
 |serviceAccount.create |If true, a new ServiceAccount will be created, if false will be used an existing one with name global.serviceAccountName |no|false|false |
@@ -285,7 +321,7 @@ The following tables list the configurable parameters of the chart relative to e
 ### [aida-redis parameters](#aida-redis-parameters)
 | **Parameter** | **Description** | **Mandatory** | **Example** | **Default** |
 | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | -------------------------------- | -------------------------------- |
-|image.repository|aida-redis image repository  |yes  |@DOCKER.AGENT.IMAGE.NAME@  |  wa-registry.prod.hclpnp.com/wa-aida/aida-hcl/aida-redis |
+|image.repository|aida-redis image repository  |yes  |@DOCKER.AGENT.IMAGE.NAME@  |  hclcr.io/wa/aida-redis |
 |image.tag | aida-ad image tag | yes |@VERSION@  | 10.1 |
 |image.pullPolicy | image pull policy |yes  |Always | Always |
 |serviceAccount.create |If true, a new ServiceAccount will be created, if false will be used an existing one with name global.serviceAccountName |no|false|false |
@@ -299,7 +335,7 @@ The following tables list the configurable parameters of the chart relative to e
 | **Parameter** | **Description** | **Mandatory** | **Example** | **Default** |
 | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | -------------------------------- | -------------------------------- |
 |uiLogLevel |Log level in AIDA UI.  | no |  |"ERROR:*,INFO:*,-TRACE:*"  |
-|image.repository|aida-ui image repository  |yes  |@DOCKER.AGENT.IMAGE.NAME@  |  wa-registry.prod.hclpnp.com/wa-aida/aida-hcl/aida-ui |
+|image.repository|aida-ui image repository  |yes  |@DOCKER.AGENT.IMAGE.NAME@  |  hclcr.io/wa/aida-ui |
 |image.tag | aida-ad image tag | yes |@VERSION@  | 10.1 |
 |image.pullPolicy | image pull policy |yes  |Always | Always |
 |serviceAccount.create |If true, a new ServiceAccount will be created, if false will be used an existing one with name global.serviceAccountName |no |false|false |
