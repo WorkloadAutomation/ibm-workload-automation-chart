@@ -1,0 +1,75 @@
+{{- if eq (.Values.console.exposeServiceType | upper )  "INGRESS" }} 
+####################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2022. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+####################################################################
+{{- include "wa.init" (list . "waconsole") }}
+{{ $fullName := include "wa.fullName" . }}
+{{ $dwcServiceName := include "wa.fullName" . }}
+{{- if semverCompare ">=1.19-0" .Capabilities.KubeVersion.GitVersion }}
+apiVersion: networking.k8s.io/v1
+{{- else if semverCompare ">=1.14-0" .Capabilities.KubeVersion.GitVersion }}
+apiVersion: networking.k8s.io/v1beta1
+{{- else }}
+apiVersion: extensions/v1beta1
+{{- end }}
+kind: Ingress
+metadata:
+  name: {{ $dwcServiceName }}
+  labels:
+{{ include "wa.console.labels" . | indent 4 }}
+  annotations:
+    ingress.kubernetes.io/backend-protocol: HTTPS
+    ingress.kubernetes.io/force-ssl-redirect: "true"
+    ingress.kubernetes.io/secure-backends: "true"
+    nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/secure-backends: "true"
+    nginx.ingress.kubernetes.io/affinity: cookie
+    nginx.ingress.kubernetes.io/session-cookie-name: {{ $dwcServiceName }}-console-affinity-cookie
+    nginx.ingress.kubernetes.io/session-cookie-hash: sha1
+    ingress.kubernetes.io/affinity: cookie
+    ingress.kubernetes.io/session-cookie-name: {{ $dwcServiceName }}-console-affinity-cookie
+    ingress.kubernetes.io/session-cookie-hash: sha1
+{{- with .Values.console.exposeServiceAnnotation }}
+{{ toYaml . | indent 4 }} 
+{{- end }}  
+spec:
+{{- if and .Values.console.ingress.className (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion) }}
+  ingressClassName: {{ .Values.console.ingress.className }}
+{{- end }}
+  tls:
+    - hosts:
+      {{- if .Values.console.ingress.hostname }}
+       - {{ .Values.console.ingress.hostname }}
+      {{- else }}  
+       - {{ $fullName }}.{{ .Release.Name }}.{{ .Release.Namespace }}.mycluster.proxy
+      {{- end }}
+      {{- if .Values.console.ingress.secretName }}       
+      secretName: {{ .Values.console.ingress.secretName }}    
+      {{- end }}       
+  rules:
+  {{- if .Values.console.ingress.hostname }}
+  - host: {{ .Values.console.ingress.hostname }}
+  {{- else }}  
+  - host: {{ $fullName }}.{{ .Release.Name }}.{{ .Release.Namespace }}.mycluster.proxy
+  {{- end }}
+    http:
+      paths:
+      - path: /
+        {{- if  (semverCompare ">=1.18-0" $.Capabilities.KubeVersion.GitVersion) }}
+        pathType: Prefix
+	      {{- end }}
+        backend:
+        {{- if semverCompare ">=1.19-0" $.Capabilities.KubeVersion.GitVersion }}
+          service:
+            name: {{ $dwcServiceName }}
+            port:
+              number: 9443
+        {{- else }} 
+          serviceName: {{ $dwcServiceName }}
+          servicePort: 9443
+        {{- end }}
+{{- end }}             

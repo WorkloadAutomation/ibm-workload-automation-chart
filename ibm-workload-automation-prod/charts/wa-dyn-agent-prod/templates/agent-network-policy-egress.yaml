@@ -1,0 +1,31 @@
+####################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2019. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+####################################################################
+{{- include "wa.init" (list . "waagent") }}
+{{ $fullName := include "waAgt.ServiceName" . }}
+{{- if .Values.agent.networkpolicyEgress }}
+{{- range .Values.agent.networkpolicyEgress }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ $fullName }}-{{ .name }}-np
+  labels:
+{{ include "wa.dyn-agent.labels" $ | indent 5 }}
+spec:
+  podSelector:
+    matchLabels:
+{{ include "wa.dyn-agent.labels" $ | indent 7 }}  
+  policyTypes:
+  {{- if .egress }}
+  - Egress
+  {{- end }}
+{{- if .egress }}
+  egress:
+{{ .egress | toYaml | trimSuffix "\n" | indent 2 -}}
+{{- end }}
+---
+{{- end -}}
+{{- end -}}

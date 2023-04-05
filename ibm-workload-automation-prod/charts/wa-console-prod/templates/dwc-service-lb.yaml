@@ -1,0 +1,42 @@
+{{- if or (eq (.Values.console.exposeServiceType | upper )  "LOADBALANCER") (eq (.Values.console.exposeServiceType | upper )  "LOADBALANCER_SESSIONAFFINITY") }}
+####################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2019. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+####################################################################
+{{- include "wa.init" (list . "waconsole") }}
+{{ $fullName := include "wa.fullName" . }}
+{{ $dwcServiceName := include "wa.fullName" . }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $dwcServiceName }}-lb
+  labels:
+{{ include "wa.console.labels" . | indent 4 }}
+  annotations:
+    prometheus.io/scrape: {{ .Values.global.enablePrometheus | quote | default "true" }}
+    prometheus.io/scheme: http
+    prometheus.io/port: "9444"
+    prometheus.io/path: /metrics
+{{- with .Values.console.exposeServiceAnnotation }}
+{{ toYaml . | indent 4 }} 
+{{- end }}
+spec:
+  type: LoadBalancer 
+  ports:
+  - name: console-https-lb
+    protocol: TCP
+    port: 9443
+    targetPort: 9443
+  - name: console-monitoring-lb
+    protocol: TCP
+    port: 9444
+    targetPort: 9444     
+  selector:
+    app.kubernetes.io/name: "{{ include "wa.appName" . }}"
+    app.kubernetes.io/instance: "{{ .Release.Name }}" 
+{{- if (eq (.Values.console.exposeServiceType | upper )  "LOADBALANCER_SESSIONAFFINITY") }}
+  sessionAffinity: ClientIP
+{{ end -}}
+{{ end -}}

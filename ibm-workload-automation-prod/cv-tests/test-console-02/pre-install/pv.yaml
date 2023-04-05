@@ -1,0 +1,14 @@
+# Example Persistent Volume definition for creation via pre-install.sh
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: data-{{ .cv.release }}-pv
+  labels:
+    env: development
+spec:
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/tmp/{{ .cv.release }}"

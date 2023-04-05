@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ .cv.release }}-wa-db2
+  labels:
+    app: {{ .cv.release }}-wa-db2
+    app.kubernetes.io/name: ibm-workload-automation-operator
+    app.kubernetes.io/instance: ibm-workload-automation-operator-instance
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: ibm-workload-automation-operator
+spec:
+  containers:
+  - name: wa-db2
+    image: hyc-icpcontent-docker-local.artifactory.swg-devops.com/workload-automation-db:9.5
+    env:
+    - name: LICENSE
+      value: "accept"
+    - name: DB2INST1_PASSWORD
+      value: "db2inst1"
+    resources:
+      limits:
+        memory: "2Gi"
+      requests:
+        memory: "2Gi"
+    args: ["db2start"]
+        

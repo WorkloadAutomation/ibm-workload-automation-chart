@@ -1,0 +1,31 @@
+####################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2019. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+####################################################################
+{{- include "wa.init" (list . "waserver") }}
+{{ $fullName := include "wa.fullName" . }}
+{{- if .Values.server.networkpolicyEgress }}
+{{- range .Values.server.networkpolicyEgress }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ template "waMdm.ServiceName" $ }}-{{ .name }}-np
+  labels:
+{{ include "wa.server.labels" $ | indent 5 }}
+spec:
+  podSelector: 
+    matchLabels:
+     app.kubernetes.io/name: waserver
+  policyTypes:
+  {{- if .egress }}
+  - Egress
+  {{- end }}
+{{- if .egress }}
+  egress:
+{{ .egress | toYaml | trimSuffix "\n" | indent 2 -}}
+{{- end }}
+---
+{{- end -}}
+{{- end -}}

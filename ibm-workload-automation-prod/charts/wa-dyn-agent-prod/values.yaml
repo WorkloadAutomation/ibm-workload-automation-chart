@@ -1,0 +1,103 @@
+####################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2019. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+####################################################################
+global:
+  license: "not accepted"
+  serviceAccountName:
+  language: "en"
+  enablePrometheus: true
+  customLabels:
+    - name: "environment"
+      value: "prod"
+replicaCount: 1
+image:
+  repository: cp.icr.io/cp/ibm-workload-automation-agent-dynamic
+  tag: 9.5.0.06.20230324
+  pullPolicy: Always
+licenseType: "PVU"
+runAsUser: 999
+fsGroupId: 999
+supplementalGroupId:
+agent:
+  name: "WA_AGT"
+  tz:
+  dynamic:
+    server:
+      mdmhostname:
+      # Optional variable to specify the hostname of the backup master to use. If no backup master is used, leave it empty
+      bkmhostname:
+      port: "31116"
+    # Optional variable to specify a comma separated list of static workstation pools with which you want to register this agent. If no pool is used, leave an empty string
+    pools:
+    # Variable to specify the customized certificates for SSL communication
+    useCustomizedCert: false
+    certSecretName:  waagent-cert-secret
+    useSaaSConfig: false
+    saasConfig:
+      engine: sijr27wamxo-355.wa.ibmserviceengage.com
+      subscriptionID:
+      controllerHostname: wastagdal05gov.wa.ibmserviceengage.com
+      userID:
+      password:
+  containerDebug: false
+  networkpolicyEgress: {}
+  nodeAffinityRequired: {}
+  livenessProbe:
+    initialDelaySeconds: 60
+resources:
+  requests:
+    cpu: 200m
+    memory: 200Mi
+  limits:
+    cpu: 1
+    memory: 2Gi
+persistence:
+  # Determine whether to use Persistent Volumes for the pods
+  enabled: true
+  # Determine whether to use Storage Classes to dynamically create Persistent Volumes for the pods
+  useDynamicProvisioning: true
+  #
+  # Settings for the pod Persistent Volume Claims,
+  # which each pod uses for data in stdlist
+  dataPVC:
+    # Prefix for names of this Persistent Volume Claim
+    name: "data"
+    # Name of the Storage Class to use. If no Storage Class is used, leave an empty string
+    storageClassName: ""
+    # If your not using dynamic provisioning, you can use selectors to
+    # refine the binding process. You cannot specify a selector if you are using dynamic provisioning!
+    selector:
+      label: ""
+      value: ""
+    # Minimum size of the Persistent Volume
+    size: 2Gi
+  extraVolumes: []
+      # - name: custom-volume-1
+      #   persistentVolumeClaim:
+      #     claimName: pvc-name
+      # - name: custom-volume-2
+      #   configMap:
+      #      name: custom-configMap
+      #      defaultMode: 0755
+      # - name: custom-volume-3
+      #   secret:
+      #     secretName: custom-secret
+      #     defaultMode: 0744
+      # - name: nfs-volume
+      #   nfs: 
+      #     # URL for the NFS server
+      #     server: <nfs_server> # Change this!
+      #     path: /
+  extraVolumeMounts: []
+      # - name: custom-volume-1
+      #   mountPath: /custom/mount/path-1
+      #   readOnly: false
+      # - name: custom-volume-2
+      #   mountPath: /custom/mount/path-2
+      # - name: custom-volume-3
+      #   mountPath: /custom/mount/path-3
+      # - name: nfs-volume
+      #   mountPath: /path/nfs

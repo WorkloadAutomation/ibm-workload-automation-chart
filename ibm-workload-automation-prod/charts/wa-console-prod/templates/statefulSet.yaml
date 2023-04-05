@@ -1,0 +1,294 @@
+####################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2019. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+####################################################################
+{{- include "wa.init" (list . "waconsole") }}
+{{ $dataPvcName := .Values.persistence.dataPVC.name }}
+{{ $statefulSetName := include "wa.fullName" . }}
+{{ $persistentVolumeClaimName := include "wa.volumeClaimTemplateName" (list . $dataPvcName) }}
+{{ $fullName := include "wa.fullName" . }}
+{{ $serviceName := include "waDwc.ServiceName" . }}
+{{ $configName := include "waconsole.ConfigName" .}}
+{{ $waUserName := include "wa.console.waUser" .}}
+{{ $pluginsConfiName := (printf "%s-%s" $fullName "console-plugins-config") }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ $statefulSetName }}
+  labels:
+{{ include "wa.console.labels" . | indent 4 }}
+spec:
+  updateStrategy: 
+    type: RollingUpdate
+  serviceName: {{ $serviceName }}-h
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: "{{ include "wa.appName" . }}"
+      app.kubernetes.io/instance: "{{ .Release.Name }}" 
+  template:
+    metadata:
+      labels:
+{{ include "wa.console.labels" . | indent 8 }}
+        affinity: wa-console
+      annotations:
+{{ include "wa.metering" . | indent 8 }} 
+        prometheus.io/scrape: {{ .Values.global.enablePrometheus | quote | default "true" }}
+        prometheus.io/scheme: http
+        prometheus.io/port: "9444"
+        prometheus.io/path: /metrics     
+    spec:
+      hostNetwork: false
+      hostPID: false
+      hostIPC: false      
+      securityContext:
+        runAsNonRoot: true
+      {{- if not (.Capabilities.APIVersions.Has "security.openshift.io/v1") }} 
+        runAsUser: {{ .Values.runAsUser | default 999}}
+        fsGroup: {{ default 999 .Values.fsGroupId }}
+      {{- end }}
+        supplementalGroups: [{{ .Values.supplementalGroupId | default 999 }}]
+      serviceAccountName: {{ .Values.global.serviceAccountName | default $waUserName}}     
+      affinity:
+        #schedule pod on different nodes when possible
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: affinity
+                  operator: In
+                  values:
+                  - wa-console
+              topologyKey: kubernetes.io/hostname
+{{ include "wa.nodeaffinity" . | indent 8 }}  
+{{- if .Values.console.nodeAffinityRequired }} 
+{{ .Values.console.nodeAffinityRequired | toYaml | trimSuffix "\n" | indent 14 -}}
+{{- end }}  
+{{- if .Values.persistence.enabled }}                
+      initContainers:
+      - name: init-config
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        volumeMounts:
+        - name: {{ $persistentVolumeClaimName }}
+          mountPath: /tmp/data
+        command: [bash, -c]
+        args: ["/opt/wautils/wa_populate_volume.sh -s /home/wauser -d /tmp/data"]
+        securityContext:
+          privileged: false
+          readOnlyRootFilesystem: false
+          allowPrivilegeEscalation: false     
+          capabilities:
+            drop:
+            - ALL  
+        resources:     
+{{ toYaml .Values.resources | indent 10 }}  
+{{- end }}
+{{- if .Values.global.customPluginImageName }}
+      - name: init-copy-plugins
+        image: {{ .Values.global.customPluginImageName }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        volumeMounts:
+        - name: {{ $persistentVolumeClaimName }}
+          mountPath: /tmp/custom_plugins
+          subPath: wauser
+        command: [/opt/wautils/copy_custom_plugins.sh]
+        args: ["/opt/wa_plugins", "/tmp/custom_plugins"]
+        securityContext:
+          privileged: false
+          readOnlyRootFilesystem: false
+          allowPrivilegeEscalation: false     
+          capabilities:
+            drop:
+            - ALL
+{{- end }}     
+      containers:
+      - name: {{ .Chart.Name }}
+        readinessProbe:
+          exec:
+            command:
+            - /opt/wautils/wa_probe.sh
+            - console
+            - readiness
+          initialDelaySeconds: 200
+          failureThreshold: 10
+          periodSeconds: 60
+        livenessProbe:
+          exec:
+            command:
+            - /opt/wautils/wa_probe.sh
+            - console
+            - liveness
+          initialDelaySeconds: {{ default 100 .Values.console.livenessProbe.initialDelaySeconds }}
+          timeoutSeconds: 10
+          failureThreshold: 3
+          periodSeconds: 60
+        env:                
+        - name: LICENSE
+          value: {{ .Values.global.license | quote }}
+        - name: LANG
+          value: {{ default "en" .Values.global.language }}
+        - name: WA_DEBUG
+          value: {{ .Values.console.containerDebug | quote }}
+        - name: WA_ENABLE_SSO
+          value: {{ .Values.console.enableSSO | quote }}
+      {{- if .Values.console.adminGroup  }}
+        - name: WA_ADMIN_GROUP
+          value: {{ .Values.console.adminGroup | quote }}
+      {{- end}}
+      {{- if .Values.global.waAdminRestrictedGroup }}
+        - name: WA_RESTRICTED_ADMINS_GROUP
+          value: {{ .Values.global.waAdminRestrictedGroup }}
+      {{- end }}
+        - name: WA_OPENID_CLIENT_NAME
+          value: "" 
+        - name: WA_IS_KUBE
+          value: "true"          
+        - name: WA_DEBUG_SCRIPTS
+          value: "false"            
+        - name: DB_TYPE
+          value: {{ .Values.console.db.type | quote }}
+        {{- if eq (.Values.console.db.type | upper) "IDS" }}
+        - name: DB_SERVER
+          value: {{ .Values.console.db.server | quote }}    
+        {{- end}}
+        - name: DB_HOSTNAME
+          value: {{ .Values.console.db.hostname | quote }}         
+        - name: DB_PORT
+          value: {{ .Values.console.db.port | quote }}  
+        - name: DB_SSL_CONNECTION
+          value:  {{ .Values.console.db.sslConnection | quote }}                         
+        - name: DB_NAME
+          value: {{ .Values.console.db.name | quote }}    
+        - name: DB_ALTERNATE_SERVER_NAME
+          value: {{ .Values.console.db.alternateHostName | quote }}
+        - name: DB_ALTERNATE_SERVER_PORT
+          value: {{ .Values.console.db.alternatePort | quote }}
+        - name: DB_USER
+          value: {{ .Values.console.db.user | quote }} 
+        - name: DB_ADMIN_USER
+          value: {{ .Values.console.db.adminUser | quote }}             
+        {{- if .Values.console.db.tsName }}
+        - name: DB_TS_NAME
+          value: {{ .Values.console.db.tsName | quote }}
+        {{- end }}          
+        {{- if .Values.console.db.tsPath }}
+        - name: DB_TS_PATH
+          value: {{ .Values.console.db.tsPath | quote }}
+        {{- end }}        
+        {{- if .Values.console.db.tsTempName }}
+        - name: DB_TEMP_TS_NAME
+          value: {{ .Values.console.db.tsTempName | quote }}
+        {{- end }}     
+        {{- if .Values.console.db.tssbspace }}
+        - name: DB_SBSPACE
+          value: {{ .Values.console.db.tssbspace | quote }}
+        {{- end }}            
+        - name: DB_ENABLE_PARTITIONING
+          value: {{ .Values.console.db.usepartitioning | quote }}  
+        - name: ENGINE_HOSTNAME
+        {{- if .Values.console.engineHostName }}  
+          value: {{ .Values.console.engineHostName }}
+        {{- else }}
+          value: {{ template "waMdm.ServiceName" . }}   
+        {{- end }} 
+        {{- if .Values.console.enginePort }} 
+        - name: ENGINE_PORT
+          value: {{ .Values.console.enginePort | quote }} 
+        {{- end }}
+        {{- if .Values.console.tz }}
+        - name: TZ
+          value: {{ .Values.console.tz | quote }}
+        {{- end }} 
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        securityContext:
+          privileged: false
+          readOnlyRootFilesystem: false
+          allowPrivilegeEscalation: false     
+          capabilities:
+            drop:
+            - ALL         
+        resources:
+{{ toYaml .Values.resources | indent 12 }}
+        volumeMounts:
+{{- if .Values.persistence.enabled }}        
+        - name: {{ $persistentVolumeClaimName }}
+          mountPath: /home/wauser
+          subPath: wauser
+{{- end }}           
+        - name: cert-bind-volume
+          mountPath: /opt/wautils/certs
+        - name: password-bind-volume
+          mountPath: /opt/service-bind
+{{- if .Values.console.libConfigName }}          
+        - name: config-liberty-volume
+          mountPath: /opt/wautils/dropins 
+{{- end }}
+        - name: {{ include "wa.fullName" . }}-console-plugins-volume
+          mountPath: /opt/wautils/config/plugins.properties
+          subPath: plugins.properties 
+{{- if ne (len .Values.persistence.extraVolumeMounts) 0 }}
+{{ toYaml .Values.persistence.extraVolumeMounts | indent 8 }}
+{{- end }}                
+      volumes:
+      - name: cert-bind-volume
+        secret:
+          defaultMode: 0664
+          secretName: {{ .Values.console.certSecretName }} 
+      - name: password-bind-volume
+        secret:
+          defaultMode: 0664
+          secretName: {{ .Values.console.pwdSecretName }}  
+      - name: {{ include "wa.fullName" . }}-console-plugins-volume
+        configMap:
+          name: {{ .Values.global.configPlugins | default $pluginsConfiName }} 
+          optional: true
+          items:
+          - key: plugins.properties
+            path: plugins.properties
+      - name: {{ include "wa.fullName" . }}-console-scripts-volume
+        configMap:
+          name: {{ include "wa.fullName" . }}-console-scripts
+          defaultMode: 0777
+          optional: true
+{{- if .Values.console.libConfigName }} 
+      - name: config-liberty-volume
+        configMap:
+          name: {{ default $configName .Values.console.libConfigName }}   
+{{- end }}
+{{- if ne (len .Values.persistence.extraVolumes) 0 }}
+{{ toYaml .Values.persistence.extraVolumes | indent 6 }}
+{{- end }}          
+{{- if .Values.persistence.enabled }}                                
+  volumeClaimTemplates:
+  - metadata:
+      name: {{ $persistentVolumeClaimName }}
+      labels: 
+{{ include "wa.console.labels" . | indent 8 }} 
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: {{ .Values.persistence.dataPVC.size | quote }}
+      {{- if .Values.persistence.useDynamicProvisioning }}
+      # if present, use the storageClassName from the values.yaml, else use the
+      # default storageClass setup by kube Administrator
+      # setting storageClassName to nil means use the default storage class
+      storageClassName: {{ default nil .Values.persistence.dataPVC.storageClassName | quote }}
+      {{- else }}
+      # bind to an existing pv.
+      # setting storageClassName to "" disables dynamic provisioning 
+      storageClassName: ""
+        {{- if .Values.persistence.dataPVC.selector.label }}
+      # use selectors in the binding process
+      selector:
+        matchLabels:
+          {{ .Values.persistence.dataPVC.selector.label }}: {{ .Values.persistence.dataPVC.selector.value }}
+        {{- end }}      
+      {{- end }}
+{{- end }}

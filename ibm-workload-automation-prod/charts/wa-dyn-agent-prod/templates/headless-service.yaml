@@ -1,0 +1,24 @@
+####################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2019. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+####################################################################
+{{- include "wa.init" (list . "waagent") }}
+{{ $fullName := include "waAgt.ServiceName" . }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $fullName }}-h
+  labels:
+{{ include "wa.dyn-agent.labels" . | indent 4 }}
+spec:
+  clusterIP: None
+  ports:
+  - name: ita-port
+    protocol: TCP
+    port: 31114
+    targetPort: 31114
+  selector:
+    app.kubernetes.io/name: "{{ include "wa.appName" . }}"
+    app.kubernetes.io/instance: "{{ .Release.Name }}" 

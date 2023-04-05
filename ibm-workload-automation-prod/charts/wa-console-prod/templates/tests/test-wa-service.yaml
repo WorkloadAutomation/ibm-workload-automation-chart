@@ -1,0 +1,67 @@
+####################################################################
+# Licensed Materials - Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2019. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+####################################################################
+{{- include "wa.init" (list . "waconsole") }}
+{{ $fullName := include "wa.fullName" . }}
+{{ $dwcServiceName := include "wa.fullName" . }}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ $fullName }}-test
+  labels:
+    app.kubernetes.io/name: {{ include "wa.appName" . }}-test
+    helm.sh/chart: {{ .Chart.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    release: {{ .Release.Name }}
+  annotations:
+    "helm.sh/hook": test-success
+spec:
+  hostNetwork: false
+  hostPID: false
+  hostIPC: false      
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 999
+    fsGroup: {{ default 999 .Values.fsGroupId }}  
+    supplementalGroups: [{{ .Values.supplementalGroupId | default 999 }}]
+  serviceAccountName: {{ .Values.global.serviceAccountName | default "default" }}  
+  containers:
+    - name: {{ $fullName }}-test
+      image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+      command: ["bash", "-xc","cd /tmp && (echo > /dev/tcp/{{ $dwcServiceName }}/9443)"]      
+      securityContext:
+        privileged: false
+        readOnlyRootFilesystem: false
+        allowPrivilegeEscalation: false     
+        capabilities:
+          drop:
+          - ALL        
+      resources:
+        requests:
+          cpu: 1
+          memory: 4Gi  
+        limits:
+          cpu: 4
+          memory: 16Gi
+  restartPolicy: Never
+  affinity:
+    nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - preference:
+              matchExpressions:
+              - key: kubernetes.io/arch
+                operator: In
+                values:
+                - amd64
+            weight: 3
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/arch
+                operator: In
+                values:
+                - amd64

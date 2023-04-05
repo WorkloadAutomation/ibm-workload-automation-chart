@@ -1,0 +1,381 @@
+####################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2019. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+####################################################################
+{{- include "wa.init" (list . "waserver") }}
+{{ $dataPvcName := .Values.persistence.dataPVC.name }}
+{{ $statefulSetName := include "wa.fullName" . }}
+{{ $persistentVolumeClaimName := include "wa.volumeClaimTemplateName" (list . $dataPvcName) }}
+{{ $fullName := include "wa.fullName" . }}
+{{ $serviceName := include "wa.fullName" . }}
+{{ $configName := include "waserver.ConfigName" .}}
+{{ $waUserName := include "wa.server.waUser" .}}
+{{ $pluginsConfiName := (printf "%s-%s" $fullName "server-plugins-config") }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ $statefulSetName }}
+  labels:
+{{ include "wa.server.labels" . | indent 4 }}
+spec:
+  updateStrategy: 
+    type: RollingUpdate
+  serviceName: {{ $serviceName }}-h
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: "{{ include "wa.appName" . }}"
+      app.kubernetes.io/instance: "{{ .Release.Name }}"
+  template:
+    metadata:
+      labels:
+{{ include "wa.server.labels" . | indent 8 }}
+        affinity: wa-server
+        waservertype: master
+      annotations:
+{{ include "wa.metering" . | indent 8 }} 
+        prometheus.io/scrape: {{ .Values.global.enablePrometheus | quote | default "true" }}
+        prometheus.io/scheme: http
+        prometheus.io/port: "31115"
+        prometheus.io/path: /metrics
+    spec:
+      hostNetwork: false
+      hostPID: false
+      hostIPC: false    
+      securityContext:
+        runAsNonRoot: true
+      {{- if not (.Capabilities.APIVersions.Has "security.openshift.io/v1") }} 
+        runAsUser: {{ .Values.runAsUser | default 999 }}
+        fsGroup: {{ default 999 .Values.fsGroupId }}
+      {{- end }} 
+        supplementalGroups: [{{ .Values.supplementalGroupId | default 999 }}]
+      serviceAccountName: {{ .Values.global.serviceAccountName | default $waUserName  }}              
+      affinity:
+        #schedule pod on different nodes when possible
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: affinity
+                  operator: In
+                  values:
+                  - wa-server
+              topologyKey: kubernetes.io/hostname
+{{ include "wa.nodeaffinity" . | indent 8 }}  
+{{- if .Values.server.nodeAffinityRequired }} 
+{{ .Values.server.nodeAffinityRequired | toYaml | trimSuffix "\n" | indent 14 -}}
+{{- end }}  
+ {{- if .Values.persistence.enabled }}               
+      initContainers:
+      - name: init-config
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        volumeMounts:
+        - name: {{ $persistentVolumeClaimName }}
+          mountPath: /tmp/data
+        command: [/opt/wautils/wa_populate_volume.sh]
+        args: ["-s /home/wauser -d /tmp/data"]   
+        securityContext:
+          privileged: false
+          readOnlyRootFilesystem: false
+          allowPrivilegeEscalation: false     
+          capabilities:
+            drop:
+            - ALL
+        resources:  
+{{ toYaml .Values.resources | indent 10 }}
+{{- end }}
+{{- if .Values.global.customPluginImageName }}
+      - name: init-copy-plugins
+        image: {{ .Values.global.customPluginImageName }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        volumeMounts:
+        - name: {{ $persistentVolumeClaimName }}
+          mountPath: /tmp/custom_plugins
+          subPath: wauser
+        command: [/opt/wautils/copy_custom_plugins.sh]
+        args: ["/opt/wa_plugins", "/tmp/custom_plugins"]
+        securityContext:
+          privileged: false
+          readOnlyRootFilesystem: false
+          allowPrivilegeEscalation: false     
+          capabilities:
+            drop:
+            - ALL
+{{- end }}        
+      containers:
+      - name: {{ .Chart.Name }}
+        readinessProbe:
+          exec:
+            command:
+            - /opt/wautils/wa_probe.sh
+            - server
+            - readiness
+          initialDelaySeconds: {{ default 530 .Values.server.readinessProbe.initialDelaySeconds }}
+          failureThreshold: 30
+          periodSeconds: 60
+        livenessProbe:
+          exec:
+            command:
+            - /opt/wautils/wa_probe.sh
+            - server
+            - liveness
+          initialDelaySeconds: {{ default 850 .Values.server.livenessProbe.initialDelaySeconds }}
+          timeoutSeconds: 10
+          failureThreshold: 4
+          periodSeconds: 60
+        env:                
+        - name: LICENSE
+          value: {{ .Values.global.license | quote }}   
+        - name: WA_IS_KUBE
+          value: "true"
+        {{- if .Values.server.enableSingleInstaceNetwork }}   
+        - name: FTA_FORCE_SSL
+          value: "TRUE"
+        - name: FTA_NODE_NAME_DOMAIN
+          value: ".{{ .Release.Namespace }}"
+        {{- else }}
+        - name: FTA_FORCE_SSL
+          value: "FALSE"
+        {{- end }}
+        {{- if or (.Values.server.routes.enabled) (eq (.Values.server.exposeServiceType | upper )  "ROUTES")  }}
+        - name: EXPOSE_SERVICE_TYPE
+          value: "ROUTES"
+        {{- else if .Values.server.exposeServiceType }}
+        - name: EXPOSE_SERVICE_TYPE
+          value: {{ .Values.server.exposeServiceType | upper }}
+        {{- end }}
+        - name: LANG
+          value: {{ default "en" .Values.global.language }}
+        - name: WA_DEBUG_SCRIPTS
+          value: "false"      
+        - name: PUBLIC_HOSTNAME
+          value: {{ template "waMdm.ServiceName" . }}                          
+        - name: WA_SERVICE_DOMAIN
+          value: {{ $serviceName }}-h
+        - name: PUBLIC_PORT
+          value: "31116" 
+        {{- if or (.Values.server.routes.enabled) (eq (.Values.server.exposeServiceType | upper )  "ROUTES")  }} 
+        {{- if .Values.server.routes.hostname}}
+        - name: ADDITIONAL_HOSTNAME        
+          value:  {{ .Values.server.routes.hostname | quote }}
+        - name: ADDITIONAL_PORT
+          value: "443"
+        {{- end }} 
+        {{- end }}
+        {{- if eq (.Values.server.exposeServiceType | upper )  "INGRESS" }} 
+        {{- if .Values.server.ingress.hostname}}
+        - name: ADDITIONAL_HOSTNAME        
+          value:  {{ .Values.server.ingress.hostname | quote }}
+        - name: ADDITIONAL_PORT
+          value: "443"
+        {{- else }} 
+        - name: ADDITIONAL_HOSTNAME        
+          value:  {{ $fullName }}.{{ .Release.Name }}.{{ .Release.Namespace }}.mycluster.proxy
+        - name: ADDITIONAL_PORT
+          value: "443"  
+        {{- end }} 
+        {{- end }}
+        - name: COMPANY_NAME
+          value: {{ .Values.server.company | quote }}
+        {{- if .Values.server.ftaName }}
+        - name: FTA_NAME
+          value: {{ .Values.server.ftaName | quote }}
+        {{- end }}
+        {{- if .Values.server.agentName }}
+        - name: AGT_NAME
+          value: {{ .Values.server.agentName | quote }}
+        {{- end }}
+        {{- if .Values.server.startOfDay }}
+        - name: START_OF_DAY
+          value: {{ .Values.server.startOfDay | quote }}
+        {{- end }}   
+        {{- if .Values.server.timezone }}
+        - name: TIMEZONE
+          value: {{ .Values.server.timezone | quote }}
+        {{- end }}   
+        {{- if .Values.server.tz }}
+        - name: TZ
+          value: {{ .Values.server.tz | quote }}
+        {{- end }}              
+        {{- if .Values.server.dateFormat }}
+        - name: DATE_FORMAT
+          value: {{ .Values.server.dateFormat | quote }}
+        {{- end }}
+        - name: CREATE_PLAN
+          value: {{ .Values.server.createPlan | quote }}
+        - name: WA_DEBUG
+          value: {{ .Values.server.containerDebug | quote }}
+        - name: WA_ENABLE_SSO
+          value: {{ .Values.server.enableSSO | quote }}
+      {{- if .Values.server.adminGroup  }}
+        - name: WA_ADMIN_GROUP
+          value: {{ .Values.server.adminGroup | quote }}
+      {{- end}}
+        - name: DB_TYPE
+          value: {{ .Values.server.db.type | quote }}
+        {{- if eq (.Values.server.db.type | upper) "IDS" }}
+        - name: DB_SERVER
+          value: {{ .Values.server.db.server | quote }}    
+        {{- end}}
+        - name: DB_HOSTNAME
+          value: {{ .Values.server.db.hostname | quote }}         
+        - name: DB_PORT
+          value: {{ .Values.server.db.port | quote }}   
+        - name: DB_SSL_CONNECTION
+          value:  {{ .Values.server.db.sslConnection | quote }}                           
+        - name: DB_NAME
+          value: {{ .Values.server.db.name | quote }}  
+        - name: DB_ALTERNATE_SERVER_NAME
+          value: {{ .Values.server.db.alternateHostName | quote }}
+        - name: DB_ALTERNATE_SERVER_PORT
+          value: {{ .Values.server.db.alternatePort | quote }}
+        - name: DB_USER
+          value: {{ .Values.server.db.user | quote }} 
+        - name: DB_ADMIN_USER
+          value: {{ .Values.server.db.adminUser | quote }}                          
+        {{- if .Values.server.db.tsName }}
+        - name: DB_TS_NAME
+          value: {{ .Values.server.db.tsName | quote }}
+        {{- end }}          
+        {{- if .Values.server.db.tsPath }}
+        - name: DB_TS_PATH
+          value: {{ .Values.server.db.tsPath | quote }}
+        {{- end }}        
+        {{- if .Values.server.db.tsLogName }}
+        - name: DB_LOG_TS_NAME
+          value: {{ .Values.server.db.tsLogName | quote }}
+        {{- end }}          
+        {{- if .Values.server.db.tsLogPath }}
+        - name: DB_LOG_TS_PATH
+          value: {{ .Values.server.db.tsLogPath | quote }}
+        {{- end }}
+        {{- if .Values.server.db.tsPlanName }}
+        - name: DB_PLAN_TS_NAME
+          value: {{ .Values.server.db.tsPlanName | quote }}
+        {{- end }}          
+        {{- if .Values.server.db.tsPlanPath }}
+        - name: DB_PLAN_TS_PATH
+          value: {{ .Values.server.db.tsPlanPath | quote }}
+        {{- end }}
+        {{- if .Values.server.db.tsTempName }}
+        - name: DB_TEMP_TS_NAME
+          value: {{ .Values.server.db.tsTempName | quote }}
+        {{- end }}      
+        {{- if .Values.server.db.tssbspace }}
+        - name: DB_SBSPACE
+          value: {{ .Values.server.db.tssbspace | quote }}
+        {{- end }}     
+        - name: DB_ENABLE_PARTITIONING
+          value: {{ .Values.server.db.usepartitioning | quote }}
+        - name: LICENSE_SERVER_URL
+          value: {{ .Values.server.licenseServerUrl | quote }}
+        - name: LICENSE_SERVER_ID
+          value: {{ .Values.server.licenseServerId | quote }}
+        - name: RELEASE_NAME
+          value: {{ .Release.Name | quote }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        securityContext:
+          privileged: false
+          readOnlyRootFilesystem: false
+          allowPrivilegeEscalation: false     
+          capabilities:
+            drop:
+            - ALL          
+        resources:
+{{ toYaml .Values.resources | indent 12 }}
+        volumeMounts:
+{{- if .Values.persistence.enabled }}        
+        - name: {{ $persistentVolumeClaimName }}
+          mountPath: /home/wauser
+          subPath: wauser
+{{- end }}           
+        - name: cert-bind-volume
+          mountPath: /opt/wautils/certs
+        - name: password-bind-volume
+          mountPath: /opt/service-bind   
+        - name: cert-bind-volume-ext
+          mountPath: /home/wauser/wadata/ssl/depot
+{{- if .Values.server.libConfigName }}
+        - name: config-liberty-volume
+          mountPath: /opt/wautils/dropins
+{{- end }}
+        - name: {{ include "wa.fullName" . }}-server-plugins-volume
+          mountPath: /opt/wautils/config/plugins.properties
+          subPath: plugins.properties
+        - name: {{ include "wa.fullName" . }}-server-scripts-volume
+          mountPath: /opt/wautils/custom_scripts
+{{- if ne (len .Values.persistence.extraVolumeMounts) 0 }}
+{{ toYaml .Values.persistence.extraVolumeMounts | indent 8 }}
+{{- end }}
+      volumes:
+      - name: cert-bind-volume
+        secret:
+          defaultMode: 0664
+          secretName: {{ .Values.server.certSecretName }} 
+      - name: config-auth-sofy-liberty-volume
+        secret:
+          defaultMode: 0664
+          secretName: {{ include "wa.fullName" . }}-liberty-sofy-auth-config
+          optional: true
+      - name: cert-bind-volume-ext
+        secret:
+          defaultMode: 0664
+          secretName: "waagent-cert-secret-ext"
+      - name: password-bind-volume
+        secret:
+          defaultMode: 0664
+          secretName: {{ .Values.server.pwdSecretName }}        
+      - name: {{ include "wa.fullName" . }}-server-plugins-volume
+        configMap:
+          name: {{ .Values.global.configPlugins | default $pluginsConfiName }} 
+          optional: true
+          items:
+          - key: plugins.properties
+            path: plugins.properties
+      - name: {{ include "wa.fullName" . }}-server-scripts-volume
+        configMap:
+          name: {{ include "wa.fullName" . }}-server-scripts
+          defaultMode: 0777
+          optional: true
+{{- if .Values.server.libConfigName }}          
+      - name: config-liberty-volume
+        configMap:
+          name: {{ default $configName .Values.server.libConfigName }}     
+{{- end }}
+{{- if ne (len .Values.persistence.extraVolumes) 0 }}
+{{ toYaml .Values.persistence.extraVolumes | indent 6 }}
+{{- end }}                     
+{{- if .Values.persistence.enabled }}                 
+  volumeClaimTemplates:
+  - metadata:
+      name: {{ $persistentVolumeClaimName }}
+      labels: 
+{{ include "wa.server.labels" . | indent 8 }}      
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: {{ .Values.persistence.dataPVC.size | quote }}
+      {{- if .Values.persistence.useDynamicProvisioning }}
+      # if present, use the storageClassName from the values.yaml, else use the
+      # default storageClass setup by kube Administrator
+      # setting storageClassName to nil means use the default storage class
+      storageClassName: {{ default nil .Values.persistence.dataPVC.storageClassName | quote }}
+      {{- else }}
+      # bind to an existing pv.
+      # setting storageClassName to "" disables dynamic provisioning 
+      storageClassName: ""
+        {{- if .Values.persistence.dataPVC.selector.label }}
+      # use selectors in the binding process
+      selector:
+        matchLabels:
+          {{ .Values.persistence.dataPVC.selector.label }}: {{ .Values.persistence.dataPVC.selector.value }}
+        {{- end }}      
+      {{- end }}
+{{- end }}

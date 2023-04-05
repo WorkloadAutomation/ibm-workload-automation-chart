@@ -1,0 +1,7 @@
+# Add override for references which is providing guidance on what NOT to do
+ignoreMessages:
+  # We use virtual hostnames to address console and server, so there is no actual conflict
+  - '\[WARNING\] .* found duplicate launch link name: .*'
+  - '\[WARNING\] .* unexpected duplicate launch link names: .*'
+  # Error reported by Lint v1.2.6 but not by Lint v1.3.2
+  - '\[ERROR\] .* missing required metadata labels: found mismatched labels.*'
