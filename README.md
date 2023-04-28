@@ -104,7 +104,7 @@ Before you begin the deployment process, ensure your environment meets the follo
 - Grafana and Prometheus for monitoring dashboard
 - Jetstack cert-manager
 - Ingress controller: to manage the ingress service, ensure an ingress controller is correctly configured. For example, to configure an NGINX ingress controller, ensure the following option is set if NGINX is installed using a Helm chart: `"controller.extraArgs.enable-ssl-passthrough"`. Refer to the [NGINX Ingress Controller documentation](https://kubernetes.github.io/ingress-nginx/) for more details.
-- Kubernetes version: >=1.15 (no specific APIs need to be enabled)
+- Kubernetes version: >=1.24 (no specific APIs need to be enabled)
 - `kubectl` command-line tool to control Kubernetes clusters 
 - API key for accessing IBM Entitled Registry: `cp.icr.io`
 
