@@ -11,8 +11,9 @@ global:
   license: notaccepted
   serviceAccountName: wauser
   aidaEngineLogLevel: "INFO"
-  redisPwd: "default"
+  redisPwdSecretName: "redis-pwd-secret"
   defaultShardCount: 1
+  defaultReplicaCount: 0
 replicaCount: 1
 image:
   repository: aida-exporter
@@ -30,13 +31,12 @@ podSecurityContext:
   {}
   # fsGroup: 2000
 securityContext:
-  {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-  # runAsUser: 1000
+  privileged: false
+  readOnlyRootFilesystem: false
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
 service:
   type: ClusterIP
   port: 5000

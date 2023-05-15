@@ -64,7 +64,7 @@ AIDA helm chart is composed of the following sub-charts, one for each service:
 -   ``aida-orchestrator`` - Orchestrator service    
 -   ``aida-predictor`` - Predictor service    
 -   ``aida-redis`` - Internal event manager
--  `` aida-ui`` - AIDA UI
+-   ``aida-ui`` - AIDA UI
     
 
 Each sub-chart defines the following Kubernetes resources:
@@ -130,23 +130,21 @@ from `LoadBalancer` to `Routes`
 
 ##  Accessing the container images
 
-You can access AIDA subcharts and container images from the Entitled Registry. See [Creating the Secret](#creating-the-secret) for more information about accessing the registry. The images are as follows:
+You can access AIDA subcharts and container images from the Entitled Registry (online installation). See [Creating the Secret](#creating-the-secret) for more information about accessing the registry. The images are as follows:
 
- - ``cp.icr.io/cp/aida-ad:10.1.0.2`` 
- - ``cp.icr.io/cp/aida-exporter:10.1.0.2``
- - ``cp.icr.io/cp/aida-email:10.1.0.2``
- - ``cp.icr.io/cp/aida-nginx:10.1.0.2``
- - ``cp.icr.io/cp/aida-orchestrator:10.1.0.2``
- - ``cp.icr.io/cp/aida-predictor:10.1.0.2``
- - ``cp.icr.io/cp/aida-redis:10.1.0.2``
- - ``cp.icr.io/cp/aida-ui:10.1.0.2``
- 
- 
+ - ``cp.icr.io/cp/aida-ad:10.1.0.3`` 
+ - ``cp.icr.io/cp/aida-exporter:10.1.0.3``
+ - ``cp.icr.io/cp/aida-email:10.1.0.3``
+ - ``cp.icr.io/cp/aida-nginx:10.1.0.3``
+ - ``cp.icr.io/cp/aida-orchestrator:10.1.0.3``
+ - ``cp.icr.io/cp/aida-predictor:10.1.0.3``
+ - ``cp.icr.io/cp/aida-redis:10.1.0.3``
+ - ``cp.icr.io/cp/aida-ui:10.1.0.3``
 
 ##  Prerequisites
 AIDA requires:
 
- -  IBM Workload Automation V10.1 exposed metrics. For information about IBM Workload Automation exposed metrics, see "Exposing metrics to monitor your workload" in the [IBM Workload Automation documentation](https://www.ibm.com/docs/en/workload-automation/10.1.0) User's Guide.  
+ -  IBM Workload Automation V10.1 or above exposed metrics. For information about IBM Workload Automation exposed metrics, see "Exposing metrics to monitor your workload" in the [IBM Workload Automation documentation](https://www.ibm.com/docs/en/workload-automation/10.1.0) User's Guide.  
  -  API key for accessing the Entitled Registry: cp.icr.io
  -  External container image for OpenSearch 2.3.0 (an Elasticsearch based technology)
  -  Supported browsers are: 
@@ -154,7 +152,7 @@ AIDA requires:
     - Mozilla Firefox 61.0.1 or higher 
     - Microsoft Edge 79 or higher
 
-AIDA prerequisites are inherited by IBM Workload Automation V10.1. 
+AIDA prerequisites are inherited by IBM Workload Automation. 
 
 ##  Resources Required
 

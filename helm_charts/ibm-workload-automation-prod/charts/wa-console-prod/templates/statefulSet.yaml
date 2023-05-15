@@ -187,7 +187,11 @@ spec:
         - name: DB_USER
           value: {{ .Values.console.db.user | quote }} 
         - name: DB_ADMIN_USER
-          value: {{ .Values.console.db.adminUser | quote }}             
+          value: {{ .Values.console.db.adminUser | quote }}
+        {{- if eq (.Values.console.db.type | upper) "ORACLE" }} 
+        - name: DB_SKIP_CHECK
+          value: {{ .Values.console.db.skipCheck | quote }}
+        {{- end}}           
         {{- if .Values.console.db.tsName }}
         - name: DB_TS_NAME
           value: {{ .Values.console.db.tsName | quote }}
@@ -219,7 +223,7 @@ spec:
         {{- if .Values.console.tz }}
         - name: TZ
           value: {{ .Values.console.tz | quote }}
-        {{- end }} 
+        {{- end }}
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         securityContext:

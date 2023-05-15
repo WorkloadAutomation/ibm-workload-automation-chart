@@ -64,6 +64,12 @@ spec:
               value: {{ .Values.global.defaultShardCount | quote }}
             - name: HTTP_AUTH_USERNAME
               value: {{ .Values.httpAuthUsername | quote }}
+            - name: MAXIMUM_DAYS_OF_OLDER_DATA
+              value: {{ .Values.maximumDaysOfOlderData | quote }}
+            - name: MAXIMUM_DAYS_OF_OLDER_PREDICTIONS
+              value: {{ .Values.maximumDaysOfOlderPredictions | quote }}
+            - name: RESOLVE_ALERTS_AFTER_DAYS
+              value: {{ .Values.resolveAlertsAfterDays | quote }}
             - name: HTTP_AUTH_PASSWORD
               valueFrom:
                 secretKeyRef:

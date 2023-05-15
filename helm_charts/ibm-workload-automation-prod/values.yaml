@@ -13,7 +13,7 @@ global:
   defaultShardCount: 1
   enablePrometheus: true
   customPluginImageName: 
-  pluginImageName: cp.icr.io/cp/ibm-workload-automation-plugins:10.1.0.01.20221130
+  pluginImageName: cp.icr.io/cp/ibm-workload-automation-plugins:10.1.0.02.20230301
   configPlugins:
   customLabels:
     - name: "environment"
@@ -69,7 +69,7 @@ waagent:
   image:
     pullPolicy: Always
     repository: cp.icr.io/cp/ibm-workload-automation-agent-dynamic
-    tag: 10.1.0.01.20221130
+    tag: 10.1.0.02.20230301
   persistence:
     dataPVC:
       name: data
@@ -138,6 +138,7 @@ waconsole:
       type: DB2
       usepartitioning: true
       user: db2inst1
+      skipCheck: false
     routes:
       enabled: true
     ingress:
@@ -183,7 +184,7 @@ waconsole:
   image:
     pullPolicy: Always
     repository: cp.icr.io/cp/ibm-workload-automation-console
-    tag: 10.1.0.01.20221130
+    tag: 10.1.0.02.20230301
   persistence:
     dataPVC:
       name: data
@@ -233,7 +234,7 @@ waserver:
   image:
     pullPolicy: Always
     repository: cp.icr.io/cp/ibm-workload-automation-server
-    tag: 10.1.0.01.20221130
+    tag: 10.1.0.02.20230301
   persistence:
     dataPVC:
       name: data
@@ -318,6 +319,7 @@ waserver:
       type: DB2
       usepartitioning: true
       user: db2inst1
+      skipCheck: false
     routes:
       enabled: true
       hostname:
@@ -371,7 +373,7 @@ wafileproxy:
   replicaCount: 1
   image:
     repository: cp.icr.io/cp/ibm-workload-automation-fileproxy
-    tag: 10.1.0.01.20221130
+    tag: 10.1.0.02.20230301
     pullPolicy: Always
   nameOverride: ""
   fullnameOverride: ""
@@ -439,7 +441,7 @@ waaida:
   aida-ad:
     image:
       repository: cp.icr.io/cp/ibm-aida-ad
-      tag: 10.1.0.00.20220304
+      tag: 10.1.0.02.20230301
       pullPolicy: Always
     serviceAccount:
       create: false
@@ -457,13 +459,14 @@ waaida:
       minReplicas: 1
       maxReplicas: 10
       targetMemoryUtilizationPercentage: 80
+      webConcurrency: 6
+      pastMillis: 86400000
+      toleranceMillis: 240000
+      minimumSeverityForMail: "high"
   aida-es:
-    esDiscoveryType: "single-node"
-    #discoverySeedHosts: hostname,[::1]
-    #clusterInitialMasterNode: node-1
     image:
-      repository: amazon/opendistro-for-elasticsearch
-      tag: "1.13.3"
+      repository: "cp.icr.io/cp/ibm-opensearchproject-opensearch"
+      tag: "2.3.0"
       pullPolicy: Always
     serviceAccount:
       create: false
@@ -495,14 +498,16 @@ waaida:
         cpu: 0.5
         memory: 1Gi
   aida-exporter:
-    # specifiy the WA Server hostname (internal or external service/route)
     waHostName: ""
     waPort: 31116
     httpAuthUsername: "wauser"
     httpAuthPasswordSecretName: wa-pwd-secret
+    maximumDaysOfOlderPredictions: 14
+    maximumDaysOfOlderData: 400
+    resolveAlertsAfterDays: 1
     image:
       repository: cp.icr.io/cp/ibm-aida-exporter
-      tag: 10.1.0.00.20220304
+      tag: 10.1.0.02.20230301
       pullPolicy: Always
     serviceAccount:
       create: false
@@ -519,11 +524,11 @@ waaida:
     smtpServer: "smtp.server.com"
     smtpPort: "587"
     senderEmailId: "smtp@server.com"
-    senderEmailPwd: "smtpPassword"
+    senderEmailPwdSecretName: "email-pwd-secret"
     recipientMailIds: "mail1@mail.com,mail2@mail.com"
     image:
       repository: cp.icr.io/cp/ibm-aida-email
-      tag: 10.1.0.00.20220304
+      tag: 10.1.0.02.20230301
       pullPolicy: Always
     serviceAccount:
       create: false
@@ -540,7 +545,7 @@ waaida:
     waConsoleCertSecretName: waconsole-cert-secret
     image:
       repository: cp.icr.io/cp/ibm-aida-nginx
-      tag: 10.1.0.00.20220304
+      tag: 10.1.0.02.20230301
       pullPolicy: Always
     serviceAccount:
       create: false
@@ -569,9 +574,11 @@ waaida:
         cpu: 200m
         memory: 200Mi
   aida-orchestrator:
+    prophetOrchestrator: "{\"schedule\": 1440}"
+    daysOfPrediction: 1
     image:
       repository: cp.icr.io/cp/ibm-aida-orchestrator
-      tag: 10.1.0.00.20220304
+      tag: 10.1.0.02.20230301
       pullPolicy: Always
     serviceAccount:
       create: false
@@ -587,7 +594,7 @@ waaida:
   aida-predictor:
     image:
       repository: cp.icr.io/cp/ibm-aida-predictor
-      tag: 10.1.0.00.20220304
+      tag: 10.1.0.02.20230301
       pullPolicy: Always
     serviceAccount:
       create: false
@@ -605,10 +612,11 @@ waaida:
       minReplicas: 1
       maxReplicas: 10
       targetMemoryUtilizationPercentage: 80
+      webConcurrency: 6
   aida-redis:
     image:
       repository: cp.icr.io/cp/ibm-aida-redis
-      tag: 10.1.0.00.20220304
+      tag: 10.1.0.02.20230301
       pullPolicy: Always
     serviceAccount:
       create: false
@@ -625,7 +633,7 @@ waaida:
     uiLogLevel: "ERROR:*,INFO:*,-TRACE:*"
     image:
       repository: cp.icr.io/cp/ibm-aida-ui
-      tag: 10.1.0.00.20220304
+      tag: 10.1.0.02.20230301
       pullPolicy: Always
     serviceAccount:
       create: false
