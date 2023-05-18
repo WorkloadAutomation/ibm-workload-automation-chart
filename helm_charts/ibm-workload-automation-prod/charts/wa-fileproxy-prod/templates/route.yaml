@@ -25,7 +25,7 @@ spec:
   port:
     targetPort: https
   tls:
-    termination: passthrough
+    termination: {{ .Values.global.routeType | default "passthrough" }}
     insecureEdgeTerminationPolicy: None
   wildcardPolicy: None
 {{- end }}

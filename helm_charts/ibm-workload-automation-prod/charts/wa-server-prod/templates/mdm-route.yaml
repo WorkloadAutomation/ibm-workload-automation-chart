@@ -24,7 +24,7 @@ spec:
   port:
     targetPort: server-https
   tls:
-    termination: passthrough
+    termination: {{ .Values.global.routeType | default "passthrough" }}
     insecureEdgeTerminationPolicy: None
   wildcardPolicy: None
 status:
@@ -57,7 +57,7 @@ spec:
   port:
     targetPort: server-ssl-eif
   tls:
-    termination: passthrough
+    termination: {{ .Values.global.routeType | default "passthrough" }}
     insecureEdgeTerminationPolicy: None
   wildcardPolicy: None
 status:

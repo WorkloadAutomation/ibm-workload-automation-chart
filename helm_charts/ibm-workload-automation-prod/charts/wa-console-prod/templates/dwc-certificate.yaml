@@ -5,6 +5,7 @@
 # * Trademark of HCL Technologies Limited
 ####################################################################
 {{- if not .Values.console.useCustomizedCert }}
+{{ $dwcServiceName := include "waDwc.ServiceName" . }}
 {{- include "wa.init" (list . "waconsole") }}
 {{ $statefulSetName := include "wa.fullName" . }}
 {{- if .Capabilities.APIVersions.Has "cert-manager.io/v1"}}
@@ -50,6 +51,7 @@ spec:
     - client auth
   dnsNames:
   - waconsole
+  - {{ $dwcServiceName }}
 {{- if or ( .Capabilities.APIVersions.Has "cert-manager.io/v1alpha2") ( .Capabilities.APIVersions.Has "cert-manager.io/v1")  }}
   privateKey:
     rotationPolicy: Always

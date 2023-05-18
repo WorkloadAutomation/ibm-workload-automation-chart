@@ -13,11 +13,12 @@ global:
   defaultShardCount: 1
   enablePrometheus: true
   customPluginImageName: 
-  pluginImageName: cp.icr.io/cp/ibm-workload-automation-plugins:10.1.0.02.20230301
+  pluginImageName: cp.icr.io/cp/ibm-workload-automation-plugins:10.1.0.03.20230511-amd64
   configPlugins:
   customLabels:
     - name: "environment"
       value: "prod"
+  routeType: passthrough # reencrypt
 waagent:
   enableAgent: true
   licenseType: "PVU"
@@ -69,7 +70,7 @@ waagent:
   image:
     pullPolicy: Always
     repository: cp.icr.io/cp/ibm-workload-automation-agent-dynamic
-    tag: 10.1.0.02.20230301
+    tag: 10.1.0.03.20230511-amd64
   persistence:
     dataPVC:
       name: data
@@ -184,7 +185,7 @@ waconsole:
   image:
     pullPolicy: Always
     repository: cp.icr.io/cp/ibm-workload-automation-console
-    tag: 10.1.0.02.20230301
+    tag: 10.1.0.03.20230511-amd64
   persistence:
     dataPVC:
       name: data
@@ -234,7 +235,7 @@ waserver:
   image:
     pullPolicy: Always
     repository: cp.icr.io/cp/ibm-workload-automation-server
-    tag: 10.1.0.02.20230301
+    tag: 10.1.0.03.20230511-amd64
   persistence:
     dataPVC:
       name: data
@@ -373,7 +374,7 @@ wafileproxy:
   replicaCount: 1
   image:
     repository: cp.icr.io/cp/ibm-workload-automation-fileproxy
-    tag: 10.1.0.02.20230301
+    tag: 10.1.0.03.20230511-amd64
     pullPolicy: Always
   nameOverride: ""
   fullnameOverride: ""

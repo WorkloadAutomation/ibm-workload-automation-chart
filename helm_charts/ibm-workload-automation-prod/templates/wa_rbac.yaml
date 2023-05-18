@@ -25,6 +25,12 @@ rules:
   - patch
   - update 
 - apiGroups:
+  - '*'
+  resources:
+  - certificates
+  verbs:
+  - get
+- apiGroups:
   - ""
   - extensions
   - apps

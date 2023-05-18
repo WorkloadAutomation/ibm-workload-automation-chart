@@ -1,6 +1,6 @@
 apiVersion: v2
-version: 1.6.4
-appVersion: 10.1.0.02
+version: 1.6.5
+appVersion: 10.1.0.03
 description: Helm chart for configuring IBM Workload Automation.
 keywords:
 - Commercial
@@ -16,19 +16,19 @@ maintainers:
 name: workload-automation-prod
 dependencies:
   - name: wa-server-prod
-    version: 1.6.4
+    version: 1.6.5
     alias: waserver
     condition: waserver.enableServer
   - name: wa-console-prod
-    version: 1.6.4
+    version: 1.6.5
     alias: waconsole
     condition: waconsole.enableConsole
   - name: wa-dyn-agent-prod
-    version: 1.6.4
+    version: 1.6.5
     alias: waagent
     condition: waagent.enableAgent
   - name: wa-fileproxy-prod
-    version: 1.6.4
+    version: 1.6.5
     alias: wafileproxy
     condition: wafileproxy.enableFileProxy
   - name: wa-aida-prod

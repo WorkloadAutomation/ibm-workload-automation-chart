@@ -309,6 +309,14 @@ spec:
           value: {{ .Values.server.licenseServerId | quote }}
         - name: RELEASE_NAME
           value: {{ .Release.Name | quote }}
+        {{- if not .Values.server.useCustomizedCert }} 
+        - name: SSL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-ssl-secret
+              key: SSL_PASSWORD
+              optional: true
+        {{- end }}
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         securityContext:

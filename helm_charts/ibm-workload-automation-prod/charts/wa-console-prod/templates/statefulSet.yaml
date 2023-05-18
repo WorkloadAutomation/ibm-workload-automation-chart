@@ -148,6 +148,7 @@ spec:
           value: {{ .Values.global.license | quote }}
         - name: LANG
           value: {{ default "en" .Values.global.language }}
+{{ include "common.dwc.hidden.env" . | indent 8 }}
         - name: WA_DEBUG
           value: {{ .Values.console.containerDebug | quote }}
         - name: WA_ENABLE_SSO
@@ -224,6 +225,16 @@ spec:
         - name: TZ
           value: {{ .Values.console.tz | quote }}
         {{- end }}
+        {{- if not .Values.console.useCustomizedCert }} 
+        - name: SSL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-ssl-secret
+              key: SSL_PASSWORD
+              optional: true
+        - name: SSL_DWC_CERTIFICATE
+          value: {{ $statefulSetName }}
+        {{- end }}                                                                        
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         securityContext:
