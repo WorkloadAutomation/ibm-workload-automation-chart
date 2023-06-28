@@ -3,7 +3,7 @@ entries:
   workload-automation-prod:
   - apiVersion: v2
     appVersion: 10.1.0.03
-    created: "2023-05-24T17:54:15.7096001+02:00"
+    created: "2023-06-28T14:50:48.0717221+02:00"
     dependencies:
     - alias: waserver
       condition: waserver.enableServer
@@ -31,7 +31,7 @@ entries:
       repository: ""
       version: 1.0.2
     description: Helm chart for configuring IBM Workload Automation.
-    digest: d5193a1ce866038b35d5203291883afd3da4b4775e01e37363e331b285e4dc7b
+    digest: a579c6493dbb12216faa8b5c177e965c0305d69c62b307d06484720fc6041342
     keywords:
     - Commercial
     - amd64
@@ -49,7 +49,7 @@ entries:
     version: 1.6.5
   - apiVersion: v2
     appVersion: 10.1.0.02
-    created: "2023-05-24T17:54:15.6995997+02:00"
+    created: "2023-06-28T14:50:48.0597076+02:00"
     dependencies:
     - alias: waserver
       condition: waserver.enableServer
@@ -95,7 +95,7 @@ entries:
     version: 1.6.4
   - apiVersion: v2
     appVersion: 10.1.0.01
-    created: "2023-05-24T17:54:15.6866004+02:00"
+    created: "2023-06-28T14:50:48.0477076+02:00"
     dependencies:
     - alias: waserver
       condition: waserver.enableServer
@@ -141,7 +141,7 @@ entries:
     version: 1.6.3
   - apiVersion: v2
     appVersion: 10.1.0.00
-    created: "2023-05-24T17:54:15.6745999+02:00"
+    created: "2023-06-28T14:50:48.0366719+02:00"
     dependencies:
     - alias: waserver
       condition: waserver.enableServer
@@ -187,7 +187,7 @@ entries:
     version: 1.6.2
   - apiVersion: v2
     appVersion: 10.1.0.00
-    created: "2023-05-24T17:54:15.662576+02:00"
+    created: "2023-06-28T14:50:48.0236759+02:00"
     dependencies:
     - alias: waserver
       condition: waserver.enableServer
@@ -233,7 +233,7 @@ entries:
     version: 1.6.1
   - apiVersion: v2
     appVersion: 10.1.0.00
-    created: "2023-05-24T17:54:15.6507989+02:00"
+    created: "2023-06-28T14:50:48.0117085+02:00"
     dependencies:
     - alias: waserver
       condition: waserver.enableServer
@@ -279,7 +279,7 @@ entries:
     version: 1.6.0
   - apiVersion: v2
     appVersion: 9.5.0.05
-    created: "2023-05-24T17:54:15.638763+02:00"
+    created: "2023-06-28T14:50:47.9986622+02:00"
     dependencies:
     - alias: waserver
       condition: waserver.enableServer
@@ -315,7 +315,7 @@ entries:
     version: 1.5.14
   - apiVersion: v2
     appVersion: 9.5.0.4
-    created: "2023-05-24T17:54:15.6327974+02:00"
+    created: "2023-06-28T14:50:47.9926641+02:00"
     dependencies:
     - alias: waserver
       condition: waserver.enableServer
@@ -351,7 +351,7 @@ entries:
     version: 1.5.12
   - apiVersion: v2
     appVersion: 9.5.0.03
-    created: "2023-05-24T17:54:15.6257872+02:00"
+    created: "2023-06-28T14:50:47.9856617+02:00"
     dependencies:
     - alias: waserver
       condition: waserver.enableServer
@@ -387,7 +387,7 @@ entries:
     version: 1.4.3
   - apiVersion: v2
     appVersion: 9.5.0.03
-    created: "2023-05-24T17:54:15.6097906+02:00"
+    created: "2023-06-28T14:50:47.9681394+02:00"
     dependencies:
     - alias: waserver
       condition: waserver.enableServer
@@ -423,7 +423,7 @@ entries:
     version: 1.4.2
   - apiVersion: v2
     appVersion: 9.5.0.03
-    created: "2023-05-24T17:54:15.5947878+02:00"
+    created: "2023-06-28T14:50:47.9526972+02:00"
     dependencies:
     - alias: waserver
       condition: waserver.enableServer
@@ -459,7 +459,7 @@ entries:
     version: 1.4.1
   - apiVersion: v2
     appVersion: 9.5.0.02
-    created: "2023-05-24T17:54:15.5754098+02:00"
+    created: "2023-06-28T14:50:47.9327368+02:00"
     dependencies:
     - alias: waserver
       condition: waserver.enableServer
@@ -495,7 +495,7 @@ entries:
     version: 1.4.0
   - apiVersion: v2
     appVersion: 9.5.0.02
-    created: "2023-05-24T17:54:15.5575161+02:00"
+    created: "2023-06-28T14:50:47.914732+02:00"
     dependencies:
     - alias: waserver
       condition: waserver.enableServer
@@ -529,4 +529,4 @@ entries:
     urls:
     - workload-automation-prod-1.1.0.tgz
     version: 1.1.0
-generated: "2023-05-24T17:54:15.5369165+02:00"
+generated: "2023-06-28T14:50:47.8936983+02:00"
