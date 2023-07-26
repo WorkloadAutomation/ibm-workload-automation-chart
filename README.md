@@ -321,6 +321,33 @@ where:
 	  
 where **<my_path>** is the location path of the mysecret.yaml file.	
 
+### Enabling installation of dynamic agents on kubernetes with a remote gateway
+
+To install a dynamic agent with remote gateway you must have a dynamic agent already installed with a local gateway. The newly added parameters in version 10.2 facilitates you to deploy a new dynamic agent and enables the communication directly with another agent gateway.
+
+To enable the parameters for Kubernetes:
+
+Add the following parameters under the environment section of the wa-agent kubernetes service in the **docker-compose.yaml** file:** 
+
+ |  Parameter          |Description              |
+| -------------------- | -------------------- |
+| agent.dynamic.gateway.hostname          | The IP or the hostname of the agent deployed with local gateway. |
+| agent.dynamic.gateway.port              | The import of the agent deployed with local gateway. Default import value 31114      |
+| agent.dynamic.gateway.jmFullyQualifiedHostname     |   The hostname of the new dynamic agent to connect to the remote gateway.                   |
+
+To deploy a new agent in an existing environment with wa-server, wa-console, and wa-agent, specify the parameters as follows:
+
+ |  Parameter          | Replace with               |
+| -------------------- | -------------------- |
+| agent.dynamic.gateway.hostname          | wa-agent (hostname of the agent with local gateway) |
+| agent.dynamic.gateway.portT              | 31114 (default port of the agent with local gateway)     |
+| agent.dynamic.gateway.jmFullyQualifiedHostname     |   wa-agent_1 (hostname of the agent where we need to deploy and connect to the remote gateway of wa_agent)                 |
+
+NOTE: 
+To enable the communication and to update the status of the job, ensure that the parameter JobManagerGWURIs,JobManagerGWURIs, which is found in the JobManagerGW.ini file is correctly populated with the name of the service (for containers) of the agent with the local gateway (wa-agent in the above example) or the hostname of the VM where the agent has been installed. 
+For containers, ensure to replace the JobManagerGWURIs value from
+JobManagerGWURIs=https://localhost:31114/ita/JobManagerGW/JobManagerRESTWeb/JobScheduler/resource to JobManagerGWURIs=https://<wa-agent-service-name>:31114/ita/JobManagerGW/JobManagerRESTWeb/JobScheduler/resource
+
 ### Configuring the Microsoft Azure SQL server database ###
 
 ![Microsoft Azure](images/tagmsa.png "Microsoft Azure") 
