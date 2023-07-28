@@ -137,7 +137,7 @@ spec:
             secretKeyRef:
               name: {{ include "wa.fullName" . }}-secret
               key: WA_API_KEY
-              optional: true      
+              optional: true
         {{- if .Values.agent.tz }}
         - name: TZ
           value: {{ .Values.agent.tz | quote }}
@@ -164,14 +164,26 @@ spec:
         {{- if .Values.agent.enableJWT }}
         - name: WA_JWT
           value: {{ .Values.agent.enableJWT | quote }}
+        {{- end }}
+        {{- if .Values.agent.dynamic.gateway.hostname }}  
+        - name: GW_HOSTNAME
+          value: {{ .Values.agent.dynamic.gateway.hostname | quote }}
         {{- end }} 
-        {{- if not .Values.agent.useCustomizedCert }} 
+        {{- if .Values.agent.dynamic.gateway.port }}  
+        - name: GW_PORT
+          value: {{ .Values.agent.dynamic.gateway.port | quote }}       
+        {{- end }}
+        {{- if .Values.agent.dynamic.gateway.jmFullyQualifiedHostname }}  
+        - name: JM_FULLY_QUALIFIED_HOSTNAME
+          value: {{ .Values.agent.dynamic.gateway.jmFullyQualifiedHostname | quote }}
+        {{- end }} 
+        {{- if not .Values.agent.useCustomizedCert }}
         - name: SSL_PASSWORD
           valueFrom:
             secretKeyRef:
               name: {{ .Release.Name }}-ssl-secret
               key: SSL_PASSWORD
-        {{- end }}        
+        {{- end }}
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         securityContext:

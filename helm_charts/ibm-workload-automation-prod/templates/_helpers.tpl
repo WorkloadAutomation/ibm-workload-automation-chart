@@ -26,3 +26,9 @@ release: {{ .Release.Name | quote }}
 {{ .name }}: {{ .value | quote }} 
 {{- end}}
 {{- end -}}
+{{/*
+Create releaseName helper.
+*/}}
+{{- define "releaseName" -}}
+{{- printf "%s" .Release.Name -}}
+{{- end -}}

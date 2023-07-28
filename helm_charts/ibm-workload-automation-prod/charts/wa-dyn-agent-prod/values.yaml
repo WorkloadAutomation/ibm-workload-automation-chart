@@ -15,7 +15,7 @@ global:
 replicaCount: 1
 image:
   repository: cp.icr.io/cp/ibm-workload-automation-agent-dynamic
-  tag: 10.1.0.03.20230511-amd64
+  tag: 10.2.0.00.20230728
   pullPolicy: Always
 licenseType: "PVU"
 runAsUser: 999
@@ -26,6 +26,10 @@ agent:
   enableJWT: true
   tz:
   dynamic:
+    gateway:
+      hostname:
+      port:
+      jmFullyQualifiedHostname:
     server:
       mdmhostname:
       # Optional variable to specify the hostname of the backup master to use. If no backup master is used, leave it empty

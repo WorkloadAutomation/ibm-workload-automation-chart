@@ -1,6 +1,6 @@
 # *******************************************************************************
 # Licensed Materials - Property of HCL
-# (c) Copyright HCL Technologies Ltd. 2022. All Rights Reserved.
+# (c) Copyright HCL Technologies Ltd. 2023. All Rights Reserved.
 #
 # Note to U.S. Government Users Restricted Rights:
 # Use, duplication or disclosure restricted by GSA ADP Schedule
@@ -15,7 +15,7 @@ global:
 aida-ad:
   image:
     repository: cp.icr.io/cp/ibm-aida-ad
-    tag: 10.1.0.02.20230301
+    tag: 10.2.0.00.20230728
     pullPolicy: Always
   serviceAccount:
     create: false
@@ -33,10 +33,11 @@ aida-ad:
     minReplicas: 1
     maxReplicas: 10
     targetMemoryUtilizationPercentage: 80
-    webConcurrency: 6
+    webConcurrency: 2
     pastMillis: 86400000
     toleranceMillis: 240000
     minimumSeverityForMail: "high"
+    host_ip: ""
 aida-es:
   image:
     repository: "opensearchproject/opensearch"
@@ -81,7 +82,7 @@ aida-exporter:
   resolveAlertsAfterDays: 1
   image:
     repository: cp.icr.io/cp/ibm-aida-exporter
-    tag: 10.1.0.02.20230301
+    tag: 10.2.0.00.20230728
     pullPolicy: Always
   serviceAccount:
     create: false
@@ -102,7 +103,7 @@ aida-email:
   recipientMailIds: "mail1@mail.com,mail2@mail.com"
   image:
     repository: cp.icr.io/cp/ibm-aida-email
-    tag: 10.1.0.02.20230301
+    tag: 10.2.0.00.20230728
     pullPolicy: Always
   serviceAccount:
     create: false
@@ -119,7 +120,7 @@ aida-nginx:
   waConsoleCertSecretName: waconsole-cert-secret
   image:
     repository: cp.icr.io/cp/ibm-aida-nginx
-    tag: 10.1.0.02.20230301
+    tag: 10.2.0.00.20230728
     pullPolicy: Always
   serviceAccount:
     create: false
@@ -148,11 +149,11 @@ aida-nginx:
       cpu: 200m
       memory: 200Mi
 aida-orchestrator:
-  prophetOrchestrator: "{\"schedule\": 1440}"
+  prophetOrchestrator: "{\"schedule\": 1440,\"schedule_alert\": 15}"
   daysOfPrediction: 1
   image:
     repository: cp.icr.io/cp/ibm-aida-orchestrator
-    tag: 10.1.0.02.20230301
+    tag: 10.2.0.00.20230728
     pullPolicy: Always
   serviceAccount:
     create: false
@@ -168,7 +169,7 @@ aida-orchestrator:
 aida-predictor:
   image:
     repository: cp.icr.io/cp/ibm-aida-predictor
-    tag: 10.1.0.02.20230301
+    tag: 10.2.0.00.20230728
     pullPolicy: Always
   serviceAccount:
     create: false
@@ -187,10 +188,11 @@ aida-predictor:
     maxReplicas: 10
     targetMemoryUtilizationPercentage: 80
     webConcurrency: 6
+    model: "neural"
 aida-redis:
   image:
     repository: cp.icr.io/cp/ibm-aida-redis
-    tag: 10.1.0.02.20230301
+    tag: 10.2.0.00.20230728
     pullPolicy: Always
   serviceAccount:
     create: false
@@ -207,7 +209,7 @@ aida-ui:
   uiLogLevel: "ERROR:*,INFO:*,-TRACE:*"
   image:
     repository: cp.icr.io/cp/ibm-aida-ui
-    tag: 10.1.0.02.20230301
+    tag: 10.2.0.00.20230728
     pullPolicy: Always
   serviceAccount:
     create: false

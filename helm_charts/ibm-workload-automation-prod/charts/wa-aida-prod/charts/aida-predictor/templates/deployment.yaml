@@ -1,6 +1,6 @@
 # *******************************************************************************
 # Licensed Materials - Property of HCL
-# (c) Copyright HCL Technologies Ltd. 2022. All Rights Reserved.
+# (c) Copyright HCL Technologies Ltd. 2023. All Rights Reserved.
 # 
 # Note to U.S. Government Users Restricted Rights:
 # Use, duplication or disclosure restricted by GSA ADP Schedule
@@ -63,6 +63,8 @@ spec:
                 value: {{ .Values.webConcurrency | quote }} 
               - name: DEFAULT_REPLICA_COUNT
                 value: {{ .Values.global.defaultReplicaCount | quote }}
+              - name: MODEL
+                value: {{ .Values.model | quote }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}

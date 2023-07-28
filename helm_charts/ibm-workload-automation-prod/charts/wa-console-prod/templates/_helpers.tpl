@@ -18,6 +18,10 @@ Create common master service name.
 {{- $name := default .Chart.Name .Release.Name -}}
 {{- printf "%s-%s-%s" $name "waconsole" "secret" -}}
 {{- end -}}
+{{- define "waconsole.packagesUrl" -}}
+{{- $name := default .Release.Name -}}
+{{- printf "%s%s-%s" "http://" $name "nginx-service:8080/" -}}
+{{- end -}}
 {{/*
 Create common master username.
 */}}

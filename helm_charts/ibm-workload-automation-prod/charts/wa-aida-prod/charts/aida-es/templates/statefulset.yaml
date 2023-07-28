@@ -1,6 +1,6 @@
 # *******************************************************************************
 # Licensed Materials - Property of HCL
-# (c) Copyright HCL Technologies Ltd. 2022. All Rights Reserved.
+# (c) Copyright HCL Technologies Ltd. 2023. All Rights Reserved.
 # 
 # Note to U.S. Government Users Restricted Rights:
 # Use, duplication or disclosure restricted by GSA ADP Schedule
@@ -30,13 +30,20 @@ spec:
     spec:
       serviceAccountName: {{ include "aida-es.serviceAccountName" . }}
       securityContext:
-      {{- if not (.Capabilities.APIVersions.Has "security.openshift.io/v1") }} 
-        runAsUser: 1000
-        runAsGroup: 1000
-        fsGroup: 1000
-      {{- end }}
-        supplementalGroups: [1000]
-        runAsNonRoot: true
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      # {{- if .Values.persistence.enabled }}
+      # initContainers:
+      # - name: change-volume-user
+      #   image: registry.access.redhat.com/ubi8/ubi-minimal:8.4
+      #   command:
+      #     - chown
+      #     - -R
+      #     - 1000:1000
+      #     - /var/lib/opensearch/
+      #   volumeMounts:
+      #   - name: {{ include "aida-es.fullname" . }}
+      #     mountPath: /var/lib/opensearch/
+      # {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           securityContext:

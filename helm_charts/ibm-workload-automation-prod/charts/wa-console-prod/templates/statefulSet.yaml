@@ -13,6 +13,7 @@
 {{ $configName := include "waconsole.ConfigName" .}}
 {{ $waUserName := include "wa.console.waUser" .}}
 {{ $pluginsConfiName := (printf "%s-%s" $fullName "console-plugins-config") }}
+{{ $packagesUrl := include "waconsole.packagesUrl" . }}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -189,6 +190,12 @@ spec:
           value: {{ .Values.console.db.user | quote }} 
         - name: DB_ADMIN_USER
           value: {{ .Values.console.db.adminUser | quote }}
+        {{- if eq (.Values.console.db.type | upper) "MONGODB" }}
+        - name: DB_INVALID_HOSTNAME_ALLOWED
+          value:  {{ .Values.console.db.invalidHostnameAllowed | quote }}
+        - name: DB_AUTHDB
+          value:  {{ .Values.console.db.authDb | quote }}
+        {{- end}}
         {{- if eq (.Values.console.db.type | upper) "ORACLE" }} 
         - name: DB_SKIP_CHECK
           value: {{ .Values.console.db.skipCheck | quote }}
@@ -225,16 +232,16 @@ spec:
         - name: TZ
           value: {{ .Values.console.tz | quote }}
         {{- end }}
-        {{- if not .Values.console.useCustomizedCert }} 
+        {{- if .Values.enableNginxServer }}
+        - name: PACKAGES_URL
+          value: {{ $packagesUrl }}packages.json
+        {{- end }}
         - name: SSL_PASSWORD
           valueFrom:
             secretKeyRef:
               name: {{ .Release.Name }}-ssl-secret
               key: SSL_PASSWORD
-              optional: true
-        - name: SSL_DWC_CERTIFICATE
-          value: {{ $statefulSetName }}
-        {{- end }}                                                                        
+              optional: true                                                                      
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         securityContext:

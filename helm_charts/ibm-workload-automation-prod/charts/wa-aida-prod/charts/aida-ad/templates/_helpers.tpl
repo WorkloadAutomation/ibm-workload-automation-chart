@@ -1,7 +1,7 @@
 /*
  * *******************************************************************************
  * Licensed Materials - Property of HCL
- * (c) Copyright HCL Technologies Ltd. 2022. All Rights Reserved.
+ * (c) Copyright HCL Technologies Ltd. 2023. All Rights Reserved.
  * 
  * Note to U.S. Government Users Restricted Rights:
  * Use, duplication or disclosure restricted by GSA ADP Schedule
@@ -61,7 +61,7 @@ Create the name of the service account to use
 {{- if .Values.serviceAccount.create }}
 {{- default (include "aida-ad.fullname" .) .Values.serviceAccount.name }}
 {{- else }}
-{{- default .Values.global.serviceAccountName .Values.serviceAccount.name}}
+{{- default .Values.global.serviceAccountName .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
 {{/*

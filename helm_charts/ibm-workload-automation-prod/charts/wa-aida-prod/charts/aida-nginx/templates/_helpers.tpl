@@ -1,7 +1,7 @@
 /*
  * *******************************************************************************
  * Licensed Materials - Property of HCL
- * (c) Copyright HCL Technologies Ltd. 2022. All Rights Reserved.
+ * (c) Copyright HCL Technologies Ltd. 2023. All Rights Reserved.
  * 
  * Note to U.S. Government Users Restricted Rights:
  * Use, duplication or disclosure restricted by GSA ADP Schedule
@@ -62,6 +62,21 @@ Create the name of the service account to use
 {{- default (include "aida-nginx.fullname" .) .Values.serviceAccount.name }}
 {{- else }}
 {{- default .Values.global.serviceAccountName .Values.serviceAccount.name }}
+{{- end }}
+{{- end }}
+{{/*
+The name of aida-es service
+*/}}
+{{- define "aida-es.fullname" -}}
+{{- if .Values.fullnameOverride }}
+{{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
+{{- else }}
+{{- $name := default "aida-es" .Values.nameOverride }}
+{{- if contains $name .Release.Name }}
+{{- .Release.Name | trunc 63 | trimSuffix "-" }}
+{{- else }}
+{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" }}
+{{- end }}
 {{- end }}
 {{- end }}
 {{/*
