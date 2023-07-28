@@ -1281,17 +1281,18 @@ To configure an on-premises agent to communicate with components in the cloud:
 Access the master (server or pod) and extract the CA root certificate and, to add it to the console trustkeystore, create a secret in the console namespace with the extracted key encoded in base64 as follows: 
 
 
+		
+            apiVersion: v1
 		kind: Secret
-		apiVersion: v1
 		metadata:
 		  name: <yourcert-server-crt>
-		  namespace: <worklaod_automation_namespace>
+		  namespace: <workload_automation_namespace>
 		  labels:
 		    wa-import: 'true'
-		  annotations:
+		type: kubernetes.io/tls
 		data:
 		  tls.crt: <base64_encoded_certificate>
-		type: Opaque
+		  tls.key: ''
 
 ### Defining a z/OS engine in the Z connector from a Dynamic Workload Console deployed on Cloud
 
