@@ -140,8 +140,6 @@ You can access AIDA subcharts and container images from the Entitled Registry (o
  - ``cp.icr.io/cp/aida-predictor:10.1.0.3``
  - ``cp.icr.io/cp/aida-redis:10.1.0.3``
  - ``cp.icr.io/cp/aida-ui:10.1.0.3``
- 
- 
 
 ##  Prerequisites
 AIDA requires:
