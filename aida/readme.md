@@ -33,7 +33,7 @@
 ##  Introduction
 
 
-**AI Data Advisor (AIDA)** is a new component of IBM Workload Automation V10.1, based on Artificial Intelligence and Machine Learning techniques. It enables fast and simplified data-driven decision making for an intelligent workload management. By analyzing workload historical data and metrics gathered by IBM Workload Automation and predicting their future patterns, AIDA identifies anomalies in KPIs trend (such as the jobs in plan by status and the jobs in plan by workstation) and sends immediate alerts to prevent problems and delays. Alerts show up on the Workload Dashboard and can be notified via email.
+**AI Data Advisor (AIDA)** is a new component of IBM Workload Automation since V10.1, based on Artificial Intelligence and Machine Learning techniques. It enables fast and simplified data-driven decision making for an intelligent workload management. By analyzing workload historical data and metrics gathered by IBM Workload Automation and predicting their future patterns, AIDA identifies anomalies in KPIs trend (such as the jobs in plan by status and the jobs in plan by workstation) and sends immediate alerts to prevent problems and delays. Alerts show up on the Workload Dashboard and can be notified via email.
 
 AIDA can be deployed into the following supported third-party cloud provider infrastructures:
 
@@ -41,7 +41,7 @@ AIDA can be deployed into the following supported third-party cloud provider inf
 -   ![Microsoft Azure](images/tagmsa.png "Microsoft Azure")
 -   ![Google GKE](images/taggke.png "Google GKE")
 
-For more information about AIDA, see AIDA User's Guide in the [IBM Workload Automation documentation](https://www.ibm.com/docs/en/workload-automation/10.1.0).
+For more information about AIDA, see AIDA User's Guide in the [IBM Workload Automation documentation](https://www.ibm.com/docs/en/workload-automation/10.2.0).
 
 This readme provides the steps for deploying AIDA, using helm charts and container images. Deploy AIDA after deploying IBM Workload Automation. For details about  IBM Workload Automation deployment, refer to IBM Workload Automation readme file. 
 
@@ -132,19 +132,19 @@ from `LoadBalancer` to `Routes`
 
 You can access AIDA subcharts and container images from the Entitled Registry (online installation). See [Creating the Secret](#creating-the-secret) for more information about accessing the registry. The images are as follows:
 
- - ``cp.icr.io/cp/aida-ad:10.1.0.3`` 
- - ``cp.icr.io/cp/aida-exporter:10.1.0.3``
- - ``cp.icr.io/cp/aida-email:10.1.0.3``
- - ``cp.icr.io/cp/aida-nginx:10.1.0.3``
- - ``cp.icr.io/cp/aida-orchestrator:10.1.0.3``
- - ``cp.icr.io/cp/aida-predictor:10.1.0.3``
- - ``cp.icr.io/cp/aida-redis:10.1.0.3``
- - ``cp.icr.io/cp/aida-ui:10.1.0.3``
+ - ``cp.icr.io/cp/aida-ad:10.2.0.0`` 
+ - ``cp.icr.io/cp/aida-exporter:10.2.0.0``
+ - ``cp.icr.io/cp/aida-email:10.2.0.0``
+ - ``cp.icr.io/cp/aida-nginx:10.2.0.0``
+ - ``cp.icr.io/cp/aida-orchestrator:10.2.0.0``
+ - ``cp.icr.io/cp/aida-predictor:10.2.0.0``
+ - ``cp.icr.io/cp/aida-redis:10.2.0.0``
+ - ``cp.icr.io/cp/aida-ui:10.2.0.0``
 
 ##  Prerequisites
 AIDA requires:
 
- -  IBM Workload Automation V10.1 or above exposed metrics. For information about IBM Workload Automation exposed metrics, see "Exposing metrics to monitor your workload" in the [IBM Workload Automation documentation](https://www.ibm.com/docs/en/workload-automation/10.1.0) User's Guide.  
+ -  IBM Workload Automation V10.1 or above exposed metrics. For information about IBM Workload Automation exposed metrics, see "Exposing metrics to monitor your workload" in the [IBM Workload Automation documentation](https://www.ibm.com/docs/en/workload-automation/10.2.0) User's Guide.  
  -  API key for accessing the Entitled Registry: cp.icr.io
  -  External container image for OpenSearch 2.3.0 (an Elasticsearch based technology)
  -  Supported browsers are: 
@@ -291,214 +291,223 @@ Refer to IBM Workload Automation readme file.
 
 Refer to IBM Workload Automation readme file.
 		
+		
 ##  Configuration Parameters
 
-The following tables list the configurable parameters of the chart **values.yaml**, and their default values. The tables are organized as follows:
+The following tables list the configurable parameters of the chart **values.yaml**, and their default values. 
 
-- **[Global parameters](#global-parameters)**
 
-- **[AIDA parameters](#aida-parameters)**
+AIDA configuration parameters in the **values.yaml** file are divided in three categories:
 
-&nbsp;
+1.  Parameters whose value users **must provide** (Mandatory=Y)
+2.  Parameters with a default value that users can **optionally customize** ( Customizable =Y)
+3.  Parameters with a default value that users **should not change** ( Customizable =N) because their value is inherited by Workload Automation chart or because their customization is for expert users only. 
 
- 
+
+The tables are organized as follows:
+
+**[Global parameters](#global-parameters)**
+
+**[AIDA parameters](#aida-parameters)** 
 
  - ### Global parameters
 
 The following table lists the global configurable parameters of the chart and their default values:
 
-| **Parameter** | **Description** | **Mandatory** | **Example** | **Default** |
+| **Parameter** | **Description** | **Mandatory** | **Customizable** | **Default** |
 | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | -------------------------------- | -------------------------------- |
-|license |Use **accept** to agree to the license agreement | yes |notaccepted   | notaccepted |
-|serviceAccountName|The name of the serviceAccount to use. The IBM Workload Automation default service account (wauser) and not the default cluster account| no | wauser | default
-|aidaEngineLogLevel |Log level in AIDA. It can be DEBUG, INFO, ERROR, WARNING, CRITICAL | yes |"INFO"  |"INFO"  |
-|redisPwd|aida-redis passowrd  | yes |"foobared"  |"foobared" |
-|defaultShardCount | The default number of OpenSearch shards |yes | 1 |1  |	
-|defaultReplicaCount | The default number of OpenSearch replicas |yes | 0 |0  |
+|license |Use **accept** to agree to the license agreement | Y |Y   | notaccepted |
+|serviceAccountName|The name of the serviceAccount to use. The Workload Automation default service account (wauser) is used| Y (Inherited by WA chart) | N||
+|aidaEngineLogLevel |Log level in AIDA. It can be DEBUG, INFO, ERROR, WARNING, CRITICAL | N|N  |"INFO"  |
+|redisPwdSecretName|aida-redis password secret name  | N |N |"foobared" |
+|defaultShardCount | The default number of OpenSearch shards |N | N |1  |	
+|defaultReplicaCount | The default number of OpenSearch replicas |N | N |0  |
+
 
 - ### AIDA parameters
 The following tables list the configurable parameters of the chart relative to each service and their default values:
  
  ### [aida-ad parameters](#aida-ad-parameters)
  	
-| **Parameter** | **Description** | **Mandatory** | **Example** | **Default** |
+| **Parameter** | **Description** | **Mandatory** | **Customizable** | **Default** |
 | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | -------------------------------- | -------------------------------- |
-|image.repository|aida-ad image repository  |yes  | @DOCKER.AGENT.IMAGE.NAME@ |  cp.icr.io/cp/aida-ad |
-|image.tag | aida-ad image tag | yes |@VERSION@  | 10.1 |
-|image.pullPolicy | image pull policy |yes  |Always | Always |
-|serviceAccount.create | If true, a new ServiceAccount will be created, if false will be used an existing one with name global.serviceAccountName |  no | false |false |
-|serviceAccount.annotations | Annotations to add to the created ServiceAccount | no | kubernetes.io/service-account.name: sa-name |{} |
-|serviceAccount.name | The name of the created ServiceAccount. If not set, the Pod name will be used instead. | no | sa-name |"" |
-|resources.limits.cpu |The maximum CPU requested to run   | no| 2 |2 |
-|resources.limits.memory |The maximum memory requested to run | no  | 8Gi |8Gi |
-|resources.requests.cpu |The minimum CPU requested to run | no  | 0.5 |0.5 |
-|resources.requests.memory |The minimum memory requested to run | no  | 1Gi |1Gi |
-|autoscaling.enabled |Set this to **false** to completely disable autoscaling and **true** to enable it | no  | true |true |
-|autoscaling.minReplicas |The minimum number of Pods | no  | 1 |1 |
-|autoscaling.maxReplicas |The maximum number of Pods | no  | 10 |10 |
-|autoscaling.targetMemoryUtilizationPercentage |The value in percentage of memory utilization that each Pod should have | no  | 80 |80 |
-|pastMillis |The number of milliseconds that AIDA waits before analyzing predictions to generate alerts  | yes  | 86400000 |86400000 |
-|toleranceMillis |The maximum number of milliseconds between a real data point and a predicted data point in oder to consider them close and therefore usable by the alert detection algorithm   | yes  | 240000 |240000 |
-|webConcurrency |Number of workers of the web server. The more they are, the more there is parallelism (and the more RAM is consumed). Suggested value: 2 x number_of_cores + 1 | yes  | 6 |6 |	
-|minimumSeverityForMail |Minimum level of severity above which an alert will be sent by email. Can be high, medium or low| yes  | high |high |
+|image.repository|aida-ad image repository  |N  |N |  cp.icr.io/cp/aida-ad |
+|image.tag | aida-ad image tag | N |N  | 10.2.0.0 |
+|image.pullPolicy | image pull policy |N  |N| Always |
+|serviceAccount.create | If true, a new ServiceAccount will be created, if false will be used an existing one with name global.serviceAccountName |  N |N |false |
+|serviceAccount.annotations | Annotations to add to the created ServiceAccount | N | N |{} |
+|serviceAccount.name | The name of the created ServiceAccount. If not set, the Pod name will be used instead. | N | N|"" |
+|resources.limits.cpu |The maximum CPU requested to run   | N|N|2 |
+|resources.limits.memory |The maximum memory requested to run | N  | N |8Gi |
+|resources.requests.cpu |The minimum CPU requested to run | N  | N |0.5 |
+|resources.requests.memory |The minimum memory requested to run | N  | N|1Gi |
+|autoscaling.enabled |Set this to **false** to completely disable autoscaling and **true** to enable it | N  |N |true |
+|autoscaling.minReplicas |The minimum number of Pods | N  |N |1 |
+|autoscaling.maxReplicas |The maximum number of Pods | N  | N |10 |
+|autoscaling.targetMemoryUtilizationPercentage |The value in percentage of memory utilization that each Pod should have | N  |N |80 |
+|toleranceMillis |The maximum number of milliseconds between a real data point and a predicted data point in order to consider them close and, therefore, usable by the alert detection algorithm   | N  | Y |240000 |
+|webConcurrency |Number of workers of the web server. The more they are, the more there is parallelism (and the more RAM is consumed). Suggested value: 2 | N  | N |2 |
+|minimumSeverityForMail |Minimum level of severity above which an alert will be sent by email. Can be high, medium or low| Y (if you want to receive alerts by email)   | Y |high |
+|host_ip |AIDA host IP address for alert email| Y (if you want to receive alerts by email)   | Y |"" |
 	
  ### [aida-es parameters](#aida-es-parameters)
  	
-| **Parameter** | **Description** | **Mandatory** | **Example** | **Default** |
+| **Parameter** | **Description** | **Mandatory** | **Customizable** | **Default** |
 | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | -------------------------------- | -------------------------------- |
-|image.repository|aida-es image repository  |yes  |@DOCKER.AGENT.IMAGE.NAME@  |  amazon/opendistro-for-elasticsearch |
-|image.tag | aida-es image tag | yes |@VERSION@  | 1.13.3 |
-|image.pullPolicy | image pull policy |yes  |Always | Always |
-|serviceAccount.create |If true, a new ServiceAccount will be created, if false will be used an existing one with name global.serviceAccountName | no|false  |false |
-|serviceAccount.annotations | Annotations to add to the created ServiceAccount | no | kubernetes.io/service-account.name: sa-name |{} |
-|serviceAccount.name | The name of the created ServiceAccount. If not set, the Pod name will be used instead. | no | sa-name |"" |
-|persistence.enabled | If true, StorageClasses are used to dynamically create persistent volumes for the pods |no   |true  |true |
-|persistence.useDynamicProvisioning | If true, StorageClasses are used to dynamically create persistent volumes for the pods | no  |true  |true |
-|persistence.dataPVC.storageClassName |The name of the Storage Class to be used. Leave empty to not use a storage class |no   |nfs-dynamic  |"" |
-|persistence.dataPVC.selector.label |Volume label to bind (only limited to single label)        | no  |my-volume-label  |"" |
-|persistence.dataPVC.selector.value |Volume label value to bind (only limited to single value) | no  |my-volume-value  |"" |
-|persistence.dataPVC.size |The minimum size of the Persistent Volume | no |10Gi|10Gi|
-|resources.limits.cpu |The maximum CUP requested to run   | yes|4  |4 |
-|resources.limits.memory |The maximum memory requested to run | yes  |8Gi  |8Gi |
-|resources.requests.cpu |The minimum CPU requested to run | yes  | 0.5 |0.51 |
-|resources.requests.memory |The minimum memory requested to run | yes  | 1Gi |1Gi |
+|image.repository|aida-es image repository  |N |N  |  amazon/opensearchproject/opensearch |
+|image.tag | aida-es image tag | N |N  |2.3.0 |
+|image.pullPolicy | image pull policy |N  |N | Always |
+|serviceAccount.create |If true, a new ServiceAccount will be created. If false, an existing one with name global.serviceAccountName will be used| N|N |false |
+|serviceAccount.annotations | Annotations to add to the created ServiceAccount | N |N |{} |
+|serviceAccount.name | The name of the created ServiceAccount. If not set, the Pod name will be used instead. | N | N |"" |
+|persistence.enabled | If true, StorageClasses are used to dynamically create persistent volumes for the pods |N   |N |true |
+|persistence.useDynamicProvisioning | If true, StorageClasses are used to dynamically create persistent volumes for the pods | N  |N |true |
+|persistence.dataPVC.storageClassName |The name of the Storage Class to be used. Leave empty to not use a storage class |N  |N  |"" |
+|persistence.dataPVC.selector.label |Volume label to bind (only limited to single label)        | N  |N  |"" |
+|persistence.dataPVC.selector.value |Volume label value to bind (only limited to single value) | N |N  |"" |
+|persistence.dataPVC.size |The minimum size of the Persistent Volume | N |N|10Gi|
+|resources.limits.cpu |The maximum CUP requested to run   |N|N  |4 |
+|resources.limits.memory |The maximum memory requested to run |N |N  |8Gi |
+|resources.requests.cpu |The minimum CPU requested to run | N | N |0.51 |
+|resources.requests.memory |The minimum memory requested to run | N  | N |1Gi |
 
  ### [aida-exporter parameters](#aida-exporter-parameters)
  	
-| **Parameter** | **Description** | **Mandatory** | **Example** | **Default** |
+| **Parameter** | **Description** | **Mandatory** | **Customizable** | **Default** |
 | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | -------------------------------- | -------------------------------- |
-|waHostName|The host name used to reach the WA server. Not required if WA is deployed in the same helm chart as AIDA.   |no  | wa-hostname.com | "" |
-|waPort|The port used to reach the WA server   |yes  |31116  | 31116  |
-|httpAuthUsername| The username of WA basic authentication.  | yes | wauser | wauser |
-|httpAuthPasswordSecretName| The name of the secret that stores the password of WA basic authentication.  | yes | wa-pwd-secret | wa-pwd-secret  |
-|image.repository|aida-exporter image repository  |yes  | @DOCKER.AGENT.IMAGE.NAME@ |  cp.icr.io/cp/aida-exporter |
-|image.tag | aida-exporter image tag | yes |@VERSION@  | 10.1 |
-|image.pullPolicy | image pull policy |yes  |Always | Always |
-|serviceAccount.create |If true, a new ServiceAccount will be created, if false will be used an existing one with name global.serviceAccountName |no   |false  |false |
-|serviceAccount.annotations | Annotations to add to the created ServiceAccount | no | kubernetes.io/service-account.name: sa-name |{} |
-|serviceAccount.name | The name of the created ServiceAccount. If not set, the Pod name will be used instead. | no | sa-name |"" |
-|resources.limits.cpu |The maximum CUP requested to run   | yes| 2 |2 |
-|resources.limits.memory |The maximum memory requested to run | yes  |4Gi  |4Gi |
-|resources.requests.cpu |The minimum CPU requested to run | yes  | 0.5 |0.5 |
-|resources.requests.memory |The minimum memory requested to run | yes  |0.5Gi  |0.5Gi |
-|maximumDaysOfOlderPredictions |How many days of predictions to keep in the past | yes  |14 |14 |
-|maximumDaysOfOlderData |How many days of metrics data to keep in the past | yes  |400 |400|
-|resolveAlertsAfterDays |Number of days after which alerts will automatically go in "resolved" status | yes  |1 |1|
+|waHostName|The host name used to reach the WA server. Not required if WA is deployed in the same helm chart as AIDA.   |N  | N | "" |
+|waPort|The port used to reach the WA server   |N  |Y  | 31116  |
+|httpAuthUsername| The username of WA basic authentication.  | N (Inherited by WA chart) | N | wauser |
+|httpAuthPasswordSecretName| The name of the secret that stores the password of WA basic authentication.  | N (Inherited by WA chart) | N|  |
+|image.repository|aida-exporter image repository  |N  | N | cp.icr.io/cp/aida-exporter |
+|image.tag | aida-exporter image tag | N |N  | 10.2.0.0 |
+|image.pullPolicy | image pull policy |N  |N | Always |
+|serviceAccount.create |If true, a new ServiceAccount will be created, if false will be used an existing one with name global.serviceAccountName |N   |N  |false |
+|serviceAccount.annotations | Annotations to add to the created ServiceAccount | N | N |{} |
+|serviceAccount.name | The name of the created ServiceAccount. If not set, the Pod name will be used instead. | N | N |"" |
+|resources.limits.cpu |The maximum CUP requested to run   | N|N|2 |
+|resources.limits.memory |The maximum memory requested to run | N  |N  |4Gi |
+|resources.requests.cpu |The minimum CPU requested to run | N  |N |0.5 |
+|resources.requests.memory |The minimum memory requested to run | N  |N  |0.5Gi |
+|maximumDaysOfOlderPredictions |How many days of predictions to keep in the past | N  |Y|14 |
+|maximumDaysOfOlderData |How many days of metrics data to keep in the past | N  |Y |400|
+|resolveAlertsAfterDays |Number of days after which alerts will automatically go in "resolved" status | N  |Y|1|
 
 ### [aida-email parameters](#aida-email-parameters)
  	
-| **Parameter** | **Description** | **Mandatory** | **Example** | **Default** |
+| **Parameter** | **Description** | **Mandatory** | **Customizable** | **Default** |
 | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | -------------------------------- | -------------------------------- |
-|smtpServer|The smtp server   | yes | "smtp-mail.outlook.com" | "smtp.server.com"  |
-|smtpPort|The port of the smtp server  | yes | 587 | 587  |
-|senderEmailId| The email account of the alert sender   | yes |`"john@outlook.com"`  |  `"smtp@server.com"` |
-|senderEmailPwd|The email password of the alert sender   | yes |"pwd"  |  "smtpPassword" |
-|recipientMailIds|The list of recipient emails   | yes |`"jack@gmail.com,jessie@live.com"`  | `"mail1@mail.com,mail2@mail.com"` |
-|image.repository|aida-email image repository  |yes  |@DOCKER.AGENT.IMAGE.NAME@  |  cp.icr.io/cp/aida-email |
-|image.tag | aida-exporter image tag | yes |@VERSION@  | 10.1 |
-|image.pullPolicy | image pull policy |yes  |Always | Always |
-|serviceAccount.create |If true, a new ServiceAccount will be created, if false will be used an existing one with name global.serviceAccountName | no|false|false |
-|serviceAccount.annotations | Annotations to add to the created ServiceAccount | no | kubernetes.io/service-account.name: sa-name |{} |
-|serviceAccount.name | The name of the created ServiceAccount. If not set, the Pod name will be used instead. | no | sa-name |"" |
-|resources.limits.cpu |The maximum CUP requested to run   | yes|1  |1 |
-|resources.limits.memory |The maximum memory requested to run | yes  | 2Gi |2Gi |
-|resources.requests.cpu |The minimum CPU requested to run | yes  |200m  |200m |
-|resources.requests.memory |The minimum memory requested to run | yes  |0.5Gi  | 0.5Gi|
+|smtpServer|The smtp server   |Y (only if you want to enable alerting by email) | Y |   |
+|smtpPort|The port of the smtp server  | Y (only if you want to enable alerting by email) | Y | 587  |
+|senderEmailId| The email account of the alert sender   | Y (only if you want to enable alerting by email) |Y |   |
+|senderEmailPwd|The email password of the alert sender   | Y (only if you want to enable alerting by email) |Y |   |
+|recipientMailIds|The list of recipient emails `"mail1@mail.com,mail2@mail.com"`   | Y (only if you want to enable alerting by email) |Y | |
+|image.repository|aida-email image repository  |N  |N | cp.icr.io/cp/aida-email |
+|image.tag | aida-exporter image tag | N |N| 10.2.0.0 |
+|image.pullPolicy | image pull policy |N  |N | Always |
+|serviceAccount.create |If true, a new ServiceAccount will be created, if false will be used an existing one with name global.serviceAccountName | N|N|false |
+|serviceAccount.annotations | Annotations to add to the created ServiceAccount | N | N |{} |
+|serviceAccount.name | The name of the created ServiceAccount. If not set, the Pod name will be used instead. | N |N |"" |
+|resources.limits.cpu |The maximum CUP requested to run   | N|N |1 |
+|resources.limits.memory |The maximum memory requested to run | N  |N|2Gi |
+|resources.requests.cpu |The minimum CPU requested to run | N  |N  |200m |
+|resources.requests.memory |The minimum memory requested to run |N  |N  | 0.5Gi|
 
 ### [aida-nginx parameters](#aida-nginx-parameters)
  	
-| **Parameter** | **Description** | **Mandatory** | **Example** | **Default** |
+| **Parameter** | **Description** | **Mandatory** | **Customizable** | **Default** |
 | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | -------------------------------- | -------------------------------- |
-|waConsoleCertSecretName|The name of the WA console secret to store customized SSL certificates  |yes  |waconsole-cert-secret  | waconsole-cert-secret |
-|image.repository|aida-nginx image repository  |yes  |@DOCKER.AGENT.IMAGE.NAME@  |  cp.icr.io/cp/aida-nginx |
-|image.tag | aida-nginx image tag | yes |@VERSION@  | 10.1 |
-|image.pullPolicy | image pull policy |yes  |Always | Always |
-|serviceAccount.create |If true, a new ServiceAccount will be created, if false will be used an existing one with name global.serviceAccountName |no |false|false |
-|serviceAccount.annotations | Annotations to add to the created ServiceAccount | no | kubernetes.io/service-account.name: sa-name |{} |
-|serviceAccount.name | The name of the created ServiceAccount. If not set, the Pod name will be used instead. | no | sa-name |"" |
-|routes.enabled |If true, the ingress controller rules are enabled  | no  | true |true |
-|ingress.hostname|The virtual hostname defined in the DNS used to reach the WA Console   | yes, only if the network enablement implementation is INGRESS   | aida.com | |
-|ingress.secretName|The WA Console ingress secret | yes, only if the network enablement implementation is INGRESS   |wa-console-ingress-secret  | wa-console-ingress-secret|
-|exposeServiceType |The network enablement configuration implemented. Valid values: LoadBalancer, Ingress or Routes     | yes| LoadBalancer |LoadBalancer |
-|exposeServiceAnnotation |Annotations of either the resource of the service or the resource of the ingress, customized in accordance with the cloud provider       | yes| networking.gke.io/load-balancer-type: "Internal" | {} |
-|resources.limits.cpu |The maximum CUP requested to run   | yes| 1 |1 |
-|resources.limits.memory |The maximum memory requested to run | yes  |1Gi  |1Gi |
-|resources.requests.cpu |The minimum CPU requested to run | yes  |200m  |200m |
-|resources.requests.memory |The minimum memory requested to run | yes  |200Mi  | 200Mi|
+|waConsoleCertSecretName|The name of the WA console secret to store customized SSL certificates  |N (Inherited by WA chart)  |N  | |
+|image.repository|aida-nginx image repository  |N  |N  |cp.icr.io/cp/aida-nginx |
+|image.tag | aida-nginx image tag | N|N| 10.2.0.0 |
+|image.pullPolicy | image pull policy |N  |N| Always |
+|serviceAccount.create |If true, a new ServiceAccount will be created, if false will be used an existing one with name global.serviceAccountName |N |N|false |
+|serviceAccount.annotations | Annotations to add to the created ServiceAccount | N | N |{} |
+|serviceAccount.name | The name of the created ServiceAccount. If not set, the Pod name will be used instead. | N | N|"" |
+|routes.enabled |If true, the ingress controller rules are enabled  | N  | N |true |
+|ingress.hostname|The virtual hostname defined in the DNS used to reach the WA Console   | Y (only if the network enablement implementation is INGRESS)  |N | |
+|ingress.secretName|The WA Console ingress secret | Y (only if the network enablement implementation is INGRESS)   |N  | |
+|exposeServiceType |The network enablement configuration implemented. Valid values: LoadBalancer, Ingress or Routes     | N| N |LoadBalancer |
+|exposeServiceAnnotation |Annotations of either the resource of the service or the resource of the ingress, customized in accordance with the cloud provider. Example: networking.gke.io/load-balancer-type: "Internal"       | N| N | {} |
+|resources.limits.cpu |The maximum CUP requested to run   | N|N  |1 |
+|resources.limits.memory |The maximum memory requested to run | N  |N  |1Gi |
+|resources.requests.cpu |The minimum CPU requested to run | N |N  |200m |
+|resources.requests.memory |The minimum memory requested to run | N  |N| 200Mi|
 
 ### [aida-orchestrator parameters](#aida-orchestrator-parameters)
  	
-| **Parameter** | **Description** | **Mandatory** | **Example** | **Default** |
+| **Parameter** | **Description** | **Mandatory** | **Customizable** | **Default** |
 | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | -------------------------------- | -------------------------------- |
-|image.repository|aida-orchestrator image repository  |yes  |@DOCKER.AGENT.IMAGE.NAME@  |  cp.icr.io/cp/aida-orchestrator |
-|image.tag | aida-ad image tag | yes |@VERSION@  | 10.1 |
-|image.pullPolicy | image pull policy |yes  |Always | Always |
-|serviceAccount.create |If true, a new ServiceAccount will be created, if false will be used an existing one with name global.serviceAccountName |no |false|false |
-|serviceAccount.annotations | Annotations to add to the created ServiceAccount | no | kubernetes.io/service-account.name: sa-name |{} |
-|serviceAccount.name | The name of the created ServiceAccount. If not set, the Pod name will be used instead. | no | sa-name |"" |
-|resources.limits.cpu |The maximum CUP requested to run   | yes| 2 |2 |
-|resources.limits.memory |The maximum memory requested to run | yes  |4Gi  |4Gi |
-|resources.requests.cpu |The minimum CPU requested to run | yes  | 0.5 |0.5 |
-|resources.requests.memory |The minimum memory requested to run | yes  |0.5Gi  |0.5Gi |
-|prophetOrchestrator | The number of minutes between subsequent training(s) | yes  | "{\"schedule\": 1440}" | "{\"schedule\": 1440}"|
-|daysOfPrediction |How many days to predict in the future| yes  |1  |1 |	
+|prophetOrchestrator | Interval in minutes between two subsequent predictions, and between two subsequent alert detections |N  | Y | {"schedule":1440},{"schedule_alert":15}|
+|daysOfPrediction |How many days to predict in the future| N  |Y  |1 |
+|image.repository|aida-orchestrator image repository  |N  |N | cp.icr.io/cp/aida-orchestrator |
+|image.tag | aida-ad image tag | N |N| 10.2.0.0 |
+|image.pullPolicy | image pull policy |N |N | Always |
+|serviceAccount.create |If true, a new ServiceAccount will be created, if false will be used an existing one with name global.serviceAccountName |N |N|false |
+|serviceAccount.annotations | Annotations to add to the created ServiceAccount |N | N |{} |
+|serviceAccount.name | The name of the created ServiceAccount. If not set, the Pod name will be used instead. | N | N|"" |
+|resources.limits.cpu |The maximum CUP requested to run   | N| N|2 |
+|resources.limits.memory |The maximum memory requested to run |N  |N  |4Gi |
+|resources.requests.cpu |The minimum CPU requested to run | N  | N |0.5 |
+|resources.requests.memory |The minimum memory requested to run | N  |N  |0.5Gi |
+
 
 ### [aida-predictor parameters](#aida-predictor-parameters)
 	
  	
-| **Parameter** | **Description** | **Mandatory** | **Example** | **Default** |
+| **Parameter** | **Description** | **Mandatory** | **Customizable** | **Default** |
 | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | -------------------------------- | -------------------------------- |
-|image.repository|aida-predictor image repository  |yes  |@DOCKER.AGENT.IMAGE.NAME@  |  cp.icr.io/cp/aida-predictor |
-|image.tag | aida-ad image tag | yes |@VERSION@  | 10.1 |
-|image.pullPolicy | image pull policy |yes  |Always | Always |
-|serviceAccount.create |If true, a new ServiceAccount will be created, if false will be used an existing one with name global.serviceAccountName |no|false|false |
-|serviceAccount.annotations | Annotations to add to the created ServiceAccount | no | kubernetes.io/service-account.name: sa-name |{} |
-|serviceAccount.name | The name of the created ServiceAccount. If not set, the Pod name will be used instead. | no | sa-name |"" |
-|resources.limits.cpu |The maximum CUP requested to run   | yes| 8 |8 |
-|resources.limits.memory |The maximum memory requested to run | yes  |16Gi  |16Gi |
-|resources.requests.cpu |The minimum CPU requested to run | yes  | 1 |1 |
-|resources.requests.memory |The minimum memory requested to run | yes  |1Gi  |1Gi |
-|autoscaling.enabled |Set this to **false** to completely disable autoscaling and **true** to enable it | no  |true  |true |
-|autoscaling.minReplicas |The minimum number of Pods | no  |1  |1 |
-|autoscaling.maxReplicas |The maximum number of Pods | no  | 10 |10 |
-|autoscaling.targetMemoryUtilizationPercentage |The value in percentage of memory utilization that each Pod should have | no  |80  |80 |
-|webConcurrency |Number of workers of the web server. The more they are, the more there is parallelism (and the more RAM is consumed). Suggested value: 2 x number_of_cores + 1 | yes  | 6 |6 |
+|image.repository|aida-predictor image repository  |N  |N |  cp.icr.io/cp/aida-predictor |
+|image.tag | aida-ad image tag |N |N  | 10.2.0.0 |
+|image.pullPolicy | image pull policy |N  |N | Always |
+|serviceAccount.create |If true, a new ServiceAccount will be created, if false will be used an existing one with name global.serviceAccountName |N|N|false |
+|serviceAccount.annotations | Annotations to add to the created ServiceAccount | N | N |{} |
+|serviceAccount.name | The name of the created ServiceAccount. If not set, the Pod name will be used instead. | N | N |"" |
+|resources.limits.cpu |The maximum CUP requested to run   | N| N |8 |
+|resources.limits.memory |The maximum memory requested to run | N  |N  |16Gi |
+|resources.requests.cpu |The minimum CPU requested to run | N  | N |1 |
+|resources.requests.memory |The minimum memory requested to run | N  |N  |1Gi |
+|autoscaling.enabled |Set this to **false** to completely disable autoscaling and **true** to enable it | N  |N  |true |
+|autoscaling.minReplicas |The minimum number of Pods | N  |N  |1 |
+|autoscaling.maxReplicas |The maximum number of Pods | N  | N |10 |
+|autoscaling.targetMemoryUtilizationPercentage |The value in percentage of memory utilization that each Pod should have |N  |N |80 |
+|webConcurrency |Number of workers of the web server. The more they are, the more there is parallelism (and the more RAM is consumed) | N |N|2 |
+|model |The Machine Learning model used for predictions| N |N |neural |
 
 ### [aida-redis parameters](#aida-redis-parameters)
  	
-| **Parameter** | **Description** | **Mandatory** | **Example** | **Default** |
+| **Parameter** | **Description** | **Mandatory** | **Customizable** | **Default** |
 | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | -------------------------------- | -------------------------------- |
-|image.repository|aida-redis image repository  |yes  |@DOCKER.AGENT.IMAGE.NAME@  |  cp.icr.io/cp/aida-redis |
-|image.tag | aida-ad image tag | yes |@VERSION@  | 10.1 |
-|image.pullPolicy | image pull policy |yes  |Always | Always |
-|serviceAccount.create |If true, a new ServiceAccount will be created, if false will be used an existing one with name global.serviceAccountName |no|false|false |
-|serviceAccount.annotations | Annotations to add to the created ServiceAccount | no | kubernetes.io/service-account.name: sa-name |{} |
-|serviceAccount.name | The name of the created ServiceAccount. If not set, the Pod name will be used instead. | no | sa-name |"" |
-|resources.limits.cpu |The maximum CUP requested to run   | yes|1  |1 |
-|resources.limits.memory |The maximum memory requested to run | yes  |500Mi  |500Mi |
-|resources.requests.cpu |The minimum CPU requested to run | yes  |200m  |200m |
-|resources.requests.memory |The minimum memory requested to run | yes  |200Mi  |200Mi |
+|image.repository|aida-redis image repository  |N  |N | cp.icr.io/cp/aida-redis |
+|image.tag | aida-ad image tag | N |N  | 10.2.0.0 |
+|image.pullPolicy | image pull policy |N  |N | Always |
+|serviceAccount.create |If true, a new ServiceAccount will be created, if false will be used an existing one with name global.serviceAccountName |N|N|false |
+|serviceAccount.annotations | Annotations to add to the created ServiceAccount | N | N |{} |
+|serviceAccount.name | The name of the created ServiceAccount. If not set, the Pod name will be used instead. | N | N |"" |
+|resources.limits.cpu |The maximum CUP requested to run   | N|N  |1 |
+|resources.limits.memory |The maximum memory requested to run | N  |N  |500Mi |
+|resources.requests.cpu |The minimum CPU requested to run | N  |N  |200m |
+|resources.requests.memory |The minimum memory requested to run |N |N  |200Mi |
 
 ### [aida-ui parameters](#aida-ui-parameters)
  	
-| **Parameter** | **Description** | **Mandatory** | **Example** | **Default** |
+| **Parameter** | **Description** | **Mandatory** | **Customizable** | **Default** |
 | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | -------------------------------- | -------------------------------- |
-|uiLogLevel |Log level in AIDA UI.  | no |  |"ERROR:*,INFO:*,-TRACE:*"  |
-|image.repository|aida-ui image repository  |yes  |@DOCKER.AGENT.IMAGE.NAME@  |  cp.icr.io/cp/aida-ui |
-|image.tag | aida-ad image tag | yes |@VERSION@  | 10.1 |
-|image.pullPolicy | image pull policy |yes  |Always | Always |
-|serviceAccount.create |If true, a new ServiceAccount will be created, if false will be used an existing one with name global.serviceAccountName |no |false|false |
-|serviceAccount.annotations | Annotations to add to the created ServiceAccount | no | kubernetes.io/service-account.name: sa-name |{} |
-|serviceAccount.name | The name of the created ServiceAccount. If not set, the Pod name will be used instead. | no | sa-name |"" |
-|resources.limits.cpu |The maximum CUP requested to run   | yes|1  |1 |
-|resources.limits.memory |The maximum memory requested to run | yes  |2Gi  |2Gi |
-|resources.requests.cpu |The minimum CPU requested to run | yes  |0.3  |0.3 |
-|resources.requests.memory |The minimum memory requested to run | yes  |0.5Gi   |0.5Gi |
-|autoscaling.enabled |Set this to **false** to completely disable autoscaling and **true** to enable it | no  |true  |true |
-|autoscaling.minReplicas |The minimum number of Pods |no   |1  |1 |
-|autoscaling.maxReplicas |The maximum number of Pods | no  |10  |10 |
-|autoscaling.targetMemoryUtilizationPercentage |The value in percentage of memory utilization that each Pod should have |no  |80  |80 |
-
+|uiLogLevel |Log level in AIDA UI | N |N|"ERROR:*,INFO:*,-TRACE:*"  |
+|image.repository|aida-ui image repository  |N  |N |  cp.icr.io/cp/aida-ui |
+|image.tag | aida-ad image tag |N |N| 10.2.0.0 |
+|image.pullPolicy | image pull policy |N  |N | Always |
+|serviceAccount.create |If true, a new ServiceAccount will be created, if false will be used an existing one with name global.serviceAccountName |N |N|false |
+|serviceAccount.annotations | Annotations to add to the created ServiceAccount | N | N|{} |
+|serviceAccount.name | The name of the created ServiceAccount. If not set, the Pod name will be used instead | N |N |"" |
+|resources.limits.cpu |The maximum CUP requested to run   | N|N |1 |
+|resources.limits.memory |The maximum memory requested to run |N |N  |2Gi |
+|resources.requests.cpu |The minimum CPU requested to run |N |N  |0.3 |
+|resources.requests.memory |The minimum memory requested to run |N |N  |0.5Gi |
+|autoscaling.enabled |Set this to **false** to completely disable autoscaling and **true** to enable it | N  |N  |true |
+|autoscaling.minReplicas |The minimum number of Pods |N   |N |1 |
+|autoscaling.maxReplicas |The maximum number of Pods | N |N |10 |
+|autoscaling.targetMemoryUtilizationPercentage |The value in percentage of memory utilization that each Pod should have |N  |N  |80 |
 
 ##  Configuring
 
