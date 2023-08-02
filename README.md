@@ -173,8 +173,8 @@ For more information about supported storage types, see [Storage overview | Stor
 
 Installing and configuring IBM Workload Automation, involves the following high-level steps:
 
-1. [Create the Namespace](#create-the-namespace).
-2. [Creating a Kubernetes Secret](#create-the-secret) by accessing the entitled registry to store an entitlement key for the IBM Workload Automation offering on your cluster. 
+1. [Creating the Namespace](#creating-the-namespace).
+2. [Creating a Kubernetes Secret](#creating-the-secret) by accessing the entitled registry to store an entitlement key for the IBM Workload Automation offering on your cluster. 
 3. [Securing communication](#securing-communication) using either Jetstack cert-manager or using your custom certificates.
 4. [Creating a secrets file](#creating-a-secrets-file) to store passwords for the console and server components, or if you use custom certificates, to add your custom certificates to the Certificates Secret.
 5. [Loading third-party certificates](#loading-third-party-certificates) 
@@ -186,14 +186,14 @@ Installing and configuring IBM Workload Automation, involves the following high-
 6. [Verifying the installation](#verifying-the-installation).
 
 
-### Create the Namespace
+### Creating the Namespace
 
 To create the namespace, run the following command:
 
         kubectl create namespace <workload_automation_namespace>
 	
 
-### Create the Secret 
+### Creating the Secret 
 
  
 
@@ -321,8 +321,7 @@ where:
    - WA_PASSWORD: \<hidden password>
    - DB_ADMIN_PASSWORD: \<hidden password>
    - DB_PASSWORD: \<hidden password>    
-   - SSL_PASSWORD: \<hidden password>
-> **Note b**: The SSL_PASSWORD parameter is required only if you use custom certificates in PEM format. If you want to encrypt the custom certificate with SSL_PASSWORD, ensure that they use the same password defined in SSL_PASSWORD.
+   
 
 2. Once the file has been created and filled in, it must be imported.
 
