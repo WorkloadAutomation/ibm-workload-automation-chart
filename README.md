@@ -363,7 +363,7 @@ where **<my_path>** is the location path of the mysecret.yaml file.
 
 ### Loading third-party certificates
 
-To add third-party certificates to the trustsore, create a secret with the following syntax: 
+To add third-party certificates to the truststore, create a secret with the following syntax: 
 
 
 		
