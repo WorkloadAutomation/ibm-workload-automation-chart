@@ -290,7 +290,7 @@ Create a secrets file to store passwords for the server, console and database, o
 	    apiVersion: v1
 	    kind: Secret
 	    metadata:
-	      name: wa-pwd-secret-ssl-secret
+	      name: wa-pwd-secret
 	      namespace: <workload_automation_namespace>
    	     labels:
                 app.kubernetes.io/instance wa-pwd-secret-ssl-secret
@@ -307,7 +307,7 @@ Create a secrets file to store passwords for the server, console and database, o
 	       WA_PASSWORD: <hidden_password>
 	       DB_ADMIN_PASSWORD: <hidden_password>
 	       DB_PASSWORD: <hidden_password>	
-	       SSL_PASSWORD: <hidden_password>
+	      
      
 where:
      
@@ -331,7 +331,33 @@ where:
 	
 	    kubectl apply -f <my_path>/mysecret.yaml -n <workload_automation_namespace>
 	  
-where **<my_path>** is the location path of the mysecret.yaml file.	
+where **<my_path>** is the location path of the mysecret.yaml file.
+
+3. You can optionally force the keystore password or use a non-randomic password. Starting from v 10.1 Fix Pack 3, if you do not create a secret, the SSL password for the keystores is generated randomically. If you want to crete a secret, use the following syntax:
+
+
+	    apiVersion: v1
+	    kind: Secret
+	    metadata:
+	      name: <release_name>-ssl-secret
+	      namespace: <workload_automation_namespace>
+   	     labels:
+                app.kubernetes.io/instance wa-pwd-secret-ssl-secret
+                app.kubernetes.io/managed-by: Helm
+                app.kubernetes.io/name: workload-automation-prod
+                environment: prod
+                helm.sh/chart: workload-automation-prod
+                release: wa-pwd-secret-ssl-secret
+              annotations:
+                meta.helm.sh/release-name: wa-pwd-secret-ssl-secret
+                meta.helm.sh/release-namespace: <workload_automation_namespace>
+	    type: Opaque
+	    data:
+	       SSL_PASSWORD: <hidden_password>
+	      
+     
+
+**Note** Starting from v 10.2, if the passwords in the keystore secret and in the secret optionally created in step 3, do not match, keystores are removed and recreated from scratch using the password you defined. This mechanism allows you to rotate the keystore password when necessary. 
 
 ### Enabling installation of dynamic agents on kubernetes with a remote gateway
 
