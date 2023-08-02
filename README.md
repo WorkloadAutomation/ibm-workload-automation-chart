@@ -334,7 +334,7 @@ where:
 	  
 where **<my_path>** is the location path of the mysecret.yaml file.
 
-3. You can optionally force the keystore password or use a non-randomic password. Starting from v 10.1 Fix Pack 3, if you do not create a secret, the SSL password for the keystores is generated randomically. If you want to crete a secret, use the following syntax:
+3. You can optionally force the keystore password or use a non-randomic password. Starting from v 10.1 Fix Pack 3, if you do not create a secret, the SSL password for the keystores is generated randomly. If you want to create a secret, use the following syntax:
 
 
 	    apiVersion: v1
