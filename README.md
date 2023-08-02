@@ -177,7 +177,7 @@ Installing and configuring IBM Workload Automation, involves the following high-
 2. [Creating a Kubernetes Secret](#create-the-secret) by accessing the entitled registry to store an entitlement key for the IBM Workload Automation offering on your cluster. 
 3. [Securing communication](#securing-communication) using either Jetstack cert-manager or using your custom certificates.
 4. [Creating a secrets file](#creating-a-secrets-file) to store passwords for the console and server components, or if you use custom certificates, to add your custom certificates to the Certificates Secret.
-5. [Loading third-party certificates](#loading-third-party-certificates) Loading third-party certificates
+5. [Loading third-party certificates](#loading-third-party-certificates) 
 6. (For Microsoft Azure AKS and Google GKE only) [Configuring the Microsoft Azure SQL server database](#configuring-the-microsoft-azure-sql-server-database) or [Configuring the Google Cloud SQL for SQL Server
  database](#configuring-the-google-cloud-sql-for-sql-server-database).
 7. [Installing Automation Hub integrations](#installing-automation-hub-integrations).
