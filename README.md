@@ -1434,7 +1434,7 @@ For the Dynamic Workload Console, type the following command:
     
    where, ca.crt, tls.key, and tls.crt are your customized certificates.
    
-   For details about custom certificates, see [Connection security overview](https://www.ibm.com/docs/en/workload-scheduler/9.5.0?topic=configuration-connection-security-overview).
+   For details about custom certificates, see [Connection security overview](https://www.ibm.com/docs/en/workload-automation/10.2.0?topic=configuration-connection-security-overview).
 
 <!-- > **Note**: Passwords for "TWSServerTrustFile.jks" and "TWSServerKeyFile.jks" files must be entered in the respective "TWSServerTrustFile.jks.pwd" and "TWSServerKeyFile.jks.pwd" files. -->
  
