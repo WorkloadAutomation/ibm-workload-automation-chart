@@ -1446,10 +1446,9 @@ For the Dynamic Workload Console, type the following command:
   
  Customized files must have the same name as the ones listed above.
          
-If you want to use SSL connection to DB, set `db.sslConnection:true` and `useCustomizedCert:true`, then use kubectl to create the secret in the same namespace where you want to deploy the chart:
+If you want to use SSL connection to DB, set `db.sslConnection:true` and `useCustomizedCert:true` in the values.yaml files for server and console, then use kubectl to create the secret in the same namespace where you want to deploy the chart:
 
-      bash
-      $ kubectl create secret generic release_name-secret --from-file=ca.crt --from-file=tls.key --from-file=tls.crt -n --namespace=<workload_automation_namespace>
+    kubectl create secret generic <release_name>-secret --from-file=ca.crt --from-file=tls.key --from-file=tls.crt -n --namespace=<workload_automation_namespace>
         
 
 If you define custom certificates, you are in charge of keeping them up to date, therefore, ensure you check their duration and plan to rotate them as necessary. To rotate custom certificates, delete the previous secret and upload a new secret, containing new certificates. The pod restarts automatically and the new certificates are applied.
@@ -1501,11 +1500,10 @@ For the Dynamic Workload Console, type the following command:
 
  Customized files must have the same name as the ones listed above.
          
-If you want to use SSL connection to DB, set `db.sslConnection:true` and `useCustomizedCert:true`, then use kubectl to create the secret in the same namespace where you want to deploy the chart:
-
-      bash
-      $ kubectl create secret generic release_name-secret --from-file=TWSServerTrustFile.jks --from-file=TWSServerKeyFile.jks --from-file=TWSServerTrustFile.jks.pwd --from-file=TWSServerKeyFile.jks.pwd --namespace=<workload_automation_namespace>
-
+If you want to use SSL connection to DB, set `db.sslConnection:true` and `useCustomizedCert:true` in the values.yaml files for the server and console, then use kubectl to create the secret with the required files in the same namespace where you want to deploy the chart:
+```
+ kubectl create secret generic <release_name>-secret --from-file=TWSServerTrustFile.jks --from-file=TWSServerKeyFile.jks --from-file=TWSServerTrustFile.jks.pwd --from-file=TWSServerKeyFile.jks.pwd --namespace=<workload_automation_namespace>
+```
 ## Storage
 
 ### Storage requirements for the workload
