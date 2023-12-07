@@ -19,7 +19,7 @@ The information in this README contains the steps for deploying the following IB
  > **IBM Workload Automation**, which comprises master domain manager and its backup, Dynamic Workload Console, and Dynamic Agent
  
  
- For more information about IBM Workload Automation, see the product documentation library in [IBM Documentation]( https://www.ibm.com/docs/workload-scheduler/10.1.0).
+ For more information about IBM Workload Automation, see the product documentation library in [IBM Documentation]( https://www.ibm.com/docs/workload-scheduler/10.2.1).
  
 ## Details
 
@@ -27,7 +27,7 @@ By default, a single  server (master domain manager), Dynamic Workload Console (
 
 To achieve high availability in an IBM Workload Automation environment, the minimum base configuration is composed of 2 Dynamic Workload Consoles and 2 servers (master domain managers). For more details about IBM Workload Automation and high availability, see: 
 
-[An active-active high availability scenario](https://www.ibm.com/docs/workload-scheduler/10.1.0?topic=scheduler-active-active-high-availability-scenario).
+[An active-active high availability scenario](https://www.ibm.com/docs/workload-scheduler/10.2.1?topic=scheduler-active-active-high-availability-scenario).
 
 
 IBM Workload Automation can be deployed across a single cluster, but you can add multiple instances of the product components by using a different namespace in the cluster. The product components can run in multiple failure zones in a single cluster.
@@ -80,11 +80,12 @@ From `LoadBalancer` to `Routes`
 You can access the IBM Workload Automation chart and container images from the Entitled Registry. See [Create the secret](#create-the-secret) for more information about accessing the registry. The images are as follows:
 
 
-* cp.icr.io/cp/ibm-workload-automation-agent-dynamic:10.2.0.00.20230728
-* cp.icr.io/cp/ibm-workload-automation-server:10.2.0.00.20230728
-* cp.icr.io/cp/ibm-workload-automation-console:10.2.0.00.20230728
+* cp.icr.io/cp/ibm-workload-automation-agent-dynamic:10.2.0.01.20231201
+* cp.icr.io/cp/ibm-workload-automation-server:10.2.0.01.20231201
+* cp.icr.io/cp/ibm-workload-automation-console:10.2.0.01.20231201
 
 ## Other supported tags
+* 10.2.0.01.20231201
 * 10.2.0.00.20230728
 * 10.1.0.03.20230511-amd64
 * 10.1.0.02.20230301
@@ -333,7 +334,7 @@ where:
 	  
 where **<my_path>** is the location path of the mysecret.yaml file.
 
-3. You can optionally force the keystore password or use a non-randomic password. Starting from v 10.1 Fix Pack 3, if you do not create a secret, the SSL password for the keystores is generated randomly. If you want to create a secret, use the following syntax:
+3. You can optionally force the keystore password or use a non-randomic password. If you do not create a secret, the SSL password for the keystores is generated randomly. If you want to create a secret, use the following syntax:
 
 
 	    apiVersion: v1
@@ -357,7 +358,7 @@ where **<my_path>** is the location path of the mysecret.yaml file.
 	      
      
 
->**Note** Starting from v 10.2, if the passwords in the keystore secret and in the secret optionally created in step 3, do not match, keystores are removed and recreated from scratch using the password you defined. This mechanism allows you to rotate the keystore password when necessary. 
+>**Note** If the passwords in the keystore secret and in the secret optionally created in step 3, do not match, keystores are removed and recreated from scratch using the password you defined. This mechanism allows you to rotate the keystore password when necessary. 
 
 
 ### Loading third-party certificates
@@ -497,7 +498,7 @@ The following procedure describes how you can create and customize a *configMap*
 
 		####################################################################
 		# Licensed Materials Property of HCL*
-		# (c) Copyright HCL Technologies Ltd. 2021. All rights reserved.
+		# (c) Copyright HCL Technologies Ltd. 2023. All rights reserved.
 		#
 		# * Trademark of HCL Technologies Limited
 		####################################################################
@@ -635,7 +636,7 @@ To install a custom plug-in and make it available to be used in your workload, p
 		#!/bin/sh
 		####################################################################
 		# Licensed Materials Property of HCL*
-		# (c) Copyright HCL Technologies Ltd. 2021. All rights reserved.
+		# (c) Copyright HCL Technologies Ltd. 2023. All rights reserved.
 		#
 		# * Trademark of HCL Technologies Limited
 		####################################################################
@@ -764,12 +765,7 @@ To manually verify that the installation was successfully installed, you can per
 
         composer li cpu=/@/@
 		
-     An example of the output for this command is as follows:	
      
-  
- ![listcpu output](images/listcpu.png) 
-
-   
   	 
   
 		
@@ -777,19 +773,14 @@ To manually verify that the installation was successfully installed, you can per
 
         conman sc /@/@
 		
-   An example of the output for this command is as follows:
-
   
- ![showcpu output](images/showcpu.png)
-
- 
      
 	
    c. **Global option command optman ls**:
 	 
         optman ls
 		
-This command lists the current values of all IBM Workload Automation global options. For more information about the global options see [Global Options - detailed description](https://www.ibm.com/docs/workload-scheduler/10.1.0?topic=options-global-detailed-description).	
+This command lists the current values of all IBM Workload Automation global options. For more information about the global options see [Global Options - detailed description](https://www.ibm.com/docs/workload-scheduler/10.2.1?topic=options-global-detailed-description).	
 	
 * **Verify that the default engine connection is created from the Dynamic Workload Console**
 
@@ -832,12 +823,7 @@ Verifying the default engine connection depends on the network enablement config
 	
 3. From the navigation toolbar, select **Administration -> Manage Engines**.
 	
-4.  Verify that the default engine, **engine_wa-waserver** is dsplayed in the Manage Engines list:
-
-  
- ![engine connection properties panel](images/dwcengcnxn.png)
-
-
+4.  Verify that the default engine, **engine_wa-waserver** is dsplayed in the Manage Engines list.
 
 To ensure the Dynamic Workload Console logout page redirects to the login page, modify the value of the logout url entry available in file authentication_config.xml:
 
@@ -949,7 +935,7 @@ The following table lists the configurable parameters of the chart relative to t
 
 
 >\(*) **Note:** for details about static agent workstation pools, see: 
-[Workstation](https://www.ibm.com/docs/workload-scheduler/10.1.0?topic=objects-workstation).
+[Workstation](https://www.ibm.com/docs/workload-scheduler/10.2.1?topic=objects-workstation).
 
 
 - #### Dynamic Workload Console parameters
@@ -1359,7 +1345,7 @@ To configure an on-premises agent to communicate with components in the cloud:
 3. Replace the files on the on-premises agent in the same path.
 
 **On-premises console engine connection (connection between an on-premises console with a server in the cloud):**
-1. Copy the public CA root certificate from the server. Refer to the IBM Workload Automation product documentation for details about creating custom certificates for communication between the server and the console: [Customizing certificates](https://www.ibm.com/docs/workload-scheduler/10.1.0?topic=scbdwcwsc-customizing-certificates-master-domain-manager-dynamic-workload-console-communication).
+1. Copy the public CA root certificate from the server. Refer to the IBM Workload Automation product documentation for details about creating custom certificates for communication between the server and the console: [Customizing certificates](https://www.ibm.com/docs/workload-scheduler/10.2.1?topic=scbdwcwsc-customizing-certificates-master-domain-manager-dynamic-workload-console-communication).
 
 2. To enable the changes, restart the Console workstation.
 
@@ -1383,7 +1369,7 @@ Access the master (server or pod) and extract the CA root certificate and, to ad
 
 ### Defining a z/OS engine in the Z connector from a Dynamic Workload Console deployed on Cloud
 
-To perform this operation, see the information available at [Defining a z/OS engine in the Z connector](https://www.ibm.com/docs/en/workload-automation/10.1.0?topic=console-defining-zos-engine-in-z-connector). The information at this link also applies to the cloud environment. If you want to apply the same configuration to all instances, create a configMap containing all xml files and use the `waconsole.console.libConfigName` parameter to provide the name of your  configMap.
+To perform this operation, see the information available at [Defining a z/OS engine in the Z connector](https://www.ibm.com/docs/en/workload-automation/10.2.1?topic=console-defining-zos-engine-in-z-connector). The information at this link also applies to the cloud environment. If you want to apply the same configuration to all instances, create a configMap containing all xml files and use the `waconsole.console.libConfigName` parameter to provide the name of your  configMap.
 
 ### Scaling the product 
 
@@ -1434,7 +1420,7 @@ For the Dynamic Workload Console, type the following command:
     
    where, ca.crt, tls.key, and tls.crt are your customized certificates.
    
-   For details about custom certificates, see [Connection security overview](https://www.ibm.com/docs/en/workload-scheduler/9.5.0?topic=configuration-connection-security-overview).
+   For details about custom certificates, see [Connection security overview](https://www.ibm.com/docs/en/workload-automation/10.2.1?topic=guide-connection-security-overview).
 
 <!-- > **Note**: Passwords for "TWSServerTrustFile.jks" and "TWSServerKeyFile.jks" files must be entered in the respective "TWSServerTrustFile.jks.pwd" and "TWSServerKeyFile.jks.pwd" files. -->
  
@@ -1486,7 +1472,7 @@ For the Dynamic Workload Console, type the following command:
     
    where, TWSClientKeyStoreJKS.sth, TWSClientKeyStore.kdb, TWSClientKeyStore.sth, TWSClientKeyStoreJKS.jks, TWSServerTrustFile.jks and TWSServerKeyFile.jks are the Container keystore and stash file containing your customized certificates.
    
-   For details about custom certificates, see [Connection security overview](https://www.ibm.com/docs/workload-scheduler/10.1.0?topic=configuration-connection-security-overview).
+   For details about custom certificates, see [Connection security overview](https://www.ibm.com/docs/workload-scheduler/10.2.1?topic=configuration-connection-security-overview).
     
 
 > **Note**: Passwords for "TWSServerTrustFile.jks" and "TWSServerKeyFile.jks" files must be entered in the respective "TWSServerTrustFile.jks.pwd" and "TWSServerKeyFile.jks.pwd" files.
@@ -1582,58 +1568,14 @@ Consider the following example:
 
 For more information, see: 
 
-[Running batch reports from the command line interface](https://www.ibm.com/docs/en/workload-automation/10.1.0?topic=reports-running-batch-from-command-line-interface)
+[Running batch reports from the command line interface](https://www.ibm.com/docs/en/workload-automation/10.2.1?topic=reports-running-batch-from-command-line-interface)
 
 ## Metrics monitoring 
 
-IBM Workload Automation uses Grafana to display performance data related to the product. This data includes metrics related to the server and console application servers (WebSphere Application Server Liberty Base), your workload, your workstations, critical jobs, message queues, the database connection status, and more. Grafana is an open source tool for visualizing application metrics. Metrics provide insight into the state, health, and performance of your deployments and infrastructure. IBM Workload Automation cloud metric monitoring uses an opensource Cloud Native Computing Foundation (CNCF) project called Prometheus. It is particularly useful for collecting time series data that can be easily queried. Prometheus integrates with Grafana to visualize the metrics collected.
+IBM Workload Automation uses Grafana to display performance data related to the product. This data includes metrics related to the server and console application servers (WebSphere Application Server Liberty Base), your workload, your workstations, critical jobs, message queues, the database connection status, and more. Grafana is an open source tool for visualizing application metrics. Metrics provide insight into the state, health, and performance of your deployments and infrastructure. IBM Workload Automation cloud metric monitoring uses an opensource Cloud Native Computing Foundation (CNCF) project called Prometheus. It is particularly useful for collecting time series data that can be easily queried. Prometheus integrates with Grafana to visualize the metrics collected. For more informaiton about metrics, see [Metrics](https://www.ibm.com/docs/en/workload-automation/10.2.1?topic=scheduler-exposing-metrics-monitor-your-workload).
 
 
 
-The following metrics are collected and available to be visualized in the preconfigured Grafana dashboard. The dashboard is named **<workload_automation_namespace> <workload_automation_release_name>**:
-
-| Metric Display Name    | Metric Name                         | Description                                                                                                                               |
-|-----------------------------------------|--------------------------|-----------------------------------------------------------------------------------------------------------------|
-| Workload                                | application_wa_JobsInPlanCount_jobs   |Workload by job status: WAITING, READY, HELD, BLOCKED, CANCELED, ERROR, RUNNING, SUCCESSFUL, SUPPRESS, UNDECIDED  |
-|                               | application_wa_JobsByWorkstation    |Job status by workstation  |
-|                               | application_wa_JobsByFolder_jobs    |Job status by folder  |
-|                               | application_wa_JobsInPlanCount_jobs  | Workload throughput (jobs/minute)
-| Critical Jobs              | application_wa_criticalJob_incompletePredecessor    |Incomplete predecessors  |
-|                            | application_wa_criticalJob_potentialRisk_boolean   |Risk level:  potential risk  |
-|                            | application_wa_criticalJob_highRisk_boolean |Risk level: high risk  |
-|                            | application_wa_criticalJob_estimateEnd_seconds  | Estimated end  |
-|                            | application_wa_criticalJob_confidence_factor     | Confidence factor  |
-| WA Server - Internal Message Queues | application_wa_msgFileFill_percent    | Internal message queue usage for Appserverbox.msg, Courier.msg, mirrorbox.msg, Mailbox.msg, Monbox.msgn, Moncmd.msg, auditbox.msg, clbox.msg, planbox.msg, Intercom.msg, pobox messages, and server.msg   |
-| Workstation Status     | application_wa_workstation_running | Workstations running  |
-|                        | application_wa_workstation_linked_boolean | Workstations linked  |
-| Database Connection Status  | application_wa_DB_connected_boolean            |  1 - connected, 0 - not connected   |
-| PODs        |  kube_pod_container_status_restarts_total | Pod restarts (server, console, and agent) |
-|             |  kube_pod_status_phase                     | Failing pods (server, console, and agent)|
-|             |  container_cpu_usage_seconds_total          | POD CPU usage (server, console, and agent)        |
-|             |  container_network_transmit_bytes_total  |  Network I/O (server and console)        |
-|             |  container_network_receive_bytes_total  |  Network I/O (server and console)        |
-|             |  container_memory_usage_bytes          | RAM usage (server, console, and agent)       |
-| Persistent Volumes | kubelet_volume_stats_used_bytes   | For server, console, and agent: volume capacity (used, free)      |
-| WA  Server and Console - Liberty  |  base_memory_usedHeap_bytes     | Heap usage percentage  |
-|                                   | vendor_session_activeSessions   | Active sessions  |
-|                                   | vendor_session_liveSessions     |   Live sessions  |
-|                                   | vendor_threadpool_activeThreads | Active threads  |
-|                                   | vendor_threadpool_size          | Threadpool size  |
-|                                   | base_gc_time_seconds            |Time per garbage collection cycle moving average  |
-| WA Sever and Console - Connection Pools (Liberty) | vendor_connectionpool_inUseTime_total_seconds | Average time usage per connection over last |
-|                                   | vendor_connectionpool_managedConnections| Managed connections |
-|                                   | vendor_connectionpool_freeConnections | Free connections |
-|                                   | vendor_connectionpool_connectionHandles  | Connection handles |
-|                                   | vendor_connectionpool_destroy_total  | Created and destroyed connections |
-
-The following is an example of the various metrics available with focus on the workload job status:
-
-![Job status](images/WA_dashboard_jobstats.png)
- 
-
- The following is an exammple of how persistent volume capacity for the server, console and agent are visualized:
- 
-  ![Job status](images/WA_dashboard_pv.png)
   
   ### Setting the Grafana service
   Before you set the Grafana service, ensure that you have already installed Grafana and Prometheus on your cluster. For information about deploying Grafana see [Install Grafana](https://github.com/helm/charts/blob/master/stable/grafana/README.md). For information about deploying the open-source Prometheus project see [Download Promotheus](https://github.com/helm/charts/tree/master/stable/prometheus).
@@ -1695,7 +1637,7 @@ For more information about using Grafana dashboards see [Dashboards overview](ht
 
 ## Documentation
 
-To access the complete product documentation library for IBM Workload Automation, see https://www.ibm.com/docs/workload-scheduler/10.1.0  .
+To access the complete product documentation library for IBM Workload Automation, see [IBM Documentation]( https://www.ibm.com/docs/workload-scheduler/10.2.1).
 
 
 ## Troubleshooting
@@ -1703,16 +1645,16 @@ To access the complete product documentation library for IBM Workload Automation
 
 In the event a problem should occur while using IBM Workload Automation, Customer Support might ask you to supply information about your system and environment to perform problem determination. The following utilities are available:
 
--   A general data capture utility command that extracts information about IBM Workload Automation  and related agent workstations, system-specific information, and data related to WebSphere Application Server Liberty Base; see [Data capture utility](https://www.ibm.com/docs/workload-scheduler/10.1.0?topic=data-capture-utility).
+-   A general data capture utility command that extracts information about IBM Workload Automation  and related agent workstations, system-specific information, and data related to WebSphere Application Server Liberty Base; see [Data capture utility](https://www.ibm.com/docs/workload-scheduler/10.2.1?topic=data-capture-utility).
 
--   A first failure data capture (ffdc) facility built into **batchman** and **mailman** that automatically runs the data capture utility when failures occur in **jobman**, **mailman**, or **batchman** and collects products logs, traces and configuration files; see [First failure data capture (ffdc)](https://www.ibm.com/docs/workload-scheduler/10.1.0?topic=data-first-failure-capture-ffdc).
+-   A first failure data capture (ffdc) facility built into **batchman** and **mailman** that automatically runs the data capture utility when failures occur in **jobman**, **mailman**, or **batchman** and collects products logs, traces and configuration files; see [First failure data capture (ffdc)](https://www.ibm.com/docs/workload-scheduler/10.2.1?topic=data-first-failure-capture-ffdc).
 
--   The data capture utility script, wa_pull_info, is also used to collect data related to the Dynamic Workload Console to assist in problem determination; see [Data capture utility](https://www.ibm.com/docs/workload-scheduler/10.1.0?topic=data-capture-utility).
+-   The data capture utility script, wa_pull_info, is also used to collect data related to the Dynamic Workload Console to assist in problem determination; see [Data capture utility](https://www.ibm.com/docs/workload-scheduler/10.2.1?topic=data-capture-utility).
 
--   WebSphere Application Server Liberty Base javadump command to create the heap dump for WebSphere Application Server Liberty Base that runs on the Dynamic Workload Console and the master domain manager; see [Creating application server dumps](https://www.ibm.com/docs/workload-scheduler/10.1.0?topic=data-creating-application-server-dumps).
+-   WebSphere Application Server Liberty Base javadump command to create the heap dump for WebSphere Application Server Liberty Base that runs on the Dynamic Workload Console and the master domain manager; see [Creating application server dumps](https://www.ibm.com/docs/workload-scheduler/10.2.1?topic=data-creating-application-server-dumps).
 
 
-In case of problems related to deploying the product with containers, see [Troubleshooting](https://www.ibm.com/docs/workload-scheduler/10.1.0?topic=containers-troubleshooting).
+In case of problems related to deploying the product with containers, see [Troubleshooting](https://www.ibm.com/docs/workload-scheduler/10.2.1?topic=containers-troubleshooting).
 
 ### Known problems
 
@@ -1734,6 +1676,9 @@ In case of problems related to deploying the product with containers, see [Troub
 
 
 ### Change history
+
+## Added December 2023
++ new version released
 
 ## Added November 2022
 * JSON Web Token (JWT) support
