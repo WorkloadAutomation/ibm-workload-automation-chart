@@ -33,7 +33,7 @@
 ##  Introduction
 
 
-**AI Data Advisor (AIDA)** is a new component of IBM Workload Automation since V10.1, based on Artificial Intelligence and Machine Learning techniques. It enables fast and simplified data-driven decision making for an intelligent workload management. By analyzing workload historical data and metrics gathered by IBM Workload Automation and predicting their future patterns, AIDA identifies anomalies in KPIs trend (such as the jobs in plan by status and the jobs in plan by workstation) and sends immediate alerts to prevent problems and delays. Alerts show up on the Workload Dashboard and can be notified via email.
+**AI Data Advisor (AIDA)** is a new component of IBM Workload Automation V10.1, based on Artificial Intelligence and Machine Learning techniques. It enables fast and simplified data-driven decision making for an intelligent workload management. By analyzing workload historical data and metrics gathered by IBM Workload Automation and predicting their future patterns, AIDA identifies anomalies in KPIs trend (such as the jobs in plan by status and the jobs in plan by workstation) and sends immediate alerts to prevent problems and delays. Alerts show up on the Workload Dashboard and can be notified via email.
 
 AIDA can be deployed into the following supported third-party cloud provider infrastructures:
 
@@ -43,7 +43,7 @@ AIDA can be deployed into the following supported third-party cloud provider inf
 
 For more information about AIDA, see AIDA User's Guide in the [IBM Workload Automation documentation](https://www.ibm.com/docs/en/workload-automation/10.2.0).
 
-This readme provides the steps for deploying AIDA, using helm charts and container images. Deploy AIDA after deploying IBM Workload Automation. For details about  IBM Workload Automation deployment, refer to IBM Workload Automation readme file. 
+This readme provides the steps for deploying AIDA, using helm charts and container images. Deploy AIDA after deploying IBM Workload Automation. For details about IBM Workload Automation deployment, refer to IBM Workload Automation readme file. 
 
 
 ##  Limitations
@@ -56,15 +56,15 @@ This readme provides the steps for deploying AIDA, using helm charts and contain
 ##  Details
 AIDA helm chart is composed of the following sub-charts, one for each service:
 
--   ``aida-ad`` - Anomaly detection and alert generation service    
--   ``aida-es`` - Elasticsearch, to store and analyze data    
--   ``aida-exporter`` - Exporter service    
--   ``aida-email`` - Email notification service    
--   ``aida-nginx`` - As a reverse proxy for AIDA components    
--   ``aida-orchestrator`` - Orchestrator service    
--   ``aida-predictor`` - Predictor service    
--   ``aida-redis`` - Internal event manager
--   ``aida-ui`` - AIDA UI
+-   ``aida-ad`` - Anomaly detection and alert generation service    
+-   ``aida-es`` - Elasticsearch, to store and analyze data    
+-   ``aida-exporter`` - Exporter service    
+-   ``aida-email`` - Email notification service    
+-   ``aida-nginx`` - As a reverse proxy for AIDA components    
+-   ``aida-orchestrator`` - Orchestrator service    
+-   ``aida-predictor`` - Predictor service    
+-   ``aida-redis`` - Internal event manager
+-  `` aida-ui`` - AIDA UI
     
 
 Each sub-chart defines the following Kubernetes resources:
@@ -132,23 +132,25 @@ from `LoadBalancer` to `Routes`
 
 You can access AIDA subcharts and container images from the Entitled Registry (online installation). See [Creating the Secret](#creating-the-secret) for more information about accessing the registry. The images are as follows:
 
- - ``cp.icr.io/cp/aida-ad:10.2.0.0`` 
- - ``cp.icr.io/cp/aida-exporter:10.2.0.0``
- - ``cp.icr.io/cp/aida-email:10.2.0.0``
- - ``cp.icr.io/cp/aida-nginx:10.2.0.0``
- - ``cp.icr.io/cp/aida-orchestrator:10.2.0.0``
- - ``cp.icr.io/cp/aida-predictor:10.2.0.0``
- - ``cp.icr.io/cp/aida-redis:10.2.0.0``
- - ``cp.icr.io/cp/aida-ui:10.2.0.0``
+ - ``cp.icr.io/cp/aida-ad:10.2.1.0`` 
+ - ``cp.icr.io/cp/aida-exporter:10.2.1.0``
+ - ``cp.icr.io/cp/aida-email:10.2.1.0``
+ - ``cp.icr.io/cp/aida-nginx:10.2.1.0``
+ - ``cp.icr.io/cp/aida-orchestrator:10.2.1.0``
+ - ``cp.icr.io/cp/aida-predictor:10.2.1.0``
+ - ``cp.icr.io/cp/aida-redis:10.2.1.0``
+ - ``cp.icr.io/cp/aida-ui:10.2.1.0``
+ 
+ 
 
 ##  Prerequisites
 AIDA requires:
 
- -  IBM Workload Automation V10.1 or above exposed metrics. For information about IBM Workload Automation exposed metrics, see "Exposing metrics to monitor your workload" in the [IBM Workload Automation documentation](https://www.ibm.com/docs/en/workload-automation/10.2.0) User's Guide.  
+ -  IBM Workload Automation V10.1 or higher exposed metrics. For information about IBM Workload Automation exposed metrics, see "Exposing metrics to monitor your workload" in the [IBM Workload Automation documentation](https://www.ibm.com/docs/en/workload-automation/10.1.0) User's Guide.  
  -  API key for accessing the Entitled Registry: cp.icr.io
  -  External container image for OpenSearch 2.3.0 (an Elasticsearch based technology)
  -  Supported browsers are: 
-	- Google Chrome 67.0.3396.99 or higher
+    - Google Chrome 67.0.3396.99 or higher
     - Mozilla Firefox 61.0.1 or higher 
     - Microsoft Edge 79 or higher
 
@@ -174,16 +176,18 @@ AIDA prerequisites are inherited by IBM Workload Automation.
 
 Before installing AIDA, run the following steps: 
 
-1.  Accept the product license by setting the global.license parameter to **accept** (default value is **notaccepted**) in the values.yaml file.
-2.  To use custom SSL certificates for AIDA, in the <install_path>/nginx/cert folder replace aida.crt e aida.key with your own files (do not change the default names).
-3.  Verify that aida-exporter.waHostName parameter in the values.yaml file is set to the host name used to reach the WA server. This parameter is not required if AIDA is deployed in the same helm chart as WA.
-4.  Verify that aida-exporter.waPort parameter in the values.yaml file is set to the port used to reach the WA server. Its default value is "3116".   
-5.  Verify that aida-nginx.waConsoleCertSecretName parameter in the values.yaml file is set to the name of the WA console secret used to store the customized SSL certificates.
-6.  If you want to receive alert notification via email, properly set the configuration parameters in the aida-email section of the values.yaml file.  
+1.  To use custom SSL certificates for AIDA, in the <install_path>/nginx/cert folder replace aida.crt e aida.key with your own files (do not change the default names).
+2.  Verify that aida-exporter.waHostName parameter in the values.yaml file is set to the host name used to reach the WA server. This parameter is not required if AIDA is deployed in the same helm chart as WA.
+3.  Verify that aida-exporter.waPort parameter in the values.yaml file is set to the port used to reach the WA server. Its default value is "3116".   
+4.  Verify that aida-nginx.waConsoleCertSecretName parameter in the values.yaml file is set to the name of the WA console secret used to store the customized SSL certificates.
+5.  If you want to receive alert notification via email, properly set the configuration parameters in the aida-email section of the values.yaml file.  
+6.  To prevent HTTP Host Header attacks, in the values.yaml file add the string ``EXTERNAL_HOSTNAME=IP`` where IP is the IP address of the machine where AIDA is being installed.
 
 ##  Installing
 
 Refer to IBM Workload Automation readme file for the general installation procedure that includes AIDA as an IBM Workload Automation component.
+During the installation procedure, accept the product license when prompted.
+
 In addition, run the following AIDA specific steps: 
 
 1. [Creating the  Secret](#creating-the-secret) by accessing the entitled registry to store an entitlement key for AIDA offering on your cluster.
@@ -290,7 +294,6 @@ Refer to IBM Workload Automation readme file.
 ##  Uninstalling the Chart
 
 Refer to IBM Workload Automation readme file.
-		
 		
 ##  Configuration Parameters
 
@@ -509,6 +512,7 @@ The following tables list the configurable parameters of the chart relative to e
 |autoscaling.maxReplicas |The maximum number of Pods | N |N |10 |
 |autoscaling.targetMemoryUtilizationPercentage |The value in percentage of memory utilization that each Pod should have |N  |N  |80 |
 
+
 ##  Configuring
 
 The following procedures are ways in which you can configure AIDA default deployment. They include the following configuration topics:
@@ -691,4 +695,4 @@ AIDA supports only ReadWriteOnce (RWO) access mode. The volume can be mounted as
 
 ##  Documentation
 
-For more information about AIDA, see AIDA User's Guide in the [IBM Workload Automation documentation](https://www.ibm.com/docs/en/workload-automation/10.1.0).
+For more information about AIDA, see AIDA User's Guide in the [IBM Workload Automation documentation](https://www.ibm.com/docs/en/workload-automation/10.2.0).
