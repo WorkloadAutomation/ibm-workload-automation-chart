@@ -13,7 +13,7 @@ global:
   defaultShardCount: 1
   enablePrometheus: true
   customPluginImageName: 
-  pluginImageName: cp.icr.io/cp/ibm-workload-automation-plugins:10.2.0.00.20230728
+  pluginImageName: cp.icr.io/cp/ibm-workload-automation-plugins:10.2.1.00.20231201
   configPlugins:
   customLabels:
     - name: "environment"
@@ -74,7 +74,7 @@ waagent:
   image:
     pullPolicy: Always
     repository: cp.icr.io/cp/ibm-workload-automation-agent-dynamic
-    tag: 10.2.0.00.20230728
+    tag: 10.2.1.00.20231201
   persistence:
     dataPVC:
       name: data
@@ -117,7 +117,7 @@ waagent:
       memory: 200Mi
 waconsole:
   enableConsole: true
-  enableNginxServer: false
+  enableNginxServer: true
   runAsUser: 999
   fsGroupId: 999
   supplementalGroupId:
@@ -192,7 +192,7 @@ waconsole:
   image:
     pullPolicy: Always
     repository: cp.icr.io/cp/ibm-workload-automation-console
-    tag: 10.2.0.00.20230728
+    tag: 10.2.1.00.20231201
   persistence:
     dataPVC:
       name: data
@@ -242,7 +242,7 @@ waserver:
   image:
     pullPolicy: Always
     repository: cp.icr.io/cp/ibm-workload-automation-server
-    tag: 10.2.0.00.20230728
+    tag: 10.2.1.00.20231201
   persistence:
     dataPVC:
       name: data
@@ -381,7 +381,7 @@ wafileproxy:
   replicaCount: 1
   image:
     repository: cp.icr.io/cp/ibm-workload-automation-fileproxy
-    tag: 10.2.0.00.20230728
+    tag: 10.2.1.00.20231201
     pullPolicy: Always
   nameOverride: ""
   fullnameOverride: ""
@@ -449,7 +449,7 @@ waaida:
   aida-ad:
     image:
       repository: cp.icr.io/cp/ibm-aida-ad
-      tag: 10.2.0.00.20230728
+      tag: 10.2.1.00.20231201
       pullPolicy: Always
     serviceAccount:
       create: false
@@ -515,7 +515,7 @@ waaida:
     resolveAlertsAfterDays: 1
     image:
       repository: cp.icr.io/cp/ibm-aida-exporter
-      tag: 10.2.0.00.20230728
+      tag: 10.2.1.00.20231201
       pullPolicy: Always
     serviceAccount:
       create: false
@@ -536,7 +536,7 @@ waaida:
     recipientMailIds: "mail1@mail.com,mail2@mail.com"
     image:
       repository: cp.icr.io/cp/ibm-aida-email
-      tag: 10.2.0.00.20230728
+      tag: 10.2.1.00.20231201
       pullPolicy: Always
     serviceAccount:
       create: false
@@ -553,7 +553,7 @@ waaida:
     waConsoleCertSecretName: waconsole-cert-secret
     image:
       repository: cp.icr.io/cp/ibm-aida-nginx
-      tag: 10.2.0.00.20230728
+      tag: 10.2.1.00.20231201
       pullPolicy: Always
     serviceAccount:
       create: false
@@ -586,7 +586,7 @@ waaida:
     daysOfPrediction: 1
     image:
       repository: cp.icr.io/cp/ibm-aida-orchestrator
-      tag: 10.2.0.00.20230728
+      tag: 10.2.1.00.20231201
       pullPolicy: Always
     serviceAccount:
       create: false
@@ -602,7 +602,7 @@ waaida:
   aida-predictor:
     image:
       repository: cp.icr.io/cp/ibm-aida-predictor
-      tag: 10.2.0.00.20230728
+      tag: 10.2.1.00.20231201
       pullPolicy: Always
     serviceAccount:
       create: false
@@ -624,7 +624,7 @@ waaida:
   aida-redis:
     image:
       repository: cp.icr.io/cp/ibm-aida-redis
-      tag: 10.2.0.00.20230728
+      tag: 10.2.1.00.20231201
       pullPolicy: Always
     serviceAccount:
       create: false
@@ -641,7 +641,7 @@ waaida:
     uiLogLevel: "ERROR:*,INFO:*,-TRACE:*"
     image:
       repository: cp.icr.io/cp/ibm-aida-ui
-      tag: 10.2.0.00.20230728
+      tag: 10.2.1.00.20231201
       pullPolicy: Always
     serviceAccount:
       create: false

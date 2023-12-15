@@ -4,13 +4,13 @@
 #
 # * Trademark of HCL Technologies Limited
 ####################################################################
-enableNginxServer: false
+enableNginxServer: true
 global:
   # set to "accept" to accept the license
   license: "not accepted"
   serviceAccountName:
   customPluginImageName: 
-  pluginImageName: cp.icr.io/cp/ibm-workload-automation-plugins:10.2.0.00.20230728
+  pluginImageName: cp.icr.io/cp/ibm-workload-automation-plugins:10.2.1.00.20231201
   configPlugins:
   language: "en"
   enablePrometheus: true
@@ -20,7 +20,7 @@ global:
 replicaCount: 1
 image:
   repository: cp.icr.io/cp/ibm-workload-automation-console
-  tag: 10.2.0.00.20230728
+  tag: 10.2.1.00.20231201
   pullPolicy: Always
 licenseType: "PVU"
 runAsUser: 999

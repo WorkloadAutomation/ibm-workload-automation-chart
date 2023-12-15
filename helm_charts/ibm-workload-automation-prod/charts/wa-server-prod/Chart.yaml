@@ -1,13 +1,5 @@
-####################################################################
-# Licensed Materials Property of HCL*
-# (c) Copyright HCL Technologies Ltd. 2019. All rights reserved.
-#
-# * Trademark of HCL Technologies Limited
-####################################################################
 apiVersion: v2
-name: wa-server-prod
-version: 1.6.6
-appVersion: 10.2.0.00
+appVersion: 10.2.1.00
 description: Helm chart for configuring IBM Workload Automation.
 keywords:
 - Commercial
@@ -16,6 +8,8 @@ keywords:
 - Workload Automation
 - Automation
 - DevOps
+kubeVersion: '>=1.14.0 || >=1.14.0-0'
 maintainers:
 - name: IBM Workload Automation
-kubeVersion: ">=1.14.0 || >=1.14.0-0"
+name: wa-server-prod
+version: 10.2.1

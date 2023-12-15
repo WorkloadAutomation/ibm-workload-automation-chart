@@ -1,11 +1,5 @@
-####################################################################
-# Licensed Materials Property of HCL*
-# (c) Copyright HCL Technologies Ltd. 2022. All rights reserved.
-#
-# * Trademark of HCL Technologies Limited
-####################################################################
 apiVersion: v2
-name: wa-fileproxy-prod
+appVersion: 10.2.1.00
 description: Helm chart for configuring IBM Workload Automation FileProxy
 keywords:
 - Commercial
@@ -15,9 +9,9 @@ keywords:
 - Automation
 - DevOps
 - FileProxy
+kubeVersion: '>=1.14.0 || >=1.14.0-0'
 maintainers:
 - name: IBM Workload Automation
-kubeVersion: ">=1.14.0 || >=1.14.0-0"
+name: wa-fileproxy-prod
 type: application
-version: 1.6.6
-appVersion: 10.2.0.00
+version: 10.2.1

@@ -2,7 +2,7 @@ apiVersion: v1
 entries:
   workload-automation-prod:
   - apiVersion: v2
-    appVersion: 10.2.0.00
+    appVersion: 10.2.1.00
     created: "2023-07-28T17:28:08.9790094+02:00"
     dependencies:
     - alias: waserver
