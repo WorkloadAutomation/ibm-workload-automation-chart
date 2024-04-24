@@ -13,7 +13,7 @@ global:
   defaultShardCount: 1
   enablePrometheus: true
   customPluginImageName: 
-  pluginImageName: cp.icr.io/cp/ibm-workload-automation-plugins:10.2.1.00.20231201
+  pluginImageName: cp.icr.io/cp/ibm-workload-automation-plugins:10.2.2.00.20240424
   configPlugins:
   customLabels:
     - name: "environment"
@@ -45,6 +45,8 @@ waagent:
         mdmhostname: null
         port: "31116"
       useCustomizedCert: false
+      certDuration: 2160h # 90d
+      certRenewBefore: 360h # 15d
     livenessProbe:
       initialDelaySeconds: 60
     name: WA_AGT
@@ -74,7 +76,7 @@ waagent:
   image:
     pullPolicy: Always
     repository: cp.icr.io/cp/ibm-workload-automation-agent-dynamic
-    tag: 10.2.1.00.20231201
+    tag: 10.2.2.00.20240424
   persistence:
     dataPVC:
       name: data
@@ -188,11 +190,13 @@ waconsole:
       initialDelaySeconds: 100
     pwdSecretName: wa-pwd-secret
     useCustomizedCert: false
+    certDuration: 2160h # 90d
+    certRenewBefore: 360h # 15d  
     tz:
   image:
     pullPolicy: Always
     repository: cp.icr.io/cp/ibm-workload-automation-console
-    tag: 10.2.1.00.20231201
+    tag: 10.2.2.00.20240424
   persistence:
     dataPVC:
       name: data
@@ -242,7 +246,7 @@ waserver:
   image:
     pullPolicy: Always
     repository: cp.icr.io/cp/ibm-workload-automation-server
-    tag: 10.2.1.00.20231201
+    tag: 10.2.2.00.20240424
   persistence:
     dataPVC:
       name: data
@@ -375,13 +379,15 @@ waserver:
     startOfDay: "0700"
     timezone: null
     tz: null
-    useCustomizedCert: false  
+    useCustomizedCert: false
+    certDuration: 2160h # 90d
+    certRenewBefore: 360h # 15d    
 wafileproxy:
   enableFileProxy: false
   replicaCount: 1
   image:
     repository: cp.icr.io/cp/ibm-workload-automation-fileproxy
-    tag: 10.2.1.00.20231201
+    tag: 10.2.2.00.20240424
     pullPolicy: Always
   nameOverride: ""
   fullnameOverride: ""
@@ -389,6 +395,8 @@ wafileproxy:
   fileProxy:
     certSecretName: wa-fileproxy-cert
     useCustomizedCert: false
+    certDuration: 2160h # 90d
+    certRenewBefore: 360h # 15d   
     containerDebug: false
     port: 44444
     route:
@@ -449,7 +457,7 @@ waaida:
   aida-ad:
     image:
       repository: cp.icr.io/cp/ibm-aida-ad
-      tag: 10.2.1.00.20231201
+      tag: 10.2.2.00.20240424
       pullPolicy: Always
     serviceAccount:
       create: false
@@ -515,7 +523,7 @@ waaida:
     resolveAlertsAfterDays: 1
     image:
       repository: cp.icr.io/cp/ibm-aida-exporter
-      tag: 10.2.1.00.20231201
+      tag: 10.2.2.00.20240424
       pullPolicy: Always
     serviceAccount:
       create: false
@@ -536,7 +544,7 @@ waaida:
     recipientMailIds: "mail1@mail.com,mail2@mail.com"
     image:
       repository: cp.icr.io/cp/ibm-aida-email
-      tag: 10.2.1.00.20231201
+      tag: 10.2.2.00.20240424
       pullPolicy: Always
     serviceAccount:
       create: false
@@ -553,7 +561,7 @@ waaida:
     waConsoleCertSecretName: waconsole-cert-secret
     image:
       repository: cp.icr.io/cp/ibm-aida-nginx
-      tag: 10.2.1.00.20231201
+      tag: 10.2.2.00.20240424
       pullPolicy: Always
     serviceAccount:
       create: false
@@ -586,7 +594,7 @@ waaida:
     daysOfPrediction: 1
     image:
       repository: cp.icr.io/cp/ibm-aida-orchestrator
-      tag: 10.2.1.00.20231201
+      tag: 10.2.2.00.20240424
       pullPolicy: Always
     serviceAccount:
       create: false
@@ -602,7 +610,7 @@ waaida:
   aida-predictor:
     image:
       repository: cp.icr.io/cp/ibm-aida-predictor
-      tag: 10.2.1.00.20231201
+      tag: 10.2.2.00.20240424
       pullPolicy: Always
     serviceAccount:
       create: false
@@ -624,7 +632,7 @@ waaida:
   aida-redis:
     image:
       repository: cp.icr.io/cp/ibm-aida-redis
-      tag: 10.2.1.00.20231201
+      tag: 10.2.2.00.20240424
       pullPolicy: Always
     serviceAccount:
       create: false
@@ -641,7 +649,7 @@ waaida:
     uiLogLevel: "ERROR:*,INFO:*,-TRACE:*"
     image:
       repository: cp.icr.io/cp/ibm-aida-ui
-      tag: 10.2.1.00.20231201
+      tag: 10.2.2.00.20240424
       pullPolicy: Always
     serviceAccount:
       create: false

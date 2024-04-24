@@ -132,6 +132,12 @@ spec:
               name: {{ include "wa.fullName" . }}-secret
               key: WA_USER_ENGINE_PASSWORD
               optional: true  
+        - name: SSL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "wa.fullName" . }}-secret
+              key: SSL_PASSWORD
+              optional: true
         - name: WA_API_KEY
           valueFrom:
             secretKeyRef:

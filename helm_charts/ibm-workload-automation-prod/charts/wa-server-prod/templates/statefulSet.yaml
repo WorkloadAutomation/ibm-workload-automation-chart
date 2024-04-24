@@ -170,6 +170,18 @@ spec:
         {{- end }}
         - name: LANG
           value: {{ default "en" .Values.global.language }}
+        - name: OTEL_SDK_DISABLED
+          value: {{ .Values.server.otel_sdk_disabled | quote }}
+        - name: OTEL_TRACES_EXPORTER
+          value: {{ .Values.server.otel_traces_exporter | quote }}
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: {{ .Values.server.otel_exporter_otlp_endpoint | quote }}
+        - name: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
+          value: {{ .Values.server.otel_exporter_otlp_traces_endpoint | quote }}
+        - name: OTEL_EXPORTER_OTLP_PROTOCOL
+          value: {{ .Values.server.otel_exporter_otlp_protocol | quote }}
+        - name: OTEL_EXPORTER_OTLP_TRACES_PROTOCOL
+          value: {{ .Values.server.otel_exporter_otlp_traces_protocol | quote }}
         - name: WA_DEBUG_SCRIPTS
           value: "false"      
         - name: PUBLIC_HOSTNAME
