@@ -149,6 +149,18 @@ spec:
           value: {{ .Values.global.license | quote }}
         - name: LANG
           value: {{ default "en" .Values.global.language }}
+        - name: OTEL_SDK_DISABLED
+          value: {{ .Values.console.otel_sdk_disabled | quote }}
+        - name: OTEL_TRACES_EXPORTER
+          value: {{ .Values.console.otel_traces_exporter | quote }}
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: {{ .Values.console.otel_exporter_otlp_endpoint | quote }}
+        - name: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
+          value: {{ .Values.console.otel_exporter_otlp_traces_endpoint | quote }}
+        - name: OTEL_EXPORTER_OTLP_PROTOCOL
+          value: {{ .Values.console.otel_exporter_otlp_protocol | quote }}
+        - name: OTEL_EXPORTER_OTLP_TRACES_PROTOCOL
+          value: {{ .Values.console.otel_exporter_otlp_traces_protocol | quote }}
 {{ include "common.dwc.hidden.env" . | indent 8 }}
         - name: WA_DEBUG
           value: {{ .Values.console.containerDebug | quote }}
@@ -195,6 +207,16 @@ spec:
           value:  {{ .Values.console.db.invalidHostnameAllowed | quote }}
         - name: DB_AUTHDB
           value:  {{ .Values.console.db.authDb | quote }}
+        {{- end}}
+        {{- if eq (.Values.console.db.type | upper) "DOCUMENTDB" }}
+        - name: DB_INVALID_HOSTNAME_ALLOWED
+          value:  {{ .Values.console.db.invalidHostnameAllowed | quote }}
+        - name: DB_AUTHDB
+          value:  {{ .Values.console.db.authDb | quote }}
+        - name: DB_RETRY_WRITES
+          value:  {{ .Values.console.db.retryWrites }}
+        - name: DB_READ_PREFERENCE
+          value:  {{ .Values.console.db.readPreference | quote }}
         {{- end}}
         {{- if eq (.Values.console.db.type | upper) "ORACLE" }} 
         - name: DB_SKIP_CHECK

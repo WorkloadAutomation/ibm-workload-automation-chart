@@ -15,7 +15,7 @@ global:
 aida-ad:
   image:
     repository: cp.icr.io/cp/ibm-aida-ad
-    tag: 10.2.1.00.20231201
+    tag: 10.2.2.00.20240424
     pullPolicy: Always
   serviceAccount:
     create: false
@@ -82,7 +82,7 @@ aida-exporter:
   resolveAlertsAfterDays: 1
   image:
     repository: cp.icr.io/cp/ibm-aida-exporter
-    tag: 10.2.1.00.20231201
+    tag: 10.2.2.00.20240424
     pullPolicy: Always
   serviceAccount:
     create: false
@@ -103,7 +103,7 @@ aida-email:
   recipientMailIds: "mail1@mail.com,mail2@mail.com"
   image:
     repository: cp.icr.io/cp/ibm-aida-email
-    tag: 10.2.1.00.20231201
+    tag: 10.2.2.00.20240424
     pullPolicy: Always
   serviceAccount:
     create: false
@@ -120,7 +120,7 @@ aida-nginx:
   waConsoleCertSecretName: waconsole-cert-secret
   image:
     repository: cp.icr.io/cp/ibm-aida-nginx
-    tag: 10.2.1.00.20231201
+    tag: 10.2.2.00.20240424
     pullPolicy: Always
   serviceAccount:
     create: false
@@ -153,7 +153,7 @@ aida-orchestrator:
   daysOfPrediction: 1
   image:
     repository: cp.icr.io/cp/ibm-aida-orchestrator
-    tag: 10.2.1.00.20231201
+    tag: 10.2.2.00.20240424
     pullPolicy: Always
   serviceAccount:
     create: false
@@ -169,7 +169,7 @@ aida-orchestrator:
 aida-predictor:
   image:
     repository: cp.icr.io/cp/ibm-aida-predictor
-    tag: 10.2.1.00.20231201
+    tag: 10.2.2.00.20240424
     pullPolicy: Always
   serviceAccount:
     create: false
@@ -192,7 +192,7 @@ aida-predictor:
 aida-redis:
   image:
     repository: cp.icr.io/cp/ibm-aida-redis
-    tag: 10.2.1.00.20231201
+    tag: 10.2.2.00.20240424
     pullPolicy: Always
   serviceAccount:
     create: false
@@ -209,7 +209,7 @@ aida-ui:
   uiLogLevel: "ERROR:*,INFO:*,-TRACE:*"
   image:
     repository: cp.icr.io/cp/ibm-aida-ui
-    tag: 10.2.1.00.20231201
+    tag: 10.2.2.00.20240424
     pullPolicy: Always
   serviceAccount:
     create: false

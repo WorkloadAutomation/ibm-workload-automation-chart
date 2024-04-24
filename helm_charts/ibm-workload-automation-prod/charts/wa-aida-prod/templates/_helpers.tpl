@@ -64,3 +64,52 @@ Create the name of the service account to use
 {{- default .Values.global.serviceAccountName .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
+{{/*
+Initialize parameters by merging them with the root context
+*/}}
+{{- define "wa.init" -}}
+  {{- $args := . -}}
+  {{- $root := first $args -}}
+  {{- $appName := index $args 1 -}}
+  {{- $appNameDict := dict "appName" $appName -}}
+  {{- $_ := merge $root $appNameDict -}}
+{{- end -}}
+{{- define "wa.fullName" -}}
+  {{- $appName := include "wa.appName" . | trunc 9 }}
+  {{- $longName := (printf "%s-%s" .Release.Name $appName) -}}
+  {{- if (gt (len $longName) 64) -}}
+    {{- $truncReleaseName := .Release.Name | trunc 64 -}}
+    {{- $rand := randAlphaNum 4 | lower -}}
+    {{- $fullName := (printf "%s-%s-%s" $truncReleaseName $appName $rand) -}}
+    {{- $fullName -}}
+  {{- else -}} 
+    {{- $longName -}}
+  {{- end -}}
+{{- end -}}
+{{/*
+Returns the app name
+*/}}
+{{- define "wa.appName" -}}
+  {{ .appName }}
+{{- end -}}
+{{/*
+Returns the node affinity
+*/}}
+{{- define "wa.nodeaffinity" -}}
+nodeAffinity:
+  preferredDuringSchedulingIgnoredDuringExecution:
+  - preference:
+      matchExpressions:
+      - key: kubernetes.io/arch
+        operator: In
+        values:
+        - amd64
+    weight: 3
+  requiredDuringSchedulingIgnoredDuringExecution:
+    nodeSelectorTerms:
+    - matchExpressions:
+      - key: kubernetes.io/arch
+        operator: In
+        values:
+        - amd64
+{{- end -}}

@@ -10,7 +10,7 @@ global:
   serviceAccountName:
   enablePrometheus: true
   customPluginImageName: 
-  pluginImageName: cp.icr.io/cp/ibm-workload-automation-plugins:10.2.1.00.20231201
+  pluginImageName: cp.icr.io/cp/ibm-workload-automation-plugins:10.2.2.00.20240424
   configPlugins:
   language: "en"
   customLabels:
@@ -19,7 +19,7 @@ global:
 replicaCount: 1
 image:
   repository: cp.icr.io/cp/ibm-workload-automation-server
-  tag: 10.2.1.00.20231201
+  tag: 10.2.2.00.20240424
   pullPolicy: Always
 licenseType: "PVU"
 runAsUser: 999
@@ -43,6 +43,12 @@ server:
   enableSSO: true
   enableSingleInstaceNetwork: false
   adminGroup:
+  otel_sdk_disabled: true
+  otel_traces_exporter: otlp
+  otel_exporter_otlp_endpoint: http://localhost:4317
+  otel_exporter_otlp_traces_endpoint: http://localhost:4317
+  otel_exporter_otlp_protocol: grpc
+  otel_exporter_otlp_traces_protocol: grpc
   db:
     adminUser: db2inst1
     hostname: dbhost
