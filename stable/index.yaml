@@ -3,7 +3,7 @@ entries:
   workload-automation-prod:
   - apiVersion: v2
     appVersion: 10.2.2.00
-    created: "2024-04-29T015:06:25.6294015+01:00"
+    created: "2024-04-29T15:06:25.6294015+01:00"
     dependencies:
     - alias: waserver
       condition: waserver.enableServer
