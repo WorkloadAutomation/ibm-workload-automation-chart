@@ -353,9 +353,9 @@ where **<my_path>** is the location path of the mysecret.yaml file.
                 environment: prod
                 helm.sh/chart: workload-automation-prod
                 release: wa-pwd-secret
-              annotations:
-                meta.helm.sh/release-name: wa-pwd-secret
-                meta.helm.sh/release-namespace: <workload_automation_namespace>
+             annotations:
+               meta.helm.sh/release-name: wa-pwd-secret
+               meta.helm.sh/release-namespace: <workload_automation_namespace>
 	    type: Opaque
 	    data:
 	       SSL_PASSWORD: <hidden_password>
