@@ -293,26 +293,26 @@ Create a secrets file to store passwords for the server, console and database, o
 
 1. Manually create a mysecret.yaml file to store passwords. The mysecret.yaml file must contain the following parameters:
 
-	    apiVersion: v1
-	    kind: Secret
-	    metadata:
-	      name: wa-pwd-secret
-	      namespace: <workload_automation_namespace>
-   	     labels:
-                app.kubernetes.io/instance: wa-pwd-secret
-                app.kubernetes.io/managed-by: Helm
-                app.kubernetes.io/name: workload-automation-prod
-                environment: prod
-                helm.sh/chart: workload-automation-prod
-                release: wa-pwd-secret
-              annotations:
-                meta.helm.sh/release-name: wa-pwd-secret
-                meta.helm.sh/release-namespace: <workload_automation_namespace>
-	    type: Opaque
-	    data:
-	       WA_PASSWORD: <hidden_password>
-	       DB_ADMIN_PASSWORD: <hidden_password>
-	       DB_PASSWORD: <hidden_password>	
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: wa-pwd-secret
+      namespace: <workload_automation_namespace>
+    labels:
+        app.kubernetes.io/instance: wa-pwd-secret
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: workload-automation-prod
+        environment: prod
+        helm.sh/chart: workload-automation-prod
+        release: wa-pwd-secret
+    annotations:
+        meta.helm.sh/release-name: wa-pwd-secret
+        meta.helm.sh/release-namespace: <workload_automation_namespace>
+    type: Opaque
+    data:
+       WA_PASSWORD: <hidden_password>
+       DB_ADMIN_PASSWORD: <hidden_password>
+       DB_PASSWORD: <hidden_password>	
 	      
      
 where:
