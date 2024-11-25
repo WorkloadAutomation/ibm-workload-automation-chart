@@ -1,0 +1,30 @@
+{{- if .Capabilities.APIVersions.Has "monitoring.coreos.com/v1"}}
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  labels:
+    environment: prod
+    k8slens-edit-resource-version: v1
+  name: dwc-pod-monitor
+spec:
+  jobLabel: prometheus.job.label
+  namespaceSelector:
+    any: false
+    matchNames:
+      - {{ .Release.Namespace }}
+  podMetricsEndpoints:
+    - enableHttp2: true
+      interval: 30s
+      path: /metrics
+      scheme: https
+      targetPort: 9443
+      tlsConfig:
+        insecureSkipVerify: true
+  podTargetLabels:
+    - app
+    - service
+    - release
+  selector:
+    matchLabels:
+      prometheus: 'true'
+{{- end }}

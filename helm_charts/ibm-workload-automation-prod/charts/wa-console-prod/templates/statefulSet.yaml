@@ -34,6 +34,7 @@ spec:
       labels:
 {{ include "wa.console.labels" . | indent 8 }}
         affinity: wa-console
+        prometheus: 'true'
       annotations:
         productName: IBM Workload Automation Console
         productVersion: "10.1"
@@ -144,6 +145,10 @@ spec:
           timeoutSeconds: 10
           failureThreshold: 3
           periodSeconds: 60
+        ports:
+          - name: web
+            containerPort: 9443
+            protocol: TCP
         env:                
         - name: LICENSE
           value: {{ .Values.global.license | quote }}

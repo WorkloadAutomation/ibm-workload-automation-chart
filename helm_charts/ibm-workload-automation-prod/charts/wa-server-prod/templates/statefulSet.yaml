@@ -34,6 +34,7 @@ spec:
 {{ include "wa.server.labels" . | indent 8 }}
         affinity: wa-server
         waservertype: master
+        prometheus: 'true'
       annotations:
       {{- if eq (.Values.licenseType | upper )  "PVU" }} 
 {{ include "wa.pvu.metering" . | indent 8 }} 
@@ -147,6 +148,10 @@ spec:
           timeoutSeconds: 10
           failureThreshold: 4
           periodSeconds: 60
+        ports:
+          - name: web
+            containerPort: 31116
+            protocol: TCP
         env:                
         - name: LICENSE
           value: {{ .Values.global.license | quote }}   
