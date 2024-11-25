@@ -6,7 +6,7 @@
 ####################################################################
 {{ $waUserName := include "wa.waUser" .}}
 apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
+kind: {{ if (default false .Values.global.useClusterRole) }}ClusterRole{{ else }}Role{{ end }}
 metadata:
   name: {{ .Release.Namespace }}-wa-pod-cluster-role-get-routes
   labels:
@@ -16,7 +16,7 @@ rules:
   resources: ["routes"]
   verbs: ["get", "list"]
 ---
-kind: ClusterRoleBinding
+kind: {{ if (default false .Values.global.useClusterRole) }}ClusterRoleBinding{{ else }}RoleBinding{{ end }}
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ .Release.Namespace }}-wa-pod-cluster-role-get-routes-binding
@@ -28,5 +28,5 @@ subjects:
     namespace: {{ .Release.Namespace }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
+  kind: {{ if (default false .Values.global.useClusterRole) }}ClusterRole{{ else }}Role{{ end }}
   name: {{ .Release.Namespace }}-wa-pod-cluster-role-get-routes
