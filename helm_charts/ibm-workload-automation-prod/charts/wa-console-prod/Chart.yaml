@@ -1,7 +1,7 @@
 apiVersion: v2
 name: wa-console-prod
-version: 10.2.3
-appVersion: 10.2.3.00
+version: 10.2.4
+appVersion: 10.2.4.00
 description: Helm chart for configuring IBM Workload Automation.
 keywords:
 - Commercial

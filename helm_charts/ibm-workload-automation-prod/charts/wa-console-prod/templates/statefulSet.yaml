@@ -297,6 +297,8 @@ spec:
         - name: config-liberty-volume
           mountPath: /opt/wautils/dropins 
 {{- end }}
+        - name: {{ include "wa.fullName" . }}-console-scripts-volume
+          mountPath: /opt/wautils/custom_scripts
         - name: {{ include "wa.fullName" . }}-console-plugins-volume
           mountPath: /opt/wautils/config/plugins.properties
           subPath: plugins.properties  

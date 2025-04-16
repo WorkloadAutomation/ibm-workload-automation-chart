@@ -1,26 +1,26 @@
 apiVersion: v2
-appVersion: 10.2.3.00
+appVersion: 10.2.4.00
 dependencies:
 - alias: waserver
   condition: waserver.enableServer
   name: wa-server-prod
   repository: ""
-  version: 10.2.3
+  version: 10.2.4
 - alias: waconsole
   condition: waconsole.enableConsole
   name: wa-console-prod
   repository: ""
-  version: 10.2.3
+  version: 10.2.4
 - alias: waagent
   condition: waagent.enableAgent
   name: wa-dyn-agent-prod
   repository: ""
-  version: 10.2.3
+  version: 10.2.4
 - alias: wafileproxy
   condition: wafileproxy.enableFileProxy
   name: wa-fileproxy-prod
   repository: ""
-  version: 10.2.3
+  version: 10.2.4
 - alias: waaida
   condition: waaida.enableAIDA
   name: wa-aida-prod
@@ -39,4 +39,4 @@ kubeVersion: '>=1.14.0 || >=1.14.0-0'
 maintainers:
 - name: IBM Workload Automation
 name: workload-automation-prod
-version: 10.2.3
+version: 10.2.4
