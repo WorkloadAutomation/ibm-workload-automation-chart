@@ -15,7 +15,7 @@ global:
 replicaCount: 1
 image:
   repository: cp.icr.io/cp/ibm-workload-automation-agent-dynamic
-  tag: 10.2.3.00.20241122
+  tag: 10.2.4.00.20250423
   pullPolicy: Always
 licenseType: "PVU"
 runAsUser: 999
