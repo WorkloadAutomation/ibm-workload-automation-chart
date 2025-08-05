@@ -485,7 +485,8 @@ waconsole:
         label: "Group that will have Administrator privileges" 
         description: "The group that will have WA Administrative privileges after installation"
         type: "string"
-        required: false      
+        required: false
+    openIdClientName:
     	__metadata:
 	      label: "OpenID Client name"
 	      description: "The name of the Client defined in ibm-common-services project for IAM configuration"

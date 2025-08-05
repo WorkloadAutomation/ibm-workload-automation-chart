@@ -1,7 +1,12 @@
-apiVersion: v2
+####################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2019. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+####################################################################
 name: wa-dyn-agent-prod
-version: 10.2.4
-appVersion: 10.2.4.00
+version: 10.2.5
+appVersion: 10.2.5.00
 description: Helm chart for configuring IBM Workload Automation Agent.
 keywords:
 - Commercial
@@ -10,6 +15,7 @@ keywords:
 - Workload Automation
 - Automation
 - DevOps
-kubeVersion: '>=1.14.0 || >=1.14.0-0'
 maintainers:
 - name: IBM Workload Automation
+kubeVersion: ">=1.14.0 || >=1.14.0-0"
+apiVersion: v2
