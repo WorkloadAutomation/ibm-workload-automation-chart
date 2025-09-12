@@ -302,7 +302,7 @@ Create a secrets file to store passwords for the server, console and database, o
 	      name: wa-pwd-secret
 	      namespace: <workload_automation_namespace>
    	     labels:
-                app.kubernetes.io/instance wa-pwd-secret
+                app.kubernetes.io/instance: wa-pwd-secret
                 app.kubernetes.io/managed-by: Helm
                 app.kubernetes.io/name: workload-automation-prod
                 environment: prod
