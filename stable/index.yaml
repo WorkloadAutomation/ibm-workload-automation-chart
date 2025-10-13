@@ -46,7 +46,7 @@ entries:
     name: workload-automation-prod
     urls:
       - workload-automation-prod-10.2.5.tgz
-    version: 10.2.4
+    version: 10.2.5
   - apiVersion: v2
     appVersion: 10.2.4.00
     created: "2025-04-23T15:06:25.6294015+01:00"
