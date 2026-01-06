@@ -755,21 +755,20 @@ The following are some useful Helm commands:
 If you plan to use the Dynamic Workload Console with MSSQL, perform the following steps:
 
 1) Create a new script with name dwc-console-scripts.yaml. The contents of the file is as follows:
-	```
-        
- 	{{- include "wa.init" (list . "waconsole") }}
-	apiVersion: v1
-	kind: ConfigMap
-	metadata:
-  	  name: {{ include "wa.fullName" . }}-console-scripts
-	data:
-  	  beforeLiberty.sh: |
-    	    
-	  #!/bin/sh
-   	
-    	echo "Setting the db.trustServerCertificate parameters..."
-    	sed -i '/<variable name="db.trustServerCertificate"/{s|value=".*"|value="false"|;b};3i <variable name="db.trustServerCertificate" value="false"/>' /homewauser/	wadata/usr/servers/dwcServer/configDropins/overrides/datasource.xml
-    	echo "...done!"```
+```yaml
+{{- include "wa.init" (list . "waconsole") }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "wa.fullName" . }}-console-scripts
+data:
+  beforeLiberty.sh: |-
+    #!/bin/sh
+
+    echo "Setting the db.trustServerCertificate parameters..."
+    sed -i '/<variable name="db.trustServerCertificate"/{s|value=".*"|value="false"|;b};3i <variable name="db.trustServerCertificate" value="false"/>' /home/wauser/wadata/usr/servers/dwcServer/configDropins/overrides/datasource.xml
+    echo "...done!"
+```
   
 2) Save the dwc-console-scripts.yaml file to the same path where the statefulset.yaml file is stored.
 3) Wait for the pod to restart. You can find the log file in the following path: `./wadata/installation/logs/beforeLiberty.log`.
