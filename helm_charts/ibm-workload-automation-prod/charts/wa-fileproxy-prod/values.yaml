@@ -10,7 +10,7 @@ global:
 replicaCount: 1
 image:
   repository: cp.icr.io/cp/ibm-workload-automation-fileproxy
-  tag: 10.2.5.00.20250804
+  tag: 10.2.6.00.20251212
   pullPolicy: Always
 nameOverride: ""
 fullnameOverride: ""

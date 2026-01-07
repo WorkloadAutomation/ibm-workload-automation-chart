@@ -5,8 +5,8 @@
 # * Trademark of HCL Technologies Limited
 ####################################################################
 name: wa-dyn-agent-prod
-version: 10.2.5
-appVersion: 10.2.5.00
+version: 10.2.6
+appVersion: 10.2.6.00
 description: Helm chart for configuring IBM Workload Automation Agent.
 keywords:
 - Commercial

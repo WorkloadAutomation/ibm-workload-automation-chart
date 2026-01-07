@@ -10,7 +10,7 @@ global:
   serviceAccountName:
   enablePrometheus: true
   customPluginImageName: 
-  pluginImageName: cp.icr.io/cp/ibm-workload-automation-plugins:10.2.5.00.20250804
+  pluginImageName: cp.icr.io/cp/ibm-workload-automation-plugins:10.2.6.00.20251212
   configPlugins:
   language: "en"
   customLabels:
@@ -19,7 +19,7 @@ global:
 replicaCount: 1
 image:
   repository: cp.icr.io/cp/ibm-workload-automation-server
-  tag: 10.2.5.00.20250804
+  tag: 10.2.6.00.20251212
   pullPolicy: Always
 licenseType: "PVU"
 runAsUser: 999
