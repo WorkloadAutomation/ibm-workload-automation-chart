@@ -19,5 +19,5 @@ maintainers:
 - name: IBM Workload Automation
 kubeVersion: ">=1.14.0 || >=1.14.0-0"
 type: application
-version: 10.2.5
-appVersion: 10.2.5.00
+version: 10.2.6
+appVersion: 10.2.6.00
