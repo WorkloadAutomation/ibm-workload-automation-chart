@@ -2,6 +2,52 @@ apiVersion: v1
 entries:
   workload-automation-prod:
   - apiVersion: v2
+    appVersion: 10.2.6.00
+    created: "2025-12-12T15:06:25.6294015+01:00"
+    dependencies:
+      - alias: waserver
+        condition: waserver.enableServer
+        name: wa-server-prod
+        repository: ""
+        version: 10.2.6
+      - alias: waconsole
+        condition: waconsole.enableConsole
+        name: wa-console-prod
+        repository: ""
+        version: 10.2.6
+      - alias: waagent
+        condition: waagent.enableAgent
+        name: wa-dyn-agent-prod
+        repository: ""
+        version: 10.2.6
+      - alias: wafileproxy
+        condition: wafileproxy.enableFileProxy
+        name: wa-fileproxy-prod
+        repository: ""
+        version: 10.2.6
+      - alias: waaida
+        condition: waaida.enableAIDA
+        name: wa-aida-prod
+        repository: ""
+        version: 1.0.2
+    description: Helm chart for configuring IBM Workload Automation.
+    digest: 930c359a3aa83ff320ff022db32b5f4ec7bb25f19a2ee29608d1bad82271d3bf
+    keywords:
+      - Commercial
+      - amd64
+      - Workload Scheduler
+      - Workload Automation
+      - Automation
+      - DevOps
+      - ICP
+    kubeVersion: '>=1.14.0 || >=1.14.0-0'
+    maintainers:
+      - name: IBM Workload Automation
+    name: workload-automation-prod
+    urls:
+      - workload-automation-prod-10.2.6.tgz
+    version: 10.2.6
+  - apiVersion: v2
     appVersion: 10.2.5.00
     created: "2025-08-04T15:06:25.6294015+01:00"
     dependencies:
