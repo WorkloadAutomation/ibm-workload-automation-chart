@@ -41,7 +41,7 @@ AIDA can be deployed into the following supported third-party cloud provider inf
 -   ![Microsoft Azure](images/tagmsa.png "Microsoft Azure")
 -   ![Google GKE](images/taggke.png "Google GKE")
 
-For more information about AIDA, see AIDA User's Guide in the [IBM Workload Automation documentation](https://www.ibm.com/docs/en/workload-automation/10.2.0).
+For more information about AIDA, see AIDA User's Guide in the [IBM Workload Automation documentation](https://www.ibm.com/docs/en/workload-automation/10.2.6).
 
 This readme provides the steps for deploying AIDA, using helm charts and container images. Deploy AIDA after deploying IBM Workload Automation. For details about IBM Workload Automation deployment, refer to IBM Workload Automation readme file. 
 
@@ -132,21 +132,21 @@ from `LoadBalancer` to `Routes`
 
 You can access AIDA subcharts and container images from the Entitled Registry (online installation). See [Creating the Secret](#creating-the-secret) for more information about accessing the registry. The images are as follows:
 
- - ``cp.icr.io/cp/aida-ad:10.2.1`` 
- - ``cp.icr.io/cp/aida-exporter:10.2.1``
- - ``cp.icr.io/cp/aida-email:10.2.1``
- - ``cp.icr.io/cp/aida-nginx:10.2.1``
- - ``cp.icr.io/cp/aida-orchestrator:10.2.1``
- - ``cp.icr.io/cp/aida-predictor:10.2.1``
- - ``cp.icr.io/cp/aida-redis:10.2.1``
- - ``cp.icr.io/cp/aida-ui:10.2.1``
+ - ``cp.icr.io/cp/aida-ad:10.2.6`` 
+ - ``cp.icr.io/cp/aida-exporter:10.2.6``
+ - ``cp.icr.io/cp/aida-email:10.2.6``
+ - ``cp.icr.io/cp/aida-nginx:10.2.6``
+ - ``cp.icr.io/cp/aida-orchestrator:10.2.6``
+ - ``cp.icr.io/cp/aida-predictor:10.2.6``
+ - ``cp.icr.io/cp/aida-redis:10.2.6``
+ - ``cp.icr.io/cp/aida-ui:10.2.6``
  
  
 
 ##  Prerequisites
 AIDA requires:
 
- -  IBM Workload Automation V10.1 or higher exposed metrics. For information about IBM Workload Automation exposed metrics, see "Exposing metrics to monitor your workload" in the [IBM Workload Automation documentation](https://www.ibm.com/docs/en/workload-automation/10.1.0) User's Guide.  
+ -  IBM Workload Automation V10.1 or higher exposed metrics. For information about IBM Workload Automation exposed metrics, see "Exposing metrics to monitor your workload" in the [IBM Workload Automation documentation](https://www.ibm.com/docs/en/workload-automation/10.2.6) User's Guide.  
  -  API key for accessing the Entitled Registry: cp.icr.io
  -  External container image for OpenSearch 2.3.0 (an Elasticsearch based technology)
  -  Supported browsers are: 
@@ -695,4 +695,4 @@ AIDA supports only ReadWriteOnce (RWO) access mode. The volume can be mounted as
 
 ##  Documentation
 
-For more information about AIDA, see AIDA User's Guide in the [IBM Workload Automation documentation](https://www.ibm.com/docs/en/workload-automation/10.2.0).
+For more information about AIDA, see AIDA User's Guide in the [IBM Workload Automation documentation](https://www.ibm.com/docs/en/workload-automation/10.2.6).
