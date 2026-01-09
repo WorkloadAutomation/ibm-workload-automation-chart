@@ -246,7 +246,7 @@ waserver:
   supplementalGroupId:
   image:
     pullPolicy: Always
-    repository: cp.icr.io/cp/ibm-workload-automation-server
+    repository: icr.io/cp/ibm-workload-automation-server
     tag: 10.2.6.00.20251212
   persistence:
     dataPVC:
