@@ -457,7 +457,7 @@ waaida:
   enableAIDA: false
   aida-ad:
     image:
-      repository: cp.icr.io/cp/ibm-aida-ad
+      repository: cp.icr.io/cp/ibm-workload-automation-aida-ad
       tag: 10.2.6.00.20251212
       pullPolicy: Always
     serviceAccount:
