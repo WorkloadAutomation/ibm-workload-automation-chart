@@ -523,7 +523,7 @@ waaida:
     maximumDaysOfOlderData: 400
     resolveAlertsAfterDays: 1
     image:
-      repository: cp.icr.io/cp/ibm-aida-exporter
+      repository: cp.icr.io/cp/ibm-workload-automation-aida-exporter
       tag: 10.2.6.00.20251212
       pullPolicy: Always
     serviceAccount:
@@ -544,7 +544,7 @@ waaida:
     senderEmailPwdSecretName: "email-pwd-secret"
     recipientMailIds: "mail1@mail.com,mail2@mail.com"
     image:
-      repository: cp.icr.io/cp/ibm-aida-email
+      repository: cp.icr.io/cp/ibm-workload-automation-aida-email
       tag: 10.2.6.00.20251212
       pullPolicy: Always
     serviceAccount:
@@ -561,7 +561,7 @@ waaida:
   aida-nginx:
     waConsoleCertSecretName: waconsole-cert-secret
     image:
-      repository: cp.icr.io/cp/ibm-aida-nginx
+      repository: cp.icr.io/cp/ibm-workload-automation-aida-nginx
       tag: 10.2.6.00.20251212
       pullPolicy: Always
     serviceAccount:
@@ -594,7 +594,7 @@ waaida:
     prophetOrchestrator: "{\"schedule\": 1440}"
     daysOfPrediction: 1
     image:
-      repository: cp.icr.io/cp/ibm-aida-orchestrator
+      repository: cp.icr.io/cp/ibm-workload-automation-aida-orchestrator
       tag: 10.2.6.00.20251212
       pullPolicy: Always
     serviceAccount:
@@ -610,7 +610,7 @@ waaida:
         memory: 0.5Gi
   aida-predictor:
     image:
-      repository: cp.icr.io/cp/ibm-aida-predictor
+      repository: cp.icr.io/cp/ibm-workload-automation-aida-predictor
       tag: 10.2.6.00.20251212
       pullPolicy: Always
     serviceAccount:
@@ -632,7 +632,7 @@ waaida:
       webConcurrency: 6
   aida-redis:
     image:
-      repository: cp.icr.io/cp/ibm-aida-redis
+      repository: cp.icr.io/cp/ibm-workload-automation-aida-redis
       tag: 10.2.6.00.20251212
       pullPolicy: Always
     serviceAccount:
@@ -649,7 +649,7 @@ waaida:
   aida-ui:
     uiLogLevel: "ERROR:*,INFO:*,-TRACE:*"
     image:
-      repository: cp.icr.io/cp/ibm-aida-ui
+      repository: cp.icr.io/cp/ibm-workload-automation-aida-ui
       tag: 10.2.6.00.20251212
       pullPolicy: Always
     serviceAccount:
