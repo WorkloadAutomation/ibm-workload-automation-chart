@@ -194,6 +194,8 @@ waserver:
             value: "ORACLE"
           - label: "MSSQL"
             value: "MSSQL"   
+          - label: "POSTGRESQL"
+            value: "POSTGRESQL"
           - label: "IDS"
             value: "IDS"                  
       hostname:
@@ -217,7 +219,7 @@ waserver:
       name:
         __metadata: 
           label: "Database name" 
-          description: "For DB2/IDS/MSSQL is the name of the database. For ORACLE is the Oracle Service Name"
+          description: "For DB2/IDS/MSSQL/POSTGRES is the name of the database. For ORACLE is the Oracle Service Name"
           type: "string"
           required: true     
       adminUser:
@@ -229,7 +231,7 @@ waserver:
       user:
         __metadata: 
           label: "Database user name" 
-          description: "For DB2/IDS/MSSQL is the name of the database user with granted access to the databse. For ORACLE it identifies also the database"
+          description: "For DB2/IDS/MSSQL/POSTGRES is the name of the database user with granted access to the databse. For ORACLE it identifies also the database"
           type: "string"
           required: true                      
       tsName:
@@ -241,7 +243,7 @@ waserver:
       tsPath:
         __metadata: 
           label: "Database data table space path" 
-          description: "The path of the data table space.For default leave it empty. Valid only for DB2/MSSQL/IDS"
+          description: "The path of the data table space.For default leave it empty. Valid only for DB2/MSSQL/IDS/POSTGRES"
           type: "string"
           required: false          
       tsLogName:
@@ -253,7 +255,7 @@ waserver:
       tsLogPath:
         __metadata: 
           label: "Database log table space path" 
-          description: "The path of the log table space.For default leave it empty. Valid only for DB2/MSSQL/IDS"
+          description: "The path of the log table space.For default leave it empty. Valid only for DB2/MSSQL/IDS/POSTGRES"
           type: "string"
           required: false   
       tsPlanName:
@@ -265,7 +267,7 @@ waserver:
       tsPlanPath:
         __metadata: 
           label: "Database plan table space path" 
-          description: "The path of the plan table space.For default leave it empty. Valid only for DB2/MSSQL/IDS"
+          description: "The path of the plan table space.For default leave it empty. Valid only for DB2/MSSQL/IDS/POSTGRES"
           type: "string"
           required: false     
       tsTempName:
@@ -487,11 +489,11 @@ waconsole:
         type: "string"
         required: false
     openIdClientName:
-    	__metadata:
-	      label: "OpenID Client name"
-	      description: "The name of the Client defined in ibm-common-services project for IAM configuration"
-	      type: "string"
-	      required: false        
+      __metadata:
+        label: "OpenID Client name"
+        description: "The name of the Client defined in ibm-common-services project for IAM configuration"
+        type: "string"
+        required: false        
     db:
       type:
         __metadata: 
@@ -506,6 +508,8 @@ waconsole:
             value: "ORACLE"
           - label: "MSSQL"
             value: "MSSQL"   
+          - label: "POSTGRESQL"
+            value: "POSTGRESQL"
           - label: "IDS"
             value: "IDS"  
           - label: "DERBY"
@@ -531,7 +535,7 @@ waconsole:
       name:
         __metadata: 
           label: "Database name" 
-          description: "For DB2/IDS/MSSQL is the name of the database. For ORACLE is the Oracle Service Name"
+          description: "For DB2/IDS/MSSQL/POSTGRESQL is the name of the database. For ORACLE is the Oracle Service Name"
           type: "string"
           required: true     
       adminUser:
@@ -543,7 +547,7 @@ waconsole:
       user:
         __metadata: 
           label: "Database user name" 
-          description: "For DB2/IDS/MSSQL is the name of the database user with granted access to the databse. For ORACLE it identifies also the database"
+          description: "For DB2/IDS/MSSQL/POSTGRES is the name of the database user with granted access to the databse. For ORACLE it identifies also the database"
           type: "string"
           required: true                 
       tsName:
@@ -555,7 +559,7 @@ waconsole:
       tsPath:
         __metadata: 
           label: "Database data table space name" 
-          description: "The path of the data table space.For default leave it empty. Valid only for DB2/MSSQL/IDS"
+          description: "The path of the data table space.For default leave it empty. Valid only for DB2/MSSQL/IDS/POSTGRES"
           type: "string"
           required: false          
       tsTempName:
