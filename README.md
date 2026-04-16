@@ -351,7 +351,7 @@ where **<my_path>** is the location path of the mysecret.yaml file.
 	      name: <release_name>-ssl-secret
 	      namespace: <workload_automation_namespace>
    	     labels:
-                app.kubernetes.io/instance wa-pwd-secret
+                app.kubernetes.io/instance: wa-pwd-secret
                 app.kubernetes.io/managed-by: Helm
                 app.kubernetes.io/name: workload-automation-prod
                 environment: prod
