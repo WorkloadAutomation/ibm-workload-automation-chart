@@ -1443,18 +1443,19 @@ The IBM Workload Automation Helm chart does not support automatic scaling to zer
  The IBM Workload Automation Helm chart does not support proportional scaling.		
         
 ### Managing custom PEM certificates
-
-  * ca.crt
-  * tls.key
-  * tls.crt
+Certificates are required when installing or upgrading IBM Workload Automation. The required certificates are:
       
-  If you want to use custom certificates, set `useCustomizedCert:true` and use kubectl to apply the secret in the \<workload_automation_namespace>.
+  * ca.crt: The Certificate Authority (CA) public certificate. The ca.crt can contain also the intermediate CAs. In this case, it must begin with one or more intermediate CA certificates and end with the Root ca.
+  * tls.key: The private key of the end user certificate for the instance to be installed.
+  * tls.crt: The public part of the previous key, that is the end user certificate.
+      
+If you want to use custom certificates, set `useCustomizedCert:true` and use kubectl to apply the secret in the \<workload_automation_namespace>.
  For the master domain manager, type the following command:
  
  ```
 kubectl create secret generic waserver-cert-secret --from-file=ca.crt --from-file=tls.key --from-file=tls.crt -n <workload-automation-namespace>   
  ``` 
-For the Dynamic Workload Console, type the following command:
+ For the Dynamic Workload Console, type the following command:
 
  ```
   kubectl create secret generic waconsole-cert-secret --from-file=ca.crt --from-file=tls.key --from-file=tls.crt -n <workload_automation_namespace>   
