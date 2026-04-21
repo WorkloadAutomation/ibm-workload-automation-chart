@@ -33,10 +33,10 @@ spec:
     destinationCACertificate: |
 {{ index $secret.data "ca.crt" | b64dec | indent 4 }}
     {{- else }}
-    {{- fail "Secret ca-key-pair existe mais ne contient pas la clé ca.crt" }}
+    {{- fail "Secret ca-key-pair exists but does not contain the ca.crt key" }}
     {{- end }}
     {{- else }}
-    {{- fail "Mode reencrypt activé mais secret ca-key-pair n'existe pas dans le namespace" }}
+    {{- fail "reencrypt mode enabled but secret ca-key-pair does not exist in the namespace" }}
     {{- end }}
     {{- end }}
   wildcardPolicy: None
@@ -79,10 +79,10 @@ spec:
     destinationCACertificate: |
 {{ index $secret.data "ca.crt" | b64dec | indent 4 }}
     {{- else }}
-    {{- fail "Secret ca-key-pair existe mais ne contient pas la clé ca.crt" }}
+    {{- fail "Secret ca-key-pair exists but does not contain the ca.crt key" }}
     {{- end }}
     {{- else }}
-    {{- fail "Mode reencrypt activé mais secret ca-key-pair n'existe pas dans le namespace" }}
+    {{- fail "reencrypt mode enabled but secret ca-key-pair does not exist in the namespace" }}
     {{- end }}
     {{- end }}
   wildcardPolicy: None
