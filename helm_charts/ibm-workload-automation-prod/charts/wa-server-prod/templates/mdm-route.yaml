@@ -29,11 +29,11 @@ spec:
     {{- if eq (.Values.global.routeType | upper) "REENCRYPT" }}
     {{- $secret := lookup "v1" "Secret" .Release.Namespace "ca-key-pair" }}
     {{- if $secret }}
-    {{- if index $secret.data "ca.crt" }}
+    {{- if index $secret.data "tls.crt" }}
     destinationCACertificate: |
-{{ index $secret.data "ca.crt" | b64dec | indent 4 }}
+{{ index $secret.data "tls.crt" | b64dec | indent 4 }}
     {{- else }}
-    {{- fail "Secret ca-key-pair exists but does not contain the ca.crt key" }}
+    {{- fail "Secret ca-key-pair exists but does not contain the tls.crt key" }}
     {{- end }}
     {{- else }}
     {{- fail "reencrypt mode enabled but secret ca-key-pair does not exist in the namespace" }}
@@ -75,11 +75,11 @@ spec:
     {{- if eq ($root.Values.global.routeType | upper) "REENCRYPT" }}
     {{- $secret := lookup "v1" "Secret" $root.Release.Namespace "ca-key-pair" }}
     {{- if $secret }}
-    {{- if index $secret.data "ca.crt" }}
+    {{- if index $secret.data "tls.crt" }}
     destinationCACertificate: |
-{{ index $secret.data "ca.crt" | b64dec | indent 4 }}
+{{ index $secret.data "tls.crt" | b64dec | indent 4 }}
     {{- else }}
-    {{- fail "Secret ca-key-pair exists but does not contain the ca.crt key" }}
+    {{- fail "Secret ca-key-pair exists but does not contain the tls.crt key" }}
     {{- end }}
     {{- else }}
     {{- fail "reencrypt mode enabled but secret ca-key-pair does not exist in the namespace" }}
