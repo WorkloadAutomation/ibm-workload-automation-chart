@@ -33,7 +33,7 @@ spec:
     {{- if $secret }}
     {{- if index $secret.data "tls.crt" }}
     destinationCACertificate: |
-{{ index $secret.data "tls.crt" | b64dec | indent 4 }}
+{{ index $secret.data "tls.crt" | b64dec | indent 6 }}
     {{- else }}
     {{- fail "Secret ca-key-pair exists but does not contain the tls.crt key" }}
     {{- end }}
