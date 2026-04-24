@@ -41,7 +41,7 @@ AIDA can be deployed into the following supported third-party cloud provider inf
 -   ![Microsoft Azure](images/tagmsa.png "Microsoft Azure")
 -   ![Google GKE](images/taggke.png "Google GKE")
 
-For more information about AIDA, see AIDA User's Guide in the [IBM Workload Automation documentation](https://www.ibm.com/docs/en/workload-automation/10.2.6).
+For more information about AIDA, see AIDA User's Guide in the [IBM Workload Automation documentation](https://www.ibm.com/docs/en/workload-automation/10.2.7).
 
 This readme provides the steps for deploying AIDA, using helm charts and container images. Deploy AIDA after deploying IBM Workload Automation. For details about IBM Workload Automation deployment, refer to IBM Workload Automation readme file. 
 
@@ -132,21 +132,21 @@ from `LoadBalancer` to `Routes`
 
 You can access AIDA subcharts and container images from the Entitled Registry (online installation). See [Creating the Secret](#creating-the-secret) for more information about accessing the registry. The images are as follows:
 
- - ``cp.icr.io/cp/aida-ad:10.2.6`` 
- - ``cp.icr.io/cp/aida-exporter:10.2.6``
- - ``cp.icr.io/cp/aida-email:10.2.6``
- - ``cp.icr.io/cp/aida-nginx:10.2.6``
- - ``cp.icr.io/cp/aida-orchestrator:10.2.6``
- - ``cp.icr.io/cp/aida-predictor:10.2.6``
- - ``cp.icr.io/cp/aida-redis:10.2.6``
- - ``cp.icr.io/cp/aida-ui:10.2.6``
+ - ``cp.icr.io/cp/aida-ad:10.2.7`` 
+ - ``cp.icr.io/cp/aida-exporter:10.2.7``
+ - ``cp.icr.io/cp/aida-email:10.2.7``
+ - ``cp.icr.io/cp/aida-nginx:10.2.7``
+ - ``cp.icr.io/cp/aida-orchestrator:10.2.7``
+ - ``cp.icr.io/cp/aida-predictor:10.2.7``
+ - ``cp.icr.io/cp/aida-redis:10.2.7``
+ - ``cp.icr.io/cp/aida-ui:10.2.7``
  
  
 
 ##  Prerequisites
 AIDA requires:
 
- -  IBM Workload Automation V10.1 or higher exposed metrics. For information about IBM Workload Automation exposed metrics, see "Exposing metrics to monitor your workload" in the [IBM Workload Automation documentation](https://www.ibm.com/docs/en/workload-automation/10.2.6) User's Guide.  
+ -  IBM Workload Automation V10.1 or higher exposed metrics. For information about IBM Workload Automation exposed metrics, see "Exposing metrics to monitor your workload" in the [IBM Workload Automation documentation](https://www.ibm.com/docs/en/workload-automation/10.2.7) User's Guide.  
  -  API key for accessing the Entitled Registry: cp.icr.io
  -  External container image for OpenSearch 2.3.0 (an Elasticsearch based technology)
  -  Supported browsers are: 
@@ -350,6 +350,11 @@ The following tables list the configurable parameters of the chart relative to e
 |autoscaling.targetMemoryUtilizationPercentage |The value in percentage of memory utilization that each Pod should have | N  |N |80 |
 |toleranceMillis |The maximum number of milliseconds between a real data point and a predicted data point in order to consider them close and, therefore, usable by the alert detection algorithm   | N  | Y |240000 |
 |webConcurrency |Number of workers of the web server. The more they are, the more there is parallelism (and the more RAM is consumed). Suggested value: 2 | N  | N |2 |
+| ANOMALY_USE_TOLERANCE | Enables tolerance-based evaluation when detecting anomalies. When set to true, prediction bounds are adjusted using the configured tolerance values before determining anomalous datapoints. | N | Y |false |
+| ANOMALY_FIXED_TOLERANCE | Fixed absolute tolerance applied to the upper and lower prediction bounds. When tolerance is enabled, AIDA applies the higher value between ANOMALY_FIXED_TOLERANCE and ANOMALY_PERCENTAGE_TOLERANCE. This parameter is used only when ANOMALY_USE_TOLERANCE is set to true. | N | Y |0.5 |
+| ANOMALY_PERCENTAGE_TOLERANCE | Percentage-based tolerance applied to the prediction range (for example, 0.01 represents 1%). This parameter is used only when ANOMALY_USE_TOLERANCE is set to true. | N | Y | 0.01 |
+| ALERT_ANOMALOUS_POINTS_REQUIRED | Global number of anomalous datapoints required to trigger an alert. If not specified, the value defined in each alert definition (trigger.value) is used. | N | Y |
+| ALERT_ANOMALY_RANGE_MINUTES | Global time window, in minutes, used to evaluate anomalous datapoints for alert generation. If not specified, the value defined in each alert definition (trigger.timeFrame) is used. | N | Y |
 |minimumSeverityForMail |Minimum level of severity above which an alert will be sent by email. Can be high, medium or low| Y (if you want to receive alerts by email)   | Y |high |
 |host_ip |AIDA host IP address for alert email| Y (if you want to receive alerts by email)   | Y |"" |
 	
@@ -695,4 +700,4 @@ AIDA supports only ReadWriteOnce (RWO) access mode. The volume can be mounted as
 
 ##  Documentation
 
-For more information about AIDA, see AIDA User's Guide in the [IBM Workload Automation documentation](https://www.ibm.com/docs/en/workload-automation/10.2.6).
+For more information about AIDA, see AIDA User's Guide in the [IBM Workload Automation documentation](https://www.ibm.com/docs/en/workload-automation/10.2.7).
