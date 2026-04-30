@@ -2,7 +2,7 @@ apiVersion: v1
 entries:
   workload-automation-prod:
   - apiVersion: v2
-    appVersion: 10.2.6.00
+    appVersion: 10.2.7.00
     created: "2025-12-12T15:06:25.6294015+01:00"
     dependencies:
       - alias: waserver
@@ -45,8 +45,8 @@ entries:
       - name: IBM Workload Automation
     name: workload-automation-prod
     urls:
-      - workload-automation-prod-10.2.6.tgz
-    version: 10.2.6
+      - workload-automation-prod-10.2.7.tgz
+    version: 10.2.7
   - apiVersion: v2
     appVersion: 10.2.5.00
     created: "2025-08-04T15:06:25.6294015+01:00"
