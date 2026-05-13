@@ -184,7 +184,9 @@ spec:
         - name: WA_IS_KUBE
           value: "true"          
         - name: WA_DEBUG_SCRIPTS
-          value: "false"            
+          value: "false"
+        - name: SECRETMOUNTPATH
+          value: "/opt/wautils/certs"
         - name: DB_TYPE
           value: {{ .Values.console.db.type | quote }}
         {{- if eq (.Values.console.db.type | upper) "IDS" }}
@@ -263,12 +265,12 @@ spec:
         - name: PACKAGES_URL
           value: {{ $packagesUrl }}packages.json
         {{- end }}
-        - name: SSL_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Release.Name }}-ssl-secret
-              key: SSL_PASSWORD
-              optional: true                                                                      
+       # - name: SSL_PASSWORD
+        #  valueFrom:
+          #  secretKeyRef:
+          #   name: {{ .Release.Name }}-ssl-secret
+           #  key: SSL_PASSWORD
+           #   optional: true
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         securityContext:
