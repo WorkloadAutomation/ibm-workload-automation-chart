@@ -31,7 +31,7 @@ entries:
       repository: ""
       version: 1.0.2
     description: Helm chart for configuring IBM Workload Automation.
-    digest: e16f5e6c7cd2c4a37f5ee79409bdeeb319d344c1dd2e9d69ac5bf04992bfcc79
+    digest: 0e060a98569fec4867d712078235160c879491de0963149ded08e9d45a8ef1d3
     keywords:
     - Commercial
     - amd64
