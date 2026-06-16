@@ -1488,6 +1488,59 @@ If you want to use SSL connection to DB, set `db.sslConnection:true` and `useCus
 
 If you define custom certificates, you are in charge of keeping them up to date, therefore, ensure you check their duration and plan to rotate them as necessary. To rotate custom certificates, delete the previous secret and upload a new secret, containing new certificates. The pod restarts automatically and the new certificates are applied.
 
+### Component customization for issuers and load balancers
+
+The core application components (`waagent`, `waconsole`, `wa-server`, `wafileproxy`, and `wa-aida`) support custom certificate issuers, custom load balancer IP addresses, and custom DNS configurations.
+
+#### Custom certificate issuers
+
+You can customize the `issuerRef` parameter individually for each component in the `values.yaml` file:
+
+* `waagent`
+* `waconsole`
+* `waserver`
+* `wafileproxy`
+
+**Important:** If you omit the `issuerName` and `issuerKind` fields, the chart uses the default values.
+
+You can optionally specify an `issuerGroup` value. If you leave the `issuerGroup` field empty or omit it, the `group:` line is removed from the chart. By default, the `issuerGroup` field is empty.
+
+#### Custom load balancer IP addresses
+
+For components that are exposed through a load balancer service, you can specify a custom `loadBalancerIP` value in the chart.
+
+#### Custom DNS or SAN configurations
+
+You can inject a custom list of DNS entries or subject alternative names (SANs) into the component certificates. The following parameters control this behavior:
+
+* `addCustomDns`: Enables the injection of custom DNS entries. The default value is `false`.
+* `customDns`: The list of custom domain names or SANs to add. The default value is `[]`.
+* `customDnsOnly`: If set to `true`, the parameter removes the default built-in DNS names and applies only your custom names. The default value is `false`.
+
+
+# Example.
+The following example shows the customized issuer, load balancer IP, and DNS for the waagent component.
+ ``` 
+waagent:
+
+ agentCommonName: "waagent"
+
+ issuerName: "custom-cluster-issuer"
+
+ issuerKind: "ClusterIssuer"
+
+ issuerGroup: "cert-manager.io"
+
+ loadBalancerIP: "10.240.0.45"
+
+# DNS Configuration 
+addCustomDns: true 
+customDnsOnly: true 
+customDns: 
+- "my-custom-dns-1.company.com" 
+- "my-custom-dns-2.company.com" 
+ ``` 
+
 ### Managing your custom certificates (DEPRECATED STARTING FROM V 10)
 
 This procedure is deprecated starting from v 10. Use the [Managing custom PEM certificates](#managing-custom-PEM-certificates) procedure instead. If you use customized certificates, `useCustomizedCert:true`, you must create a secret containing the customized files that will replace the Server default ones in the \<workload_automation_namespace>. Customized files must have the same name as the default ones.
