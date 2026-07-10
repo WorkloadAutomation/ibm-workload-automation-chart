@@ -29,12 +29,18 @@ spec:
 {{- if or ( .Capabilities.APIVersions.Has "cert-manager.io/v1" ) ( .Capabilities.APIVersions.Has "certmanager.k8s.io/v1" ) }}
   subject:
     organizations:
-      - IBM
+      - {{ (index $.Values.global "certManager" | default dict).organization | default "IBM" | quote }}
+    localities:
+      - {{ (index $.Values.global "certManager" | default dict).locality | default "Rome" | quote }}
+    provinces:
+      - {{ (index $.Values.global "certManager" | default dict).province | default "Lazio" | quote }}
+    countries:
+      - {{ (index $.Values.global "certManager" | default dict).country | default "IT" | quote }}
 {{- else if or ( .Capabilities.APIVersions.Has "certmanager.k8s.io/v1alpha1" ) ( .Capabilities.APIVersions.Has "cert-manager.io/v1alpha2" ) }}
   organization:
-  - IBM
+    - {{ (index $.Values.global "certManager" | default dict).organization | default "IBM" | quote }}
 {{- end }}
-  commonName: wafileproxy
+  commonName: {{ .Values.fileproxyCommonName | default "wafileproxy" | quote }}
   isCA: false
 {{- if or ( .Capabilities.APIVersions.Has "certmanager.k8s.io/v1alpha1" ) ( .Capabilities.APIVersions.Has "cert-manager.io/v1alpha2" ) }}
 {{- if not ( .Capabilities.APIVersions.Has "cert-manager.io/v1" )  }}
@@ -47,6 +53,7 @@ spec:
     - server auth
     - client auth
   dnsNames:
+  - {{ .Values.fileproxyCommonName | default "wafileproxy" | quote }}
   - wafileproxy
 {{- if or ( .Capabilities.APIVersions.Has "cert-manager.io/v1alpha2") ( .Capabilities.APIVersions.Has "cert-manager.io/v1")  }}
   privateKey:
@@ -58,6 +65,6 @@ spec:
 {{- end }}
 {{- end }}
   issuerRef:
-    name: wa-ca-issuer
-    kind: Issuer
+    name: {{ .Values.issuerName | default "wa-ca-issuer" | quote }}
+    kind: {{ .Values.issuerKind | default "Issuer" | quote }}
 {{- end }}

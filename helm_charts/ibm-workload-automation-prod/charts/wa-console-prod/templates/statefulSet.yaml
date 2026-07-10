@@ -184,7 +184,7 @@ spec:
         - name: WA_IS_KUBE
           value: "true"          
         - name: WA_DEBUG_SCRIPTS
-          value: "false"            
+          value: "false"
         - name: DB_TYPE
           value: {{ .Values.console.db.type | quote }}
         {{- if eq (.Values.console.db.type | upper) "IDS" }}
@@ -268,7 +268,7 @@ spec:
             secretKeyRef:
               name: {{ .Release.Name }}-ssl-secret
               key: SSL_PASSWORD
-              optional: true                                                                      
+              optional: true
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         securityContext:

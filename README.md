@@ -19,7 +19,7 @@ The information in this README contains the steps for deploying the following IB
  > **IBM Workload Automation**, which comprises master domain manager and its backup, Dynamic Workload Console, and Dynamic Agent
  
  
- For more information about IBM Workload Automation, see the product documentation library in [IBM Documentation]( https://www.ibm.com/docs/workload-scheduler/10.2.3).
+ For more information about IBM Workload Automation, see the product documentation library in [IBM Documentation](https://help.blueproddoc.com/workloadautomation/v1027/index.html).
  
 ## Details
 
@@ -27,7 +27,7 @@ By default, a single  server (master domain manager), Dynamic Workload Console (
 
 To achieve high availability in an IBM Workload Automation environment, the minimum base configuration is composed of 2 Dynamic Workload Consoles and 2 servers (master domain managers). For more details about IBM Workload Automation and high availability, see: 
 
-[An active-active high availability scenario](https://www.ibm.com/docs/workload-scheduler/10.2.3?topic=scheduler-active-active-high-availability-scenario).
+[An active-active high availability scenario](https://help.blueproddoc.com/workloadautomation/v1027/distr/src_ad/awsadhaloadbal.html).
 
 
 IBM Workload Automation can be deployed across a single cluster, but you can add multiple instances of the product components by using a different namespace in the cluster. The product components can run in multiple failure zones in a single cluster.
@@ -69,7 +69,7 @@ In addition to the product components, the following objects are installed:
 IBM Workload Automation supports all the platforms supported by the runtime provider of your choice.
 
 ### Openshift support
-You can deploy IBM Workload Automation on Openshift by following the instruction in this documentation and using helm charts. IBM Workload Automation 10.2.3 was formally tested by using Openshift 4.14 
+You can deploy IBM Workload Automation on Openshift by following the instruction in this documentation and using helm charts. IBM Workload Automation 10.2.6 was formally tested by using Openshift 4.14 
 For Server and Console component ensure to modify the value of these parameters:
 - waserver.server.exposeServiceType
 - waconsole.console.exposeServiceType
@@ -82,11 +82,14 @@ From `LoadBalancer` to `Routes`
 You can access the IBM Workload Automation chart and container images from the Entitled Registry. See [Create the secret](#create-the-secret) for more information about accessing the registry. The images are as follows:
 
 
-* cp.icr.io/cp/ibm-workload-automation-agent-dynamic:10.2.4.00.20250423
-* cp.icr.io/cp/ibm-workload-automation-server:10.2.4.00.20250423
-* cp.icr.io/cp/ibm-workload-automation-console:10.2.4.00.20250423
+* icr.io/cp/ibm-workload-automation-agent-dynamic:10.2.7.00.20260424.amd64
+* icr.io/cp/ibm-workload-automation-server:10.2.7.00.20260424.amd64
+* icr.io/cp/ibm-workload-automation-console:10.2.7.00.20260424.amd64
 
 ## Other supported tags
+* 10.2.6.00.20251212
+* 10.2.5.00.20250804
+* 10.2.4.00.20250423
 * 10.2.3.00.20241122
 * 10.2.2.00.20240424
 * 10.2.1.00.20231201
@@ -301,7 +304,7 @@ Create a secrets file to store passwords for the server, console and database, o
 	      name: wa-pwd-secret
 	      namespace: <workload_automation_namespace>
    	     labels:
-                app.kubernetes.io/instance wa-pwd-secret
+                app.kubernetes.io/instance: wa-pwd-secret
                 app.kubernetes.io/managed-by: Helm
                 app.kubernetes.io/name: workload-automation-prod
                 environment: prod
@@ -697,7 +700,9 @@ To deploy the IBM Workload Automation components, ensure you have first download
 
    a. Add the repository:
    
-        helm repo add <repo_name> https://workloadautomation.github.io/ibm-workload-automation-chart/stable, where <repo_name> represents the name of the chosen local repository
+        helm repo add <repo_name> https://workloadautomation.github.io/ibm-workload-automation-chart/stable 
+   
+    where <repo_name> represents the name of the chosen local repository.
    
    b.  Update the Helm chart:
    
@@ -746,6 +751,31 @@ The following are some useful Helm commands:
 * To delete the Helm release: 
 
         helm uninstall <workload_automation_release_name> -n <workload_automation_namespace>
+
+
+### Dynamic Workload Console and MSSQL
+
+If you plan to use the Dynamic Workload Console with MSSQL, perform the following steps:
+
+1) Create a new script with name dwc-console-scripts.yaml. The contents of the file is as follows:
+```yaml
+{{- include "wa.init" (list . "waconsole") }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "wa.fullName" . }}-console-scripts
+data:
+  beforeLiberty.sh: |-
+    #!/bin/sh
+
+    echo "Setting the db.trustServerCertificate parameters..."
+    sed -i '/<variable name="db.trustServerCertificate"/{s|value=".*"|value="false"|;b};3i <variable name="db.trustServerCertificate" value="false"/>' /home/wauser/wadata/usr/servers/dwcServer/configDropins/overrides/datasource.xml
+    echo "...done!"
+```
+  
+2) Save the dwc-console-scripts.yaml file to the same path where the statefulset.yaml file is stored.
+3) Wait for the pod to restart. You can find the log file in the following path: `./wadata/installation/logs/beforeLiberty.log`.
+
 		
 
 ### Verifying the installation
@@ -786,7 +816,7 @@ To manually verify that the installation was successfully installed, you can per
 	 
         optman ls
 		
-This command lists the current values of all IBM Workload Automation global options. For more information about the global options see [Global Options - detailed description](https://www.ibm.com/docs/workload-scheduler/10.2.3?topic=options-global-detailed-description).	
+This command lists the current values of all IBM Workload Automation global options. For more information about the global options see [Global Options - detailed description](https://help.blueproddoc.com/workloadautomation/v1027/distr/src_ad/awsadgloboptdescr.html).	
 	
 * **Verify that the default engine connection is created from the Dynamic Workload Console**
 
@@ -941,7 +971,7 @@ The following table lists the configurable parameters of the chart relative to t
 
 
 >\(*) **Note:** for details about static agent workstation pools, see: 
-[Workstation](https://www.ibm.com/docs/workload-scheduler/10.2.3?topic=objects-workstation).
+[Workstation](https://help.blueproddoc.com/workloadautomation/v1027/distr/src_ref/awsrgworkstationconcept.html).
 
 
 - #### Dynamic Workload Console parameters
@@ -1363,7 +1393,7 @@ To configure an on-premises agent to communicate with components in the cloud:
 3. Replace the files on the on-premises agent in the same path.
 
 **On-premises console engine connection (connection between an on-premises console with a server in the cloud):**
-1. Copy the public CA root certificate from the server. Refer to the IBM Workload Automation product documentation for details about creating custom certificates for communication between the server and the console: [Customizing certificates](https://www.ibm.com/docs/workload-scheduler/10.2.1?topic=scbdwcwsc-customizing-certificates-master-domain-manager-dynamic-workload-console-communication).
+1. Copy the public CA root certificate from the server. Refer to the IBM Workload Automation product documentation for details about creating custom certificates for communication between the server and the console: [Customizing certificates](https://help.blueproddoc.com/workloadautomation/v1027/distr/src_ad/awsadcertman.html).
 
 2. To enable the changes, restart the Console workstation.
 
@@ -1387,7 +1417,7 @@ Access the master (server or pod) and extract the CA root certificate and, to ad
 
 ### Defining a z/OS engine in the Z connector from a Dynamic Workload Console deployed on Cloud
 
-To perform this operation, see the information available at [Defining a z/OS engine in the Z connector](https://www.ibm.com/docs/en/workload-automation/10.2.3?topic=console-defining-zos-engine-in-z-connector). The information at this link also applies to the cloud environment. If you want to apply the same configuration to all instances, create a configMap containing all xml files and use the `waconsole.console.libConfigName` parameter to provide the name of your  configMap.
+To perform this operation, see the information available at [Defining a z/OS engine in the Z connector](https://help.blueproddoc.com/workloadautomation/v1027/distr/src_ad/awsadtmpltconnfactory.html). The information at this link also applies to the cloud environment. If you want to apply the same configuration to all instances, create a configMap containing all xml files and use the `waconsole.console.libConfigName` parameter to provide the name of your  configMap.
 
 ### Scaling the product 
 
@@ -1414,18 +1444,19 @@ The IBM Workload Automation Helm chart does not support automatic scaling to zer
  The IBM Workload Automation Helm chart does not support proportional scaling.		
         
 ### Managing custom PEM certificates
-
-  * ca.crt
-  * tls.key
-  * tls.crt
+Certificates are required when installing or upgrading IBM Workload Automation. The required certificates are:
       
-  If you want to use custom certificates, set `useCustomizedCert:true` and use kubectl to apply the secret in the \<workload_automation_namespace>.
+  * ca.crt: The Certificate Authority (CA) public certificate. The ca.crt can contain also the intermediate CAs. In this case, it must begin with one or more intermediate CA certificates and end with the Root ca.
+  * tls.key: The private key of the end user certificate for the instance to be installed.
+  * tls.crt: The public part of the previous key, that is the end user certificate.
+      
+If you want to use custom certificates, set `useCustomizedCert:true` and use kubectl to apply the secret in the \<workload_automation_namespace>.
  For the master domain manager, type the following command:
  
  ```
 kubectl create secret generic waserver-cert-secret --from-file=ca.crt --from-file=tls.key --from-file=tls.crt -n <workload-automation-namespace>   
  ``` 
-For the Dynamic Workload Console, type the following command:
+ For the Dynamic Workload Console, type the following command:
 
  ```
   kubectl create secret generic waconsole-cert-secret --from-file=ca.crt --from-file=tls.key --from-file=tls.crt -n <workload_automation_namespace>   
@@ -1438,7 +1469,7 @@ For the Dynamic Workload Console, type the following command:
     
    where, ca.crt, tls.key, and tls.crt are your customized certificates.
    
-   For details about custom certificates, see [Connection security overview](https://www.ibm.com/docs/en/workload-automation/10.2.3?topic=guide-connection-security-overview).
+   For details about custom certificates, see [Connection security overview](https://help.blueproddoc.com/workloadautomation/v1027/distr/src_ad/awsadcert.html).
 
 <!-- > **Note**: Passwords for "TWSServerTrustFile.jks" and "TWSServerKeyFile.jks" files must be entered in the respective "TWSServerTrustFile.jks.pwd" and "TWSServerKeyFile.jks.pwd" files. -->
  
@@ -1490,7 +1521,7 @@ For the Dynamic Workload Console, type the following command:
     
    where, TWSClientKeyStoreJKS.sth, TWSClientKeyStore.kdb, TWSClientKeyStore.sth, TWSClientKeyStoreJKS.jks, TWSServerTrustFile.jks and TWSServerKeyFile.jks are the Container keystore and stash file containing your customized certificates.
    
-   For details about custom certificates, see [Connection security overview](https://www.ibm.com/docs/workload-scheduler/10.2.3?topic=configuration-connection-security-overview).
+   For details about custom certificates, see [Connection security overview](https://help.blueproddoc.com/workloadautomation/v1027/distr/src_ad/awsadcert.html).
     
 
 > **Note**: Passwords for "TWSServerTrustFile.jks" and "TWSServerKeyFile.jks" files must be entered in the respective "TWSServerTrustFile.jks.pwd" and "TWSServerKeyFile.jks.pwd" files.
@@ -1586,11 +1617,11 @@ Consider the following example:
 
 For more information, see: 
 
-[Running batch reports from the command line interface](https://www.ibm.com/docs/en/workload-automation/10.2.3?topic=reports-running-batch-from-command-line-interface)
+[Running batch reports from the command line interface](https://help.blueproddoc.com/workloadautomation/v1027/zos/src_man/eqqr1batchrepfromcommli.html)
 
 ## Metrics monitoring 
 
-IBM Workload Automation uses Grafana to display performance data related to the product. This data includes metrics related to the server and console application servers (WebSphere Application Server Liberty Base), your workload, your workstations, critical jobs, message queues, the database connection status, and more. Grafana is an open source tool for visualizing application metrics. Metrics provide insight into the state, health, and performance of your deployments and infrastructure. IBM Workload Automation cloud metric monitoring uses an opensource Cloud Native Computing Foundation (CNCF) project called Prometheus. It is particularly useful for collecting time series data that can be easily queried. Prometheus integrates with Grafana to visualize the metrics collected. For more informaiton about metrics, see [Metrics](https://www.ibm.com/docs/en/workload-automation/10.2.3?topic=scheduler-exposing-metrics-monitor-your-workload).
+IBM Workload Automation uses Grafana to display performance data related to the product. This data includes metrics related to the server and console application servers (WebSphere Application Server Liberty Base), your workload, your workstations, critical jobs, message queues, the database connection status, and more. Grafana is an open source tool for visualizing application metrics. Metrics provide insight into the state, health, and performance of your deployments and infrastructure. IBM Workload Automation cloud metric monitoring uses an opensource Cloud Native Computing Foundation (CNCF) project called Prometheus. It is particularly useful for collecting time series data that can be easily queried. Prometheus integrates with Grafana to visualize the metrics collected. For more informaiton about metrics, see [Metrics](https://help.blueproddoc.com/workloadautomation/v1027/distr/src_ref/awsrgmonprom.html).
 
 
 
@@ -1655,7 +1686,7 @@ For more information about using Grafana dashboards see [Dashboards overview](ht
 
 ## Documentation
 
-To access the complete product documentation library for IBM Workload Automation, see [IBM Documentation]( https://www.ibm.com/docs/workload-scheduler/10.2.3).
+To access the complete product documentation library for IBM Workload Automation, see [IBM Documentation](https://help.blueproddoc.com/workloadautomation/v1027/index.html).
 
 
 ## Troubleshooting
@@ -1663,16 +1694,16 @@ To access the complete product documentation library for IBM Workload Automation
 
 In the event a problem should occur while using IBM Workload Automation, Customer Support might ask you to supply information about your system and environment to perform problem determination. The following utilities are available:
 
--   A general data capture utility command that extracts information about IBM Workload Automation  and related agent workstations, system-specific information, and data related to WebSphere Application Server Liberty Base; see [Data capture utility](https://www.ibm.com/docs/workload-scheduler/10.2.3?topic=data-capture-utility).
+-   A general data capture utility command that extracts information about IBM Workload Automation  and related agent workstations, system-specific information, and data related to WebSphere Application Server Liberty Base; see [Data capture utility](https://help.blueproddoc.com/workloadautomation/v1027/distr/src_tr/awstrmetronome.html).
 
--   A first failure data capture (ffdc) facility built into **batchman** and **mailman** that automatically runs the data capture utility when failures occur in **jobman**, **mailman**, or **batchman** and collects products logs, traces and configuration files; see [First failure data capture (ffdc)](https://www.ibm.com/docs/workload-scheduler/10.2.3?topic=data-first-failure-capture-ffdc).
+-   A first failure data capture (ffdc) facility built into **batchman** and **mailman** that automatically runs the data capture utility when failures occur in **jobman**, **mailman**, or **batchman** and collects products logs, traces and configuration files; see [First failure data capture (ffdc)](https://help.blueproddoc.com/workloadautomation/v1027/distr/src_tr/awstrffdc.html).
 
--   The data capture utility script, wa_pull_info, is also used to collect data related to the Dynamic Workload Console to assist in problem determination; see [Data capture utility](https://www.ibm.com/docs/workload-scheduler/10.2.3?topic=data-capture-utility).
+-   The data capture utility script, wa_pull_info, is also used to collect data related to the Dynamic Workload Console to assist in problem determination; see [Data capture utility](https://help.blueproddoc.com/workloadautomation/v1027/distr/src_tr/awstrmetronome.html).
 
--   WebSphere Application Server Liberty Base javadump command to create the heap dump for WebSphere Application Server Liberty Base that runs on the Dynamic Workload Console and the master domain manager; see [Creating application server dumps](https://www.ibm.com/docs/workload-scheduler/10.2.3?topic=data-creating-application-server-dumps).
+-   WebSphere Application Server Liberty Base javadump command to create the heap dump for WebSphere Application Server Liberty Base that runs on the Dynamic Workload Console and the master domain manager; see [Creating application server dumps](https://help.blueproddoc.com/workloadautomation/v1027/distr/src_tr/awstrcoredumpserver.html).
 
 
-In case of problems related to deploying the product with containers, see [Troubleshooting](https://www.ibm.com/docs/workload-scheduler/10.2.3?topic=containers-troubleshooting).
+In case of problems related to deploying the product with containers, see [Troubleshooting](https://help.blueproddoc.com/workloadautomation/v1027/distr/src_pi/awspitrblcontainers.html).
 
 ### Known problems
 
@@ -1692,61 +1723,4 @@ In case of problems related to deploying the product with containers, see [Troub
    
 3. Save the changes to the file.   
 
-
-### Change history
-
-## Added December 2023
-+ new version released
-
-## Added November 2022
-* JSON Web Token (JWT) support
-
-## Added June 2022
-* Vulnerabilities fixes
-* Support for Kubernetes 1.22
-
-## Added March 2022
-* Workload Automation 10.1 official support released.
-* New Workload Designer for Workload Automation Dynamic Console.
-* FileProxy standalone support.
-* New Artificial Intelligence features with AIDA.
-
-## Added Dicember 2021
-
-* Official support for Openshift 4.2 or later by using helm charts deployment.
-* Workload Automation 9.5.0.05 support released.
-* RFE: support for custom volume and custom volumemounts inside Workload Automation pods.
-* licenseType attribute for managing product licenses (IBM Workload Scheduler only)
-
-
-## Added June 2021
-
-* Additional metrics are monitored by Prometheus and made available in the preconfigured Grafana dashboard.
-
-* Automation Hub integrations (plug-ins) now automatically installed with the product container deployment 
-
-* New procedure for installing custom integrations
-
-## Added March 2021 - version 1.4.3
-
-* Image vulnerabilities fixed
-
-## Added March 2021 - version 1.4.2
-
-* Support for Google Kubernetes Engine (GKE)
-* Support for Google Cloud SQL for SQL Server
-
-## Added February 2021 - version 1.4.1
-
-* Support for Microsoft Azure Kubernetes Service (AKS)
-
-* New configurable parameters added to values.yaml file for agent, console and server components: 
-
-    * waagent.agent.networkpolicyEgress
-    * waconsole.console.networkpolicyEgress
-    * waserver.server.networkpolicyEgress
-    
- * New optional configurable parameter added to the values.yaml file for the server component: waserver.server.ftaName which represents the name of the Workload Automation workstation for the installation.
-    
-* RFE 148080: Provides the capability to constrain a product component pod to run on particular nodes The nodeAffinityRequired parameter has been added to the configurable parameters in the values.yaml file for the agent, console, and server components so you can determine on which nodes a component can be deployed using custom labels on nodes and label selectors specified in pods.  
 

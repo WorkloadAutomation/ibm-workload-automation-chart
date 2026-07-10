@@ -10,17 +10,26 @@ global:
   serviceAccountName: wauser
   useClusterRole: false
   aidaEngineLogLevel: "INFO"
+    # Geographical data
+  certManager:
+    organization: "IBM"
+    locality: "Rome"
+    province: "Lazio"
+    country: "IT"
   redisPwd: "default"
   defaultShardCount: 1
   enablePrometheus: true
   customPluginImageName: 
-  pluginImageName: cp.icr.io/cp/ibm-workload-automation-plugins:10.2.4.00.20250423
+  pluginImageName: cp.icr.io/cp/ibm-workload-automation-plugins:10.2.7.00.20260424.amd64
   configPlugins:
   customLabels:
     - name: "environment"
       value: "prod"
   routeType: passthrough # reencrypt
 waagent:
+  agentCommonName: "waagent"
+  issuerName: "wa-ca-issuer"
+  issuerKind: "Issuer"
   enableAgent: true
   licenseType: "PVU"
   runAsUser: 999
@@ -77,7 +86,7 @@ waagent:
   image:
     pullPolicy: Always
     repository: cp.icr.io/cp/ibm-workload-automation-agent-dynamic
-    tag: 10.2.4.00.20250423
+    tag: 10.2.7.00.20260424.amd64
   persistence:
     dataPVC:
       name: data
@@ -119,6 +128,9 @@ waagent:
       cpu: 200m
       memory: 200Mi
 waconsole:
+  consoleCommonName: "waconsole"
+  issuerName: "wa-ca-issuer"
+  issuerKind: "Issuer"
   enableConsole: true
   enableNginxServer: true
   runAsUser: 999
@@ -197,7 +209,7 @@ waconsole:
   image:
     pullPolicy: Always
     repository: cp.icr.io/cp/ibm-workload-automation-console
-    tag: 10.2.4.00.20250423
+    tag: 10.2.7.00.20260424.amd64
   persistence:
     dataPVC:
       name: data
@@ -239,6 +251,10 @@ waconsole:
       cpu: 1
       memory: 4Gi
 waserver:
+  serverCommonName: "waserver"
+  agentextCommonName: "waagent"
+  issuerName: "wa-ca-issuer"
+  issuerKind: "Issuer"
   enableServer: true
   licenseType: "PVU"
   runAsUser: 999
@@ -246,8 +262,8 @@ waserver:
   supplementalGroupId:
   image:
     pullPolicy: Always
-    repository: cp.icr.io/cp/ibm-workload-automation-server
-    tag: 10.2.4.00.20250423
+    repository: icr.io/cp/ibm-workload-automation-server
+    tag: 10.2.7.00.20260424.amd64
   persistence:
     dataPVC:
       name: data
@@ -384,11 +400,14 @@ waserver:
     certDuration: 2160h # 90d
     certRenewBefore: 360h # 15d    
 wafileproxy:
+  fileproxyCommonName: "wafileproxy"
+  issuerName: "wa-ca-issuer"
+  issuerKind: "Issuer"
   enableFileProxy: false
   replicaCount: 1
   image:
     repository: cp.icr.io/cp/ibm-workload-automation-fileproxy
-    tag: 10.2.4.00.20250423
+    tag: 10.2.7.00.20260424.amd64
     pullPolicy: Always
   nameOverride: ""
   fullnameOverride: ""
@@ -457,8 +476,8 @@ waaida:
   enableAIDA: false
   aida-ad:
     image:
-      repository: cp.icr.io/cp/ibm-aida-ad
-      tag: 10.2.4.00.20250423
+      repository: cp.icr.io/cp/ibm-workload-automation-aida-ad
+      tag: 10.2.7.00.20260424.amd64
       pullPolicy: Always
     serviceAccount:
       create: false
@@ -523,8 +542,8 @@ waaida:
     maximumDaysOfOlderData: 400
     resolveAlertsAfterDays: 1
     image:
-      repository: cp.icr.io/cp/ibm-aida-exporter
-      tag: 10.2.4.00.20250423
+      repository: cp.icr.io/cp/ibm-workload-automation-aida-exporter
+      tag: 10.2.7.00.20260424.amd64
       pullPolicy: Always
     serviceAccount:
       create: false
@@ -544,8 +563,8 @@ waaida:
     senderEmailPwdSecretName: "email-pwd-secret"
     recipientMailIds: "mail1@mail.com,mail2@mail.com"
     image:
-      repository: cp.icr.io/cp/ibm-aida-email
-      tag: 10.2.4.00.20250423
+      repository: cp.icr.io/cp/ibm-workload-automation-aida-email
+      tag: 10.2.7.00.20260424.amd64
       pullPolicy: Always
     serviceAccount:
       create: false
@@ -561,8 +580,8 @@ waaida:
   aida-nginx:
     waConsoleCertSecretName: waconsole-cert-secret
     image:
-      repository: cp.icr.io/cp/ibm-aida-nginx
-      tag: 10.2.4.00.20250423
+      repository: cp.icr.io/cp/ibm-workload-automation-aida-nginx
+      tag: 10.2.7.00.20260424.amd64
       pullPolicy: Always
     serviceAccount:
       create: false
@@ -594,8 +613,8 @@ waaida:
     prophetOrchestrator: "{\"schedule\": 1440}"
     daysOfPrediction: 1
     image:
-      repository: cp.icr.io/cp/ibm-aida-orchestrator
-      tag: 10.2.4.00.20250423
+      repository: cp.icr.io/cp/ibm-workload-automation-aida-orchestrator
+      tag: 10.2.7.00.20260424.amd64
       pullPolicy: Always
     serviceAccount:
       create: false
@@ -610,8 +629,8 @@ waaida:
         memory: 0.5Gi
   aida-predictor:
     image:
-      repository: cp.icr.io/cp/ibm-aida-predictor
-      tag: 10.2.4.00.20250423
+      repository: cp.icr.io/cp/ibm-workload-automation-aida-predictor
+      tag: 10.2.7.00.20260424.amd64
       pullPolicy: Always
     serviceAccount:
       create: false
@@ -632,8 +651,8 @@ waaida:
       webConcurrency: 6
   aida-redis:
     image:
-      repository: cp.icr.io/cp/ibm-aida-redis
-      tag: 10.2.4.00.20250423
+      repository: cp.icr.io/cp/ibm-workload-automation-aida-redis
+      tag: 10.2.7.00.20260424.amd64
       pullPolicy: Always
     serviceAccount:
       create: false
@@ -649,8 +668,8 @@ waaida:
   aida-ui:
     uiLogLevel: "ERROR:*,INFO:*,-TRACE:*"
     image:
-      repository: cp.icr.io/cp/ibm-aida-ui
-      tag: 10.2.4.00.20250423
+      repository: cp.icr.io/cp/ibm-workload-automation-aida-ui
+      tag: 10.2.7.00.20260424.amd64
       pullPolicy: Always
     serviceAccount:
       create: false
