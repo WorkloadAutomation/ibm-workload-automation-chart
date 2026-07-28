@@ -1,0 +1,30 @@
+{{- if .Capabilities.APIVersions.Has "monitoring.coreos.com/v1" }}
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: hwa-ddm-pod-monitor
+  labels:
+{{ include "wa.ddm.labels" . | indent 4 }}
+spec:
+  jobLabel: prometheus.job.label
+  namespaceSelector:
+    any: false
+    matchNames:
+      - {{ .Release.Namespace }}
+  podMetricsEndpoints:
+    - enableHttp2: true
+      interval: 30s
+      path: /metrics
+      scheme: https
+      targetPort: 31116
+      tlsConfig:
+        insecureSkipVerify: true
+  podTargetLabels:
+    - app
+    - service
+    - release
+    - waddmtype
+  selector:
+    matchLabels:
+      prometheus: 'true'
+{{- end }}
