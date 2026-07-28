@@ -1,0 +1,107 @@
+{{- if .Capabilities.APIVersions.Has "route.openshift.io/v1" -}}
+{{- if or (.Values.ddm.routes.enabled) (eq (.Values.ddm.exposeServiceType | upper) "ROUTE") }} 
+####################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2019. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+####################################################################
+
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: wa-ddm-route
+  labels:
+{{ include "wa.ddm.labels" . | indent 4 }}
+  annotations:
+    openshift.io/host.generated: 'true'
+    haproxy.router.openshift.io/cookie_name: wa-console-affinity-cookie
+    
+spec:
+  host: 
+  to:
+    kind: Service
+    name: {{ template "waDdm.ServiceName" . }}
+    weight: 100
+  port:
+    targetPort: server-https
+  tls:
+    termination: {{ .Values.global.routeType | default "passthrough" }}
+    insecureEdgeTerminationPolicy: None
+    {{- if eq (.Values.global.routeType | upper) "REENCRYPT" }}
+    {{- $secret := lookup "v1" "Secret" .Release.Namespace "ca-key-pair" }}
+    {{- if $secret }}
+    {{- if index $secret.data "tls.crt" }}
+    destinationCACertificate: |
+{{ index $secret.data "tls.crt" | b64dec | indent 6 }}
+    {{- else }}
+    {{- fail "Secret ca-key-pair exists but does not contain the tls.crt key" }}
+    {{- end }}
+    {{- else }}
+    {{- fail "reencrypt mode enabled but secret ca-key-pair does not exist in the namespace" }}
+    {{- end }}
+    {{- end }}
+  wildcardPolicy: None
+status:
+  ingress:
+    - host: 
+      routerName: default
+      conditions:
+        - type: Admitted
+          status: 'True'
+      wildcardPolicy: None
+
+{{- if (.Values.ddm.enableSingleInstaceNetwork) }} 
+{{- $root := . -}}
+{{- range $i, $e := until (.Values.replicaCount | int) }}
+---
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: "wa-ddm-route-{{ $i }}"
+  labels:
+{{ include "wa.ddm.labels" $root | indent 4 }}
+  annotations:
+    openshift.io/host.generated: 'true'
+    haproxy.router.openshift.io/cookie_name: wa-console-affinity-cookie
+
+spec:
+  host: 
+  to:
+    kind: Service
+    name: {{ template "waDdm.ServiceName" $root }}-{{ $i }}
+    weight: 100
+  port:
+    targetPort: server-ssl-eif
+  tls:
+    termination: {{ $root.Values.global.routeType | default "passthrough" }}
+    insecureEdgeTerminationPolicy: None
+    {{- if eq ($root.Values.global.routeType | upper) "REENCRYPT" }}
+    {{- $secret := lookup "v1" "Secret" $root.Release.Namespace "ca-key-pair" }}
+    {{- if $secret }}
+    {{- if index $secret.data "tls.crt" }}
+    destinationCACertificate: |
+{{ index $secret.data "tls.crt" | b64dec | indent 6 }}
+    {{- else }}
+    {{- fail "Secret ca-key-pair exists but does not contain the tls.crt key" }}
+    {{- end }}
+    {{- else }}
+    {{- fail "reencrypt mode enabled but secret ca-key-pair does not exist in the namespace" }}
+    {{- end }}
+    {{- end }}
+  wildcardPolicy: None
+status:
+  ingress:
+    - host: 
+      routerName: default
+      conditions:
+        - type: Admitted
+          status: 'True'
+      wildcardPolicy: None
+
+{{- end }}  
+{{- end }}  
+
+
+{{- end }} 
+{{- end }}

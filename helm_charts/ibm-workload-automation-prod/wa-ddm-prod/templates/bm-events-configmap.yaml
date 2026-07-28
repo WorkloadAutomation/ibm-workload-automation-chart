@@ -1,0 +1,18 @@
+####################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2021. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+####################################################################
+{{- if .Values.enableBmEventsLogging }}
+{{- include "wa.init" (list . "waddm") }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "wa.fullName" . }}-bm-events-config
+  labels:
+{{ include "wa.ddm.labels" . | indent 4 }}
+data:
+  BmEvents.conf: |-
+{{ .Values.bmEvents | indent 4 }}
+{{- end }}
