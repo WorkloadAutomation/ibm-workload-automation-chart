@@ -1,0 +1,31 @@
+####################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2019. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+####################################################################
+{{- include "wa.init" (list . "waddm") }}
+{{- $fullName := include "wa.fullName" . -}}
+{{- if .Values.ddm.networkpolicyEgress }}
+{{- range .Values.ddm.networkpolicyEgress }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ template "waDdm.ServiceName" $ }}-{{ .name }}-np
+  labels:
+{{ include "wa.ddm.labels" $ | indent 4 }}
+spec:
+  podSelector: 
+    matchLabels:
+      app.kubernetes.io/name: waddm
+  policyTypes:
+  {{- if .egress }}
+  - Egress
+  {{- end }}
+{{- if .egress }}
+  egress:
+{{ .egress | toYaml | trimSuffix "\n" | indent 2 -}}
+{{- end }}
+---
+{{- end -}}
+{{- end -}}

@@ -1,0 +1,66 @@
+{{- if and (eq (.Values.ddm.exposeServiceType | upper) "GATEWAYAPI") (.Values.ddm.gatewayApi.enabled) }}
+{{- if or (.Capabilities.APIVersions.Has "gateway.networking.k8s.io/v1/HTTPRoute") .Values.ddm.gatewayApi.skipLibraryCheck }}
+####################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2026. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+####################################################################
+{{- include "wa.init" (list . "waddm") }}
+{{- $fullName := include "wa.fullName" . -}}
+{{- $ddmServiceName := include "waDdm.ServiceName" . -}}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ printf "%s-gateway-route" $ddmServiceName | quote }}
+  labels:
+{{ include "wa.ddm.labels" . | indent 4 }}
+  {{- with .Values.ddm.gatewayApi.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  parentRefs:
+    {{- if .Values.ddm.gatewayApi.parentRefs }}
+    {{- toYaml .Values.ddm.gatewayApi.parentRefs | nindent 4 }}
+    {{- else }}
+    - name: {{ .Values.ddm.gatewayApi.gatewayName | quote }}
+      namespace: {{ .Values.ddm.gatewayApi.gatewayNamespace | default .Release.Namespace | quote }}
+    {{- end }}
+  hostnames:
+    {{- if .Values.ddm.gatewayApi.hostnames }}
+    {{- range .Values.ddm.gatewayApi.hostnames }}
+    - {{ . | quote }}
+    {{- end }}
+    {{- else if .Values.ddm.ingress.hostname }}
+    - {{ .Values.ddm.ingress.hostname | quote }}
+    {{- else }}
+    - {{ printf "%s.%s.%s.mycluster.proxy" $fullName .Release.Name .Release.Namespace | quote }}
+    {{- end }}
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: {{ .Values.ddm.gatewayApi.pathPrefix | default "/" | quote }}
+      backendRefs:
+        - name: {{ $ddmServiceName | quote }}
+          port: 31116
+          {{- with .Values.ddm.gatewayApi.backendConfig }}
+          {{- toYaml . | nindent 10 }}
+          {{- end }}
+{{- if .Values.ddm.enableSingleInstaceNetwork }}
+{{- $root := . }}
+{{- range $i, $e := until (.Values.replicaCount | int) }}
+    - matches:
+        - path:
+            type: PathPrefix
+            value: {{ printf "%sinstance-%d" ($root.Values.ddm.gatewayApi.pathPrefix | default "/") $i | quote }}
+      backendRefs:
+        - name: {{ printf "%s-%d" $ddmServiceName $i | quote }}
+          port: 31113
+{{- end }}
+{{- end }}
+{{- else -}}
+  {{- fail "\nERROR: Gateway API is enabled for DDM, but HTTPRoute CRD is not installed on the cluster.\n" -}}
+{{- end }}
+{{- end }}

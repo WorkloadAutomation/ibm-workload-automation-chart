@@ -1,0 +1,92 @@
+####################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2020. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+####################################################################
+{{- if not .Values.ddm.useCustomizedCert }} 
+{{- $ddmServiceName := include "waDdm.ServiceName" . -}}
+{{- include "wa.init" (list . "waddm") -}}
+{{- $statefulSetName := include "wa.fullName" . -}}
+{{- if .Capabilities.APIVersions.Has "certmanager.k8s.io/v1alpha1" }}
+apiVersion: certmanager.k8s.io/v1alpha1
+{{- else if .Capabilities.APIVersions.Has "cert-manager.io/v1alpha2" }}
+apiVersion: cert-manager.io/v1alpha2
+{{- else if .Capabilities.APIVersions.Has "certmanager.k8s.io/v1" }}
+apiVersion: certmanager.k8s.io/v1
+{{- else }}
+apiVersion: cert-manager.io/v1
+{{- end }}
+kind: Certificate
+metadata:
+  name: {{ $statefulSetName }}
+  labels:
+{{ include "wa.ddm.labels" . | indent 4 }}
+spec:
+  secretName: {{ .Values.ddm.certSecretName | default "wa-ddm-cert-secret" | quote }}
+  duration: {{ .Values.ddm.certDuration | default "2160h" }} # 90d
+  renewBefore: {{ .Values.ddm.certRenewBefore | default "360h" }} # 15d
+{{- if or (.Capabilities.APIVersions.Has "cert-manager.io/v1") (.Capabilities.APIVersions.Has "certmanager.k8s.io/v1") }}
+  subject:
+    organizations:
+      - {{ (index $.Values.global "certManager" | default dict).organization | default "HCL-Software" | quote }}
+    localities:
+      - {{ (index $.Values.global "certManager" | default dict).locality | default "Rome" | quote }}
+    provinces:
+      - {{ (index $.Values.global "certManager" | default dict).province | default "Lazio" | quote }}
+    countries:
+      - {{ (index $.Values.global "certManager" | default dict).country | default "IT" | quote }}
+{{- else if or (.Capabilities.APIVersions.Has "certmanager.k8s.io/v1alpha1") (.Capabilities.APIVersions.Has "cert-manager.io/v1alpha2") }}
+  organization:
+    - {{ (index $.Values.global "certManager" | default dict).organization | default "HCL-Software" | quote }}
+{{- end }}
+  commonName: {{ .Values.ddmCommonName | default "waddm" | quote }}
+  isCA: false
+{{- if or (.Capabilities.APIVersions.Has "certmanager.k8s.io/v1alpha1") (.Capabilities.APIVersions.Has "cert-manager.io/v1alpha2") }}
+{{- if not (.Capabilities.APIVersions.Has "cert-manager.io/v1") }}
+  keySize: 2048
+  keyAlgorithm: rsa
+  keyEncoding: pkcs1
+{{- end }}
+{{- end }}
+  usages:
+    - server auth
+    - client auth
+  dnsNames:
+{{- $addCustomDns := .Values.addCustomDns | default false }}
+{{- $customDns := .Values.customDns | default list }}
+{{- $customDnsOnly := .Values.customDnsOnly | default false }}
+{{- $hasCustomDns := and $addCustomDns (gt (len $customDns) 0) }}
+{{- $includeDefaultDns := not $customDnsOnly }}
+{{- if $includeDefaultDns }}
+  - {{ .Values.ddmCommonName | default "waddm" | quote }}
+  - waddm
+  - {{ $ddmServiceName }}
+{{- end }}
+{{- if $hasCustomDns }}
+{{- range $dns := $customDns }}
+  - {{ $dns | quote }}
+{{- end }}
+{{- end }}
+{{- if .Values.ddm.enableSingleInstaceNetwork }}
+{{- $root := . }}
+{{- range $i, $e := until (.Values.replicaCount | int) }}
+  - {{ printf "%s-%d" $ddmServiceName $i | quote }}
+{{- end }}
+{{- end }}
+{{- if or (.Capabilities.APIVersions.Has "cert-manager.io/v1alpha2") (.Capabilities.APIVersions.Has "cert-manager.io/v1") }}
+  privateKey:
+    rotationPolicy: Always
+{{- if .Capabilities.APIVersions.Has "cert-manager.io/v1" }}
+    size: 2048
+    algorithm: RSA
+    encoding: PKCS1
+{{- end }}
+{{- end }}
+  issuerRef:
+    name: {{ .Values.issuerName | default "wa-ca-issuer" | quote }}
+    kind: {{ .Values.issuerKind | default "Issuer" | quote }}
+    {{- if .Values.issuerGroup }}
+    group: {{ .Values.issuerGroup | default "cert-manager.io" | quote }}
+    {{- end }}
+{{- end }}

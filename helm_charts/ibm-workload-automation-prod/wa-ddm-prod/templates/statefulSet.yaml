@@ -1,0 +1,501 @@
+####################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2019. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+####################################################################
+{{- include "wa.init" (list . "waddm") }}
+{{- $dataPvcName := .Values.persistence.dataPVC.name }}
+{{- $statefulSetName := include "wa.fullName" . }}
+{{- $persistentVolumeClaimName := include "wa.volumeClaimTemplateName" (list . $dataPvcName) }}
+{{- $fullName := include "wa.fullName" . }}
+{{- $serviceName := include "wa.fullName" . }}
+{{- $configName := include "waddm.ConfigName" . }}
+{{- $waUserName := include "wa.ddm.waUser" . }}
+{{- $pluginsConfigName := (printf "%s-%s" $fullName "ddm-plugins-config") }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ $statefulSetName }}
+  labels:
+{{ include "wa.ddm.labels" . | indent 4 }}
+spec:
+  updateStrategy: 
+    type: RollingUpdate
+  serviceName: {{ $serviceName }}-h
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: "{{ include "wa.appName" . }}"
+      app.kubernetes.io/instance: "{{ .Release.Name }}"
+  template:
+    metadata:
+      labels:
+{{ include "wa.ddm.labels" . | indent 8 }}
+        affinity: wa-ddm
+        waddmtype: master
+        prometheus: 'true'
+      annotations:
+{{ include "wa.metering" . | indent 8 }}      
+        prometheus.io/scrape: {{ .Values.global.enablePrometheus | quote | default "true" }}
+        prometheus.io/scheme: http
+        prometheus.io/port: "31115"
+        prometheus.io/path: /metrics
+    spec:
+      hostNetwork: false
+      hostPID: false
+      hostIPC: false    
+      securityContext:
+        runAsNonRoot: true
+      {{- if not (.Capabilities.APIVersions.Has "security.openshift.io/v1") }} 
+        runAsUser: {{ .Values.runAsUser | default 999 }}
+        fsGroup: {{ default 999 .Values.fsGroupId }}
+      {{- end }} 
+        supplementalGroups: [{{ .Values.supplementalGroupId | default 999 }}]
+      serviceAccountName: {{ .Values.global.serviceAccountName | default $waUserName }}              
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: affinity
+                  operator: In
+                  values:
+                  - wa-ddm
+              topologyKey: kubernetes.io/hostname
+{{ include "wa.nodeaffinity" . | indent 8 }}  
+{{- if .Values.ddm.nodeAffinityRequired }} 
+{{ .Values.ddm.nodeAffinityRequired | toYaml | trimSuffix "\n" | indent 8 -}}
+{{- end }}  
+{{- if .Values.persistence.enabled }}               
+      initContainers:
+      - name: init-config
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        volumeMounts:
+        - name: {{ $persistentVolumeClaimName }}
+          mountPath: /tmp/data
+        command: [/opt/wautils/wa_populate_volume.sh]
+        args: ["-s /home/wauser -d /tmp/data"]   
+        securityContext:
+          privileged: false
+          readOnlyRootFilesystem: false
+          allowPrivilegeEscalation: false     
+          capabilities:
+            drop:
+            - ALL
+        resources:  
+{{ toYaml .Values.resources | indent 10 }}
+{{- end }}
+{{- if .Values.global.customPluginImageName }}
+      - name: init-copy-custom-plugins
+        image: {{ .Values.global.customPluginImageName }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        volumeMounts:
+        - name: {{ $persistentVolumeClaimName }}
+          mountPath: /tmp/custom_plugins
+          subPath: wauser
+        command: [/opt/wautils/copy_custom_plugins.sh]
+        args: ["/opt/wa_plugins", "/tmp/custom_plugins"]
+        securityContext:
+          privileged: false
+          readOnlyRootFilesystem: false
+          allowPrivilegeEscalation: false     
+          capabilities:
+            drop:
+            - ALL
+{{- end }} 
+      - name: init-copy-plugins
+        image: {{ .Values.global.pluginImageName }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        volumeMounts:
+        - name: {{ include "wa.fullName" . }}-plugins-volume
+          mountPath: /tmp/plugins
+        command: [/opt/wautils/copy_plugins.sh]
+        args: ["/opt/wa_cloud_plugins", "/tmp/plugins"]
+        securityContext:
+          privileged: false
+          readOnlyRootFilesystem: false
+          allowPrivilegeEscalation: false     
+          capabilities:
+            drop:
+            - ALL      
+      containers:
+      - name: {{ .Chart.Name }}
+        readinessProbe:
+          exec:
+            command:
+              - /opt/wautils/wa_probe.sh
+              - server
+              - readiness
+          initialDelaySeconds: 480
+          failureThreshold: 30
+          periodSeconds: 60
+        livenessProbe:
+          exec:
+            command:
+              - /bin/sh
+              - -c
+              - exit 0
+          initialDelaySeconds: 480
+          timeoutSeconds: 10
+          failureThreshold: 30
+          periodSeconds: 60
+        ports:
+          - name: web
+            containerPort: 31116
+            protocol: TCP
+        env:                
+        - name: LICENSE
+          value: {{ .Values.global.license | quote }}   
+        - name: WA_IS_KUBE
+          value: "true"
+        - name: DDM_MDM_HOSTNAME
+          value: {{ .Values.ddm.mdmHostname | quote }}
+        - name: DDM_MASTER
+          value: {{ .Values.ddm.masterName | default "WA-MDM-SERVER-0" | quote }}
+        - name: DDM_DOMAIN
+          value: {{ .Values.ddm.domain | default "DYNAMICDM" | quote }}
+        - name: DWBNAME
+          value: {{ .Values.ddm.dwbName | default "WA_DWB_DDM" | quote }}
+        - name: DDM_MDM_HTTPS_PORT
+          value: {{ .Values.ddm.mdmPort | quote }}
+        - name: DDM_MDM_PORT
+          value: {{ .Values.ddm.mdmPort | quote }}
+        {{- if .Values.ddm.enableSingleInstaceNetwork }}   
+        - name: FTA_FORCE_SSL
+          value: "TRUE"
+        - name: FTA_NODE_NAME_DOMAIN
+          value: ".{{ .Release.Namespace }}"
+        {{- else }}
+        - name: FTA_FORCE_SSL
+          value: "FALSE"
+        {{- end }}
+        {{- if eq (default "" .Values.ddm.exposeServiceType | toString | upper) "ROUTES" }}
+        - name: EXPOSE_SERVICE_TYPE
+          value: "ROUTES"
+        {{- else if .Values.ddm.exposeServiceType }}
+        - name: EXPOSE_SERVICE_TYPE
+          value: {{ .Values.ddm.exposeServiceType | toString | upper }}
+        {{- end }}
+        - name: LANG
+          value: {{ default "en" .Values.global.language }}
+        - name: OTEL_SDK_DISABLED
+          value: {{ default "true" .Values.ddm.otel_sdk_disabled | quote }}
+        - name: OTEL_TRACES_EXPORTER
+          value: {{ default "" .Values.ddm.otel_traces_exporter | quote }}
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: {{ default "" .Values.ddm.otel_exporter_otlp_endpoint | quote }}
+        - name: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
+          value: {{ default "" .Values.ddm.otel_exporter_otlp_traces_endpoint | quote }}
+        - name: OTEL_EXPORTER_OTLP_PROTOCOL
+          value: {{ default "" .Values.ddm.otel_exporter_otlp_protocol | quote }}
+        - name: OTEL_EXPORTER_OTLP_TRACES_PROTOCOL
+          value: {{ default "" .Values.ddm.otel_exporter_otlp_traces_protocol | quote }}
+        - name: WA_DEBUG_SCRIPTS
+          value: "false"      
+        - name: PUBLIC_HOSTNAME
+          value: {{ .Values.ddm.publicHostname | default (include "waDdm.ServiceName" .) | quote }}                  
+        - name: WA_SERVICE_DOMAIN
+          value: {{ .Values.ddm.waServiceDomain | default (printf "%s-h" $serviceName) | quote }}
+        - name: PUBLIC_PORT
+          value: {{ .Values.ddm.publicPort | default "31116" | quote }} 
+        {{- if or (.Values.ddm.routes.enabled) (eq (default "" .Values.ddm.exposeServiceType | toString | upper) "ROUTES") }} 
+        {{- if .Values.ddm.routes.hostname }}
+        - name: ADDITIONAL_HOSTNAME        
+          value: {{ .Values.ddm.routes.hostname | quote }}
+        - name: ADDITIONAL_PORT
+          value: "443"
+        {{- end }} 
+        {{- end }}
+        {{- if eq (default "" .Values.ddm.exposeServiceType | toString | upper) "INGRESS" }} 
+        {{- if .Values.ddm.ingress.hostname }}
+        - name: ADDITIONAL_HOSTNAME        
+          value: {{ .Values.ddm.ingress.hostname | quote }}
+        - name: ADDITIONAL_PORT
+          value: "443"
+        {{- else }} 
+        - name: ADDITIONAL_HOSTNAME        
+          value: {{ $fullName }}.{{ .Release.Name }}.{{ .Release.Namespace }}.mycluster.proxy
+        - name: ADDITIONAL_PORT
+          value: "443"  
+        {{- end }} 
+        {{- end }}
+        - name: COMPANY_NAME
+          value: {{ .Values.ddm.company | quote }}
+        - name: FTA_NAME
+          value: {{ .Values.ddm.ftaName | default "WA-DDM" | quote }}
+        - name: AGT_NAME
+          value: {{ .Values.ddm.agentName | default "WA_AGT_DDM_0" | quote }}
+        {{- if .Values.ddm.externalFileProxyEnabled }}
+        - name: FP_ENABLED
+          value: {{ .Values.ddm.externalFileProxyEnabled | quote }}
+        - name: FP_URLS
+          value: {{ .Values.ddm.externalFileProxyURLs | quote }}
+        {{- end }}
+        {{- if .Values.ddm.startOfDay }}
+        - name: START_OF_DAY
+          value: {{ .Values.ddm.startOfDay | quote }}
+        {{- end }}   
+        {{- if .Values.ddm.timezone }}
+        - name: TIMEZONE
+          value: {{ .Values.ddm.timezone | quote }}
+        {{- end }}   
+        {{- if .Values.ddm.tz }}
+        - name: TZ
+          value: {{ .Values.ddm.tz | quote }}
+        {{- end }}              
+        {{- if .Values.ddm.dateFormat }}
+        - name: DATE_FORMAT
+          value: {{ .Values.ddm.dateFormat | quote }}
+        {{- end }}
+        - name: CREATE_PLAN
+          value: {{ .Values.ddm.createPlan | quote }}
+        - name: WA_DEBUG
+          value: {{ .Values.ddm.containerDebug | quote }}
+        - name: WA_ENABLE_SSO
+          value: {{ .Values.ddm.enableSSO | quote }}
+      {{- if .Values.ddm.adminGroup }}
+        - name: WA_ADMIN_GROUP
+          value: {{ .Values.ddm.adminGroup | quote }}
+      {{- end }}
+        - name: DB_TYPE
+          value: {{ .Values.ddm.db.type | quote }}
+      {{- if (eq (default "" .Values.ddm.db.type | toString | upper) "IDS") }}
+        - name: DB_SERVER
+          value: {{ .Values.ddm.db.server | quote }}    
+      {{- end }}
+        - name: DB_HOSTNAME
+          value: {{ .Values.ddm.db.hostname | quote }}         
+        - name: DB_PORT
+          value: {{ .Values.ddm.db.port | quote }}   
+        - name: DB_SSL_CONNECTION
+          value: {{ .Values.ddm.db.sslConnection | quote }}                            
+        - name: DB_NAME
+          value: {{ .Values.ddm.db.name | quote }}  
+        - name: DB_ALTERNATE_SERVER_NAME
+          value: {{ .Values.ddm.db.alternateHostName | quote }}
+        - name: DB_ALTERNATE_SERVER_PORT
+          value: {{ .Values.ddm.db.alternatePort | quote }}
+        - name: DB_USER
+          value: {{ .Values.ddm.db.user | quote }} 
+        - name: DB_ADMIN_USER
+          value: {{ .Values.ddm.db.adminUser | quote }}  
+        {{- if eq (default "" .Values.ddm.db.type | toString | upper) "ORACLE" }}    
+        - name: DB_SKIP_CHECK
+          value: {{ .Values.ddm.db.skipCheck | quote }} 
+        {{- end }}                    
+        {{- if .Values.ddm.db.tsName }}
+        - name: DB_TS_NAME
+          value: {{ .Values.ddm.db.tsName | quote }}
+        {{- end }}          
+        {{- if .Values.ddm.db.tsPath }}
+        - name: DB_TS_PATH
+          value: {{ .Values.ddm.db.tsPath | quote }}
+        {{- end }}        
+        {{- if .Values.ddm.db.tsLogName }}
+        - name: DB_LOG_TS_NAME
+          value: {{ .Values.ddm.db.tsLogName | quote }}
+        {{- end }}          
+        {{- if .Values.ddm.db.tsLogPath }}
+        - name: DB_LOG_TS_PATH
+          value: {{ .Values.ddm.db.tsLogPath | quote }}
+        {{- end }}
+        {{- if .Values.ddm.db.tsPlanName }}
+        - name: DB_PLAN_TS_NAME
+          value: {{ .Values.ddm.db.tsPlanName | quote }}
+        {{- end }}          
+        {{- if .Values.ddm.db.tsPlanPath }}
+        - name: DB_PLAN_TS_PATH
+          value: {{ .Values.ddm.db.tsPlanPath | quote }}
+        {{- end }}
+        {{- if .Values.ddm.db.tsTempName }}
+        - name: DB_TEMP_TS_NAME
+          value: {{ .Values.ddm.db.tsTempName | quote }}
+        {{- end }}      
+        {{- if .Values.ddm.db.tssbspace }}
+        - name: DB_SBSPACE
+          value: {{ .Values.ddm.db.tssbspace | quote }}
+        {{- end }}     
+        - name: DB_ENABLE_PARTITIONING
+          value: {{ .Values.ddm.db.usepartitioning | quote }}
+        - name: LICENSE_SERVER_URL
+          value: {{ .Values.ddm.licenseServerUrl | quote }}
+        - name: LICENSE_SERVER_ID
+          value: {{ .Values.ddm.licenseServerId | quote }}
+        - name: RELEASE_NAME
+          value: {{ .Release.Name | quote }}
+        - name: SSL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-ssl-secret
+              key: SSL_PASSWORD
+              optional: true
+        - name: AGENT_SSL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-ssl-agent-secret
+              key: AGENT_SSL_PASSWORD
+              optional: true
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        securityContext:
+          privileged: false
+          readOnlyRootFilesystem: false
+          allowPrivilegeEscalation: false     
+          capabilities:
+            drop:
+            - ALL          
+        resources:
+{{ toYaml .Values.resources | indent 10 }}
+        volumeMounts:
+{{- if .Values.persistence.enabled }}        
+        - name: {{ $persistentVolumeClaimName }}
+          mountPath: /home/wauser
+          subPath: wauser
+{{- end }} 
+        - name: {{ include "wa.fullName" . }}-plugins-volume
+          mountPath: /opt/wa_cloud_plugins/
+          subPath: wa_cloud_plugins      
+        - name: cert-bind-volume
+          mountPath: /opt/wautils/certs
+        - name: password-bind-volume
+          mountPath: /opt/service-bind   
+        - name: cert-bind-volume-ext
+          mountPath: /home/wauser/wadata/ssl/depot
+{{- if .Values.ddm.libConfigName }}
+        - name: config-liberty-volume
+          mountPath: /opt/wautils/dropins
+{{- end }}
+{{- if .Values.enableBmEventsLogging }}
+        - name: {{ include "wa.fullName" . }}-config-bm-events-volume
+          mountPath: /home/wauser/wadata/BmEvents.conf
+          subPath: BmEvents.conf
+{{- end }}
+        - name: {{ include "wa.fullName" . }}-ddm-plugins-volume
+          mountPath: /opt/wautils/config/plugins.properties
+          subPath: plugins.properties
+        - name: {{ include "wa.fullName" . }}-ddm-scripts-volume
+          mountPath: /opt/wautils/custom_scripts
+{{- if ne (len .Values.persistence.extraVolumeMounts) 0 }}
+{{ toYaml .Values.persistence.extraVolumeMounts | indent 8 }}
+{{- end }}
+{{- if .Values.enableBmEventsLogging }}
+      - name: {{ .Chart.Name }}-bm-events
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        volumeMounts: 
+        - name: {{ $persistentVolumeClaimName }}
+          mountPath: /tmp/log
+        command: ['/bin/sh']
+        args: ['-c', 'while [ ! -f /tmp/log/wauser/wadata/event.json ] ; do echo waiting for BmEvent.json file to be created; sleep 300; done; tail -f /tmp/log/wauser/wadata/event.json']
+        securityContext:
+          privileged: false
+          readOnlyRootFilesystem: false
+          allowPrivilegeEscalation: false     
+          capabilities:
+            drop:
+            - ALL
+{{- end }}
+      - name: {{ .Chart.Name }}-db-auditing
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        volumeMounts: 
+        - name: {{ $persistentVolumeClaimName }}
+          mountPath: /tmp/log
+        command: ['/bin/sh']
+        args: ['-c', 'while [ ! -f /tmp/log/wauser/wadata/audit/database/current.json ] ; do echo waiting for current.json file to be created; sleep 300; done; tail -f /tmp/log/wauser/wadata/audit/database/current.json']
+        securityContext:
+          privileged: false
+          readOnlyRootFilesystem: false
+          allowPrivilegeEscalation: false     
+          capabilities:
+            drop:
+            - ALL
+      - name: {{ .Chart.Name }}-plan-auditing
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        volumeMounts: 
+        - name: {{ $persistentVolumeClaimName }}
+          mountPath: /tmp/log
+        command: ['/bin/sh']
+        args: ['-c', 'while [ ! -f /tmp/log/wauser/wadata/audit/plan/current.json ] ; do echo waiting for current.json file to be created; sleep 300; done; tail -f /tmp/log/wauser/wadata/audit/plan/current.json']
+        securityContext:
+          privileged: false
+          readOnlyRootFilesystem: false
+          allowPrivilegeEscalation: false     
+          capabilities:
+            drop:
+            - ALL
+      volumes:
+      - name: {{ include "wa.fullName" . }}-plugins-volume
+        emptyDir: {}
+      - name: cert-bind-volume
+        secret:
+          defaultMode: 0664
+          secretName: {{ .Values.ddm.certSecretName }} 
+      - name: config-auth-sofy-liberty-volume
+        secret:
+          defaultMode: 0664
+          secretName: {{ include "wa.fullName" . }}-liberty-sofy-auth-config
+          optional: true
+      - name: cert-bind-volume-ext
+        secret:
+          defaultMode: 0664
+          secretName: "waagent-cert-secret-ext"
+          optional: true
+      - name: password-bind-volume
+        secret:
+          defaultMode: 0664
+          secretName: {{ .Values.ddm.pwdSecretName }}        
+      - name: {{ include "wa.fullName" . }}-config-bm-events-volume
+        configMap:
+          name: {{ include "wa.fullName" . }}-bm-events-config
+          items:
+          - key: BmEvents.conf
+            path: BmEvents.conf
+          optional: true
+      - name: {{ include "wa.fullName" . }}-ddm-plugins-volume
+        configMap:
+          name: {{ .Values.global.configPlugins | default $pluginsConfigName }} 
+          optional: true
+          items:
+          - key: plugins.properties
+            path: plugins.properties
+      - name: {{ include "wa.fullName" . }}-ddm-scripts-volume
+        configMap:
+          name: {{ include "wa.fullName" . }}-ddm-scripts
+          defaultMode: 0777
+          optional: true
+{{- if .Values.ddm.libConfigName }}          
+      - name: config-liberty-volume
+        configMap:
+          name: {{ default $configName .Values.ddm.libConfigName }}     
+{{- end }}
+{{- if ne (len .Values.persistence.extraVolumes) 0 }}
+{{ toYaml .Values.persistence.extraVolumes | indent 6 }}
+{{- end }}                   
+{{- if .Values.persistence.enabled }}                 
+  volumeClaimTemplates:
+  - metadata:
+      name: {{ $persistentVolumeClaimName }}
+      labels: 
+{{ include "wa.ddm.labels" . | indent 8 }}      
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: {{ .Values.persistence.dataPVC.size | quote }}
+      {{- if .Values.persistence.useDynamicProvisioning }}
+      storageClassName: {{ default nil .Values.persistence.dataPVC.storageClassName | quote }}
+      {{- else }}
+      storageClassName: ""
+        {{- if .Values.persistence.dataPVC.selector.label }}
+      selector:
+        matchLabels:
+          {{ .Values.persistence.dataPVC.selector.label }}: {{ .Values.persistence.dataPVC.selector.value }}
+        {{- end }}      
+      {{- end }}
+{{- end }}

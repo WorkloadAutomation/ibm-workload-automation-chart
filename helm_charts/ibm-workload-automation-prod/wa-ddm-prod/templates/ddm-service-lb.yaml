@@ -1,0 +1,34 @@
+{{- if eq (.Values.ddm.exposeServiceType | upper) "LOADBALANCER" }}
+####################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2019. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+####################################################################
+{{- include "wa.init" (list . "waddm") }}
+{{ $fullName := include "wa.fullName" . }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "waDdm.ServiceName" . }}-lb
+  labels:
+{{ include "wa.ddm.labels" . | indent 4 }}
+  annotations:
+{{- with .Values.ddm.exposeServiceAnnotation }}
+{{ toYaml . | indent 4 }} 
+{{- end }}
+spec:
+  type: LoadBalancer
+  {{- if .Values.loadBalancerIP }}
+  loadBalancerIP: {{ .Values.loadBalancerIP | quote }}
+  {{- end }}
+  ports:
+  - name: server-https
+    protocol: TCP
+    port: 31116
+    targetPort: 31116   
+  selector:
+    app.kubernetes.io/name: "{{ include "wa.appName" . }}"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+    waddmtype: master
+{{- end }}
