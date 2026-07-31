@@ -19,7 +19,7 @@ The information in this README contains the steps for deploying the following IB
  > **IBM Workload Automation**, which comprises master domain manager and its backup, Dynamic Workload Console, and Dynamic Agent
  
  
- For more information about IBM Workload Automation, see the product documentation library in [IBM Documentation](https://help.blueproddoc.com/workloadautomation/v1027/index.html).
+ For more information about IBM Workload Automation, see the product documentation library in [IBM Documentation](https://www.ibm.com/docs/en/workload-automation/10.2.8).
  
 ## Details
 
@@ -27,7 +27,7 @@ By default, a single  server (master domain manager), Dynamic Workload Console (
 
 To achieve high availability in an IBM Workload Automation environment, the minimum base configuration is composed of 2 Dynamic Workload Consoles and 2 servers (master domain managers). For more details about IBM Workload Automation and high availability, see: 
 
-[An active-active high availability scenario](https://help.blueproddoc.com/workloadautomation/v1027/distr/src_ad/awsadhaloadbal.html).
+[An active-active high availability scenario](https://www.ibm.com/docs/en/workload-automation/10.2.8?topic=scheduler-active-active-high-availability-scenario).
 
 
 IBM Workload Automation can be deployed across a single cluster, but you can add multiple instances of the product components by using a different namespace in the cluster. The product components can run in multiple failure zones in a single cluster.
@@ -51,7 +51,7 @@ In addition to the product components, the following objects are installed:
 |**Role Bindings**  |wa-pod-role-binding |wa-pod-role-binding  |wa-pod-role-binding  |
 |**Cluster Roles**  | {{ .Release.Namespace }}-wa-pod-cluster-role-get-routes (name of clusterRole and, where {{ .Release.Namespace }} represents the name of the namespace \<workload_automation_namespace>) | {{ .Release.Namespace }}-wa-pod-cluster-role-get-routes  | {{ .Release.Namespace }}-wa-pod-cluster-role-get-routes  |
 |**Cluster Role Bindings**  |{{ .Release.Namespace }}-wa-pod-cluster-role-get-routes-binding (name of ClusterRoleBinding and, where {{ .Release.Namespace }} represents the name of the namespace \\<workload_automation_namespace>) |{{ .Release.Namespace }}-wa-pod-cluster-role-get-routes-binding  |{{ .Release.Namespace }}-wa-pod-cluster-role-get-routes-binding |
-|**Ingress** or **Load Balancer**|  Depends on the type of network enablement that is configured. See [Network enablement](#network-enablement)  |
+|**Ingress**, **Load Balancer**, or **Gateway API**|  Depends on the type of network enablement that is configured. See [Network enablement](#network-enablement)  |
 
  **Data encryption**: 
  * Data in transit encrypted using TLS 1.2
@@ -69,7 +69,7 @@ In addition to the product components, the following objects are installed:
 IBM Workload Automation supports all the platforms supported by the runtime provider of your choice.
 
 ### Openshift support
-You can deploy IBM Workload Automation on Openshift by following the instruction in this documentation and using helm charts. IBM Workload Automation 10.2.6 was formally tested by using Openshift 4.14 
+You can deploy IBM Workload Automation on Openshift by following the instruction in this documentation and using helm charts. IBM Workload Automation 10.2.7 was formally tested by using Openshift 4.14 
 For Server and Console component ensure to modify the value of these parameters:
 - waserver.server.exposeServiceType
 - waconsole.console.exposeServiceType
@@ -82,11 +82,12 @@ From `LoadBalancer` to `Routes`
 You can access the IBM Workload Automation chart and container images from the Entitled Registry. See [Create the secret](#create-the-secret) for more information about accessing the registry. The images are as follows:
 
 
-* icr.io/cp/ibm-workload-automation-agent-dynamic:10.2.7.00.20260424.amd64
-* icr.io/cp/ibm-workload-automation-server:10.2.7.00.20260424.amd64
-* icr.io/cp/ibm-workload-automation-console:10.2.7.00.20260424.amd64
+* icr.io/cp/ibm-workload-automation-agent-dynamic: 10.2.8.00.20260727
+* icr.io/cp/ibm-workload-automation-server: 10.2.8.00.20260727
+* icr.io/cp/ibm-workload-automation-console: 10.2.8.00.20260727
 
 ## Other supported tags
+* 10.2.7.00.20260424.amd64
 * 10.2.6.00.20251212
 * 10.2.5.00.20250804
 * 10.2.4.00.20250423
@@ -116,6 +117,9 @@ Before you begin the deployment process, ensure your environment meets the follo
 - Grafana and Prometheus for monitoring dashboard
 - Jetstack cert-manager
 - Ingress controller: to manage the ingress service, ensure an ingress controller is correctly configured. For example, to configure an NGINX ingress controller, ensure the following option is set if NGINX is installed using a Helm chart: `"controller.extraArgs.enable-ssl-passthrough"`. Refer to the [NGINX Ingress Controller documentation](https://kubernetes.github.io/ingress-nginx/) for more details.
+- Gateway API: to route external traffic instead of using Ingress, ensure the Gateway API CRDs and a compatible controller are correctly configured. For example, to configure an Envoy Gateway controller, ensure the GatewayClass and HTTPRoute resources are properly initialized. Refer to the [Gateway API documentation] (https://gateway-api.sigs.k8s.io/docs/introduction/) for more information.
+>**Note**: While the server and the console components can operate in mismatched modes, implementing the Gateway API requires a complete redeployment of the component using the Gateway API.
+																																																																																																		 
 - Kubernetes version: >=1.29 or later (no specific APIs need to be enabled)
 - `kubectl` command-line tool to control Kubernetes clusters 
 - API key for accessing IBM Entitled Registry: `cp.icr.io`
@@ -245,9 +249,6 @@ Cert-manager is a Kubernetes addon that automates the management and issuance of
     
    b. `helm install cert-manager jetstack/cert-manager --namespace cert-manager --set installCRDs=true`	
    
-   Otherwise if you are on k8s 1.21 or below:
-   
-   b. `helm install cert-manager jetstack/cert-manager --namespace cert-manager --version v0.15.1 --set installCRDs=true`	
 	
 3. Create the Certificate Authority (CA) by running the following commands:
 
@@ -274,19 +275,6 @@ Cert-manager is a Kubernetes addon that automates the management and issuance of
           ca:
             secretName: ca-key-pair
 	    
-    a. Otherwise if you are on k8s 1.21 or below:
-	
-        apiVersion: cert-manager.io/v1alpha2
-        kind: Issuer
-        metadata:
-          labels:
-            app.kubernetes.io/name: cert-manager
-          name: wa-ca-issuer
-          namespace: <workload_automation_namespace>
-        spec:
-          ca:
-            secretName: ca-key-pair
-
     b. Run the following command to create the issuer under the namespace:		  
 
         kubectl apply -f issuer.yaml -n <workload_automation_namespace>
@@ -816,7 +804,7 @@ To manually verify that the installation was successfully installed, you can per
 	 
         optman ls
 		
-This command lists the current values of all IBM Workload Automation global options. For more information about the global options see [Global Options - detailed description](https://help.blueproddoc.com/workloadautomation/v1027/distr/src_ad/awsadgloboptdescr.html).	
+This command lists the current values of all IBM Workload Automation global options. For more information about the global options see [Global Options - detailed description](https://www.ibm.com/docs/en/workload-automation/10.2.8?topic=options-global-detailed-description).	
 	
 * **Verify that the default engine connection is created from the Dynamic Workload Console**
 
@@ -851,11 +839,20 @@ Verifying the default engine connection depends on the network enablement config
   
 2.   With the output obtained, replace \<ingress> in the URL https://\<ingress>/console.
 
+**For Gateway API:**
+
+1. Run the following command to obtain the token to be inserted in https://\<gatewayAPI>/console to connect to the console:
+
+
+        kubectl get httproute/<workload_automation_release_name>-waconsole -o 'jsonpath={..host}'-n <workload_automation_namespace>
+  
+2.   With the output obtained, replace \<gatewayAPI> in the URL https://\<gatewayAPI>/console
+
 **Logging into the console:**
 
 1. Log in to the console by using the URLs obtained in the previous step.
 
-2. For the credentials, specify the user name (wauser) and password (wa-pwd-secret, the passwrod specified when you created the secrets file to store passwords for the server, console and database).
+2. For the credentials, specify the user name (wauser) and password (wa-pwd-secret, the password specified when you created the secrets file to store passwords for the server, console and database).
 	
 3. From the navigation toolbar, select **Administration -> Manage Engines**.
 	
@@ -971,7 +968,7 @@ The following table lists the configurable parameters of the chart relative to t
 
 
 >\(*) **Note:** for details about static agent workstation pools, see: 
-[Workstation](https://help.blueproddoc.com/workloadautomation/v1027/distr/src_ref/awsrgworkstationconcept.html).
+[Workstation](https://www.ibm.com/docs/en/workload-automation/10.2.8?topic=objects-workstation).
 
 
 - #### Dynamic Workload Console parameters
@@ -982,6 +979,7 @@ The following table lists the configurable parameters of the chart relative to t
 | waconsole.fsGroupId                                 | The secondary group ID of the user                                                                                                                                                                                                                                     | no            | 999                              |                                                    |
 | waconsole.supplementalGroupId                       | Supplemental group id of the user                                                                                                                                                                                                                                      | no            |                                  |                                                    |
 | waconsole.replicaCount                              | Number of replicas to deploy                                                                                                                                                                                                                                           | yes           | 1                                | 1                                                  |
+| waconsole.servicePort                              | The external port of the Dynamic Workload Console                                                                                                                                                                                                                                       | yes           | 10443                                 | 9443                                                  |
 | waconsole.image.repository                          | IBM Workload Automation Console image repository                                                                                                                                                                                                                                | yes           | @DOCKER.CONSOLE.IMAGE.NAME@      |                        |
 | waconsole.image.tag                                 | IBM Workload Automation Console image tag                                                                                                                                                                                                                                       | yes           | @VERSION@                        |                                           |
 | waconsole.image.pullPolicy                          | Image pull policy                                                                                                                                                                                                                                                      | yes           | Always                           | Always                                             |
@@ -1021,7 +1019,7 @@ The following table lists the configurable parameters of the chart relative to t
 | waconsole.persistence.dataPVC.size                  | The minimum size of the Persistent Volume                                                                                                                                                                                                                              | no            | 5Gi                              | 5Gi                                                |
 | waserver.persistence.extraVolumes               | A list of additional extra volumes                                                                                                                                                                                                                             | no            | custom-volume-1                             |                                              |
 | waserver.persistence.extraVolumeMounts               | A list of additional extra volumes mounts                                                                                                                                                                                                                            | no            | custom-volume-1                             |                                              |
-| waconsole.console.exposeServiceType            | The network enablement configuration implemented. Valid values: LOAD BALANCER or INGRESS   | yes           |     INGRESS                          |                                                | 
+| waconsole.console.exposeServiceType            | The network enablement configuration implemented. Valid values: LOAD BALANCER, INGRESS, or GATEWAYAPI  | yes           |     INGRESS                          |                                                | 
 | waconsole.console.exposeServiceAnnotation      | Annotations of either the resource of the service or the resource of the ingress, customized in accordance with the cloud provider   | yes           |                               |                     |
 | waconsole.console.networkpolicyEgress      | Customize egress policy. Controls network traffic and how a component pod is allowed to communicate with other pods. If empty, no egress policy is defined | no | See [Network enablement](#network-enablement)|
 | waconsole.console.ingressHostName      | The virtual hostname defined in the DNS used to reach the Console.   | yes, only if the network enablement implementation is INGRESS           |                               |                     | 
@@ -1032,7 +1030,17 @@ The following table lists the configurable parameters of the chart relative to t
 | waconsole.console.otel_exporter_otlp_traces_endpoint                 | Endpoint URL for trace data only, with an optionally-specified port number. Typically ends with v1/traces when using OTLP/HTTP.                       | no             | http://localhost:4317       |                               |
 | waconsole.console.otel_exporter_otlp_protocol                 | Specifies the OTLP transport protocol to be used for all telemetry data.                       | no             | grpc       |                               |
 | waconsole.console.otel_exporter_otlp_traces_protocol                 | Specifies the OTLP transport protocol to be used for trace data.                       | no             | grpc       |                               |
-
+| waconsole.gatewayApi.enabled                | Main conditional switch that controls whether Gateway API manifests are compiled.                                                                                                                                                                                                                                   |             |                           |   true                   | 
+| waconsole.gatewayApi.gatewayName                | The name of the central physical infrastructure Gateway resource managed by your network team.                                                                                                                                                                                                                                   |    yes         |    gateway_name                       |                      | 
+| waconsole.gatewayApi.gatewayNamespace                | The namespace where the Gateway resource lives. If empty, falls back to the local .Release.Namespace.                                                                                                                                                                                                                                   | no            |    release-namespace                       |  .Release.Namespace                   | 
+| waconsole.gatewayApi.parentRefs                | Enables providing a custom, complex parentRefs schema. If populated, it overrides the default gatewayName mapping block.                                                                                                                                                                                                                                   |   no          |                      |   []                   | 
+| waconsole.gatewayApi.hostnames                | Array of production domain strings (e.g., ["hwa.company.com"]) exposed on the router. Overrides any automated fallback proxied strings.                                                                                                                                                                                                                                   |   no          |        server.myhostname.com                   |   If empty, <*fullName*>.<*ReleaseName*>.<*Namespace*>.mycluster.proxy                      | 
+| waconsole.gatewayApi.pathPrefix                | The root context directory string used to match incoming L7 URI prefix routing rules.                                                                                                                                                                                                                                   |   yes          |              "/"                |   "/"                   |
+| waconsole.gatewayApi.annotations                | Key-value string pairs injected straight into the HTTPRoute metadata layer (useful for specific ingress controllers like Istio, Envoy, or Traefik).                                                                                                                                                                                                                                   | no            |    gateway.customproxy.io/route-timeout: "60s"                       |                      | 
+| waconsole.gatewayApi.backendConfig                | Enables passing specialized controller specifications directly beneath the backendRefs segment.                                                                                                                                                                                                                                   |      no       |    kind: Service                       |                        | 
+| waconsole.gatewayApi.backendTLSPolicy.enabled                | Toggles the creation of the BackendTLSPolicy resource for secure pod-level traffic.                                                                                                                                                                                                                                   |      yes       |          true                 |   true                   | 
+| waconsole.gatewayApi.backendTLSPolicy.caCertificateSecretName                | Overrides the secret name used by the proxy to check backend validity. Defaults back to the chart's generic .certSecretName.                                                                                                                                                                                                                                   |    no         |    waconsole-cert-secret                       |  Values.console.certSecretName                  | 
+| waconsole.gatewayApi.backendTLSPolicy.hostname                | Explicit SNI domain verification string used to evaluate the internal up-stream certificate handshake.                                                                                                                                                                                                                                   |      no       |          waconsole                 |   $dwcServiceName                   | 
 
 - #### Server parameters
 The following table lists the configurable parameters of the chart and an example of their values:
@@ -1093,7 +1101,7 @@ The following table lists the configurable parameters of the chart and an exampl
 | waserver.persistence.dataPVC.size                 | The minimum size of the Persistent Volume                                                                                                                                                                                                                                     | no            | 5Gi                              | 5Gi                                              |
 | waserver.persistence.extraVolumes               | A list of additional extra volumes                                                                                                                                                                                                                             | no            | custom-volume-1                             |                                              |
 | waserver.persistence.extraVolumeMounts               | A list of additional extra volumes mounts                                                                                                                                                                                                                            | no            | custom-volume-1                             |                                              |
-| waserver.server.exposeServiceType            | The network enablement configuration implemented. Valid values: LOAD BALANCER or INGRESS   | yes           |     INGRESS                          |                                                | 
+| waserver.server.exposeServiceType            | The network enablement configuration implemented. Valid values: LOAD BALANCER, INGRESS, or GATEWAYAPI   | yes           |     INGRESS                          |                                                | 
 | waserver.server.exposeServiceAnnotation      | Annotations of either the resource of the service or the resource of the ingress, customized in accordance with the cloud provider   | yes           |                               |                     |
 | waserver.server.networkpolicyEgress                                | Controls network traffic and how a component pod is allowed to communicate with other pods. Customize egress policy. If empty, no egress policy is defined                                                                                                                                                                                                                  | no            | See [Network enablement](#network-enablement)                  |                     |
 | waserver.server.ingressHostName      | The virtual hostname defined in the DNS used to reach the Server   | yes, only if the network enablement implementation is INGRESS            |                               |                     | 
@@ -1107,7 +1115,18 @@ The following table lists the configurable parameters of the chart and an exampl
 | waserver.server.otel_exporter_otlp_traces_endpoint                 | Endpoint URL for trace data only, with an optionally-specified port number. Typically ends with v1/traces when using OTLP/HTTP.                       | no             | http://localhost:4317       |                               |
 | waserver.server.otel_exporter_otlp_protocol                 | Specifies the OTLP transport protocol to be used for all telemetry data.                       | no             | grpc       |                               |
 | waserver.server.otel_exporter_otlp_traces_protocol                 | Specifies the OTLP transport protocol to be used for trace data.                       | no             | grpc       |                               |
-	
+| waserver.gatewayApi.enabled                | Main conditional switch that controls whether Gateway API manifests are compiled.                                                                                                                                                                                                                                   |             |                           |   true                   | 
+| waserver.gatewayApi.skipLibraryCheck                | If 'true', bypasses the live cluster API capability validation check (essential for offline rendering or template dry-runs).                                                                                                                                                                                                                                   |      yes       |             false              |   false                   | 
+| waserver.gatewayApi.gatewayName                | The name of the central physical infrastructure Gateway resource managed by your network team.                                                                                                                                                                                                                                   |    yes         |    gateway_name                       |                      | 
+| waserver.gatewayApi.gatewayNamespace                | The namespace where the Gateway resource lives. If empty, falls back to the local .Release.Namespace.                                                                                                                                                                                                                                   | no            |    release-namespace                       |  .Release.Namespace                   | 
+| waserver.gatewayApi.parentRefs                | Enables providing a custom, complex parentRefs schema. If populated, it overrides the default gatewayName mapping block.                                                                                                                                                                                                                                   |   no          |                      |   []                   | 
+| waserver.gatewayApi.hostnames                | Array of production domain strings (e.g., ["hwa.company.com"]) exposed on the router. Overrides any automated fallback proxied strings.                                                                                                                                                                                                                                   |   no          |        server.myhostname.com                   |   If empty, <*fullName*>.<*ReleaseName*>.<*Namespace*>.mycluster.proxy                      | 
+| waserver.gatewayApi.pathPrefix                | The root context directory string used to match incoming L7 URI prefix routing rules.                                                                                                                                                                                                                                   |   yes          |              "/"                |   "/"                   |
+| waserver.gatewayApi.annotations                | Key-value string pairs injected straight into the HTTPRoute metadata layer (useful for specific ingress controllers like Istio, Envoy, or Traefik).                                                                                                                                                                                                                                   | no            |    gateway.customproxy.io/route-timeout: "60s"                       |                      | 
+| waserver.gatewayApi.backendConfig                | Enables passing specialized controller specifications directly beneath the backendRefs segment.                                                                                                                                                                                                                                   |      no       |    kind: Service                       |                        | 
+| waserver.gatewayApi.backendTLSPolicy.enabled                | Toggles the creation of the BackendTLSPolicy resource for secure pod-level traffic.                                                                                                                                                                                                                                   |      yes       |          true                 |   true                   | 
+| waserver.gatewayApi.backendTLSPolicy.caCertificateSecretName                | Overrides the secret name used by the proxy to check backend validity. Defaults back to the chart's generic .certSecretName.                                                                                                                                                                                                                                   |    no         |    waserver-cert-secret                       |  Values.server.certSecretName                  | 
+| waserver.gatewayApi.backendTLSPolicy.hostname                | Explicit SNI domain verification string used to evaluate the internal up-stream certificate handshake.                                                                                                                                                                                                                                   |      no       |          waserver                 |   $mdmServiceName                   |
 
 
 
@@ -1129,7 +1148,7 @@ The following table lists the configurable parameters of the chart relative to t
 | wafileproxy.fileProxy.containerDebug                     | The container is executed in debug mode                                                                                                                                                                                                                              | no             | no                               | no                               |
 | wafileproxy.fileProxy.port | The port of the fileProxy deployment                                                                                                                                                                      | yes            | 60                               | 60                               | 
 | wafileproxy.fileProxy.route.enabled |     enable or disable route resource in OpenShift                                                                                                                                                                                                                                                        | no           |                                  |     false                            |
-| wafileproxy.fileProxy.route.exposeServiceType |    The network enablement configuration implemented. Valid values: LOAD BALANCER or INGRESS                                                                                                                                                                                                                                                       | true           |         LOAD_BALANCER                         |                                 |
+| wafileproxy.fileProxy.route.exposeServiceType |    The network enablement configuration implemented. Valid values: LOAD BALANCER, INGRESS, or GATEWAYAPI                                                                                                                                                                                                                                                       | true           |         LOAD_BALANCER                         |                                 |
 | wafileproxy.fileProxy.route.exposeServiceAnnotation |        Annotations of either the resource of the service or the resource of the ingress, customized in accordance with the cloud provider                                                                                                                                                                                                                                                      | no           |                                  |                                 |
 | wafileproxy.podAnnotations |        You can use Kubernetes annotations to attach arbitrary non-identifying metadata to objects                                                                                                                                                                                                                                                     | no           |                                  |                                 |
 | wafileproxy.podSecurityContext |    defines privilege and access control settings for a Pod or Container                                                                                                                                                                                                                                                         | no           |                                  |                                 |
@@ -1144,7 +1163,18 @@ The following table lists the configurable parameters of the chart relative to t
 | wafileproxy.autoscaling.targetCPUUtilizationPercentage                  | The number of CPU to use expressed in percentage                                                                                                                                                                                                                              | yes            | 80                            | 80                           | 
 | wafileproxy.nodeSelector                | specifies a map of key-value pairs. For the pod to be eligible to run on a node, the node must have each of the indicated key-value pairs as labels                                                                                                                                                                                                                                    | no            |                          |                       | 
 | wafileproxy.tolerations                | Tolerations are applied to pods, and allow (but do not require) the pods to schedule onto nodes with matching taints                                                                                                                                                                                                                                   | no            |                           |                      | 
-
+| wafileproxy.gatewayApi.enabled                | Main conditional switch that controls whether Gateway API manifests are compiled.                                                                                                                                                                                                                                   |             |                           |   true                   | 
+| wafileproxy.gatewayApi.skipLibraryCheck                | If 'true', bypasses the live cluster API capability validation check (essential for offline rendering or template dry-runs).                                                                                                                                                                                                                                   |      yes       |             false              |   false                   | 
+| wafileproxy.gatewayApi.gatewayName                | The name of the central physical infrastructure Gateway resource managed by your network team.                                                                                                                                                                                                                                   |    yes         |    gateway_name                       |                      | 
+| wafileproxy.gatewayApi.gatewayNamespace                | The namespace where the Gateway resource lives. If empty, falls back to the local .Release.Namespace.                                                                                                                                                                                                                                   | no            |    release-namespace                       |  .Release.Namespace                   | 
+| wafileproxy.gatewayApi.parentRefs                | Enables providing a custom, complex parentRefs schema. If populated, it overrides the default gatewayName mapping block.                                                                                                                                                                                                                                   |   no          |                      |   []                   | 
+| wafileproxy.gatewayApi.hostnames                | Array of production domain strings (e.g., ["hwa.company.com"]) exposed on the router. Overrides any automated fallback proxied strings.                                                                                                                                                                                                                                   |   no          |        server.myhostname.com                   |   If empty, <*fullName*>.<*ReleaseName*>.<*Namespace*>.mycluster.proxy                      | 
+| wafileproxy.gatewayApi.pathPrefix                | The root context directory string used to match incoming L7 URI prefix routing rules.                                                                                                                                                                                                                                   |   yes          |              "/"                |   "/"                   |
+| wafileproxy.gatewayApi.annotations                | Key-value string pairs injected straight into the HTTPRoute metadata layer (useful for specific ingress controllers like Istio, Envoy, or Traefik).                                                                                                                                                                                                                                   | no            |    gateway.customproxy.io/route-timeout: "60s"                       |                      | 
+| wafileproxy.gatewayApi.backendConfig                | Enables passing specialized controller specifications directly beneath the backendRefs segment.                                                                                                                                                                                                                                   |      no       |    kind: Service                       |                        | 
+| wafileproxy.gatewayApi.backendTLSPolicy.enabled                | Toggles the creation of the BackendTLSPolicy resource for secure pod-level traffic.                                                                                                                                                                                                                                   |      yes       |          true                 |   true                   | 
+| wafileproxy.gatewayApi.backendTLSPolicy.caCertificateSecretName                | Overrides the secret name used by the proxy to check backend validity. Defaults back to the chart's generic .certSecretName.                                                                                                                                                                                                                                   |    no         |    wafileproxy-cert-secret                       |  Values.fileProxy.certSecretName                  | 
+| wafileproxy.gatewayApi.backendTLSPolicy.hostname                | Explicit SNI domain verification string used to evaluate the internal up-stream certificate handshake.                                                                                                                                                                                                                                   |      no       |          waproxy                 |   $fullName                   | 
   
 
 ## Configuring
@@ -1158,12 +1188,13 @@ The following procedures are ways in which you can configure the default deploym
 
 ### Network enablement
 
-The IBM Workload Automation server and console can use two different ways to route external traffic into the Kubernetes Service cluster:
+The IBM Workload Automation server and console can use three different ways to route external traffic into the Kubernetes Service cluster:
 
 * A **load balancer** service that redirects traffic
 * An **ingress** service that manages external access to the services in the cluster
+* A **Gateway API** configuration that uses modern layer 7 routing definitions and policies to direct traffic into the cluster
 
-You can freely switch between these two types of configuration.
+You can freely switch between these three types of configuration.
 
 #### Network policy
 
@@ -1327,6 +1358,34 @@ For more information about these configurable parameters, see the **[Server para
 		#service.beta.kubernetes.io/azure-load-balancer-internal: "true"
 		#networking.gke.io/load-balancer-type: "Internal"
 
+#### Gateway API configuration
+																				
+
+- **Server:**
+
+  To configure the Gateway API for the server, follow these steps:
+
+1. Locate the following parameter in the `values.yaml` file:
+
+		exposeServiceType
+
+   For more information about these configurable parameters, see the **[Server parameters](#server-parameters)** table.
+
+2. Set the value of the `exposeServiceType`parameter to `GATEWAYAPI`.
+
+
+- **Console:**
+
+  To configure the Gateway API for the console, follow these steps: 
+
+1. Locate the following parameter in the `values.yaml` file:
+
+		exposeServiceType
+
+  For more information about these configurable parameters, see the **[Console parameters](#console-parameters)** table.
+
+2. Set the value of the `exposeServiceType`parameter to `GATEWAYAPI`.
+
 		
  ### Enabling communication from a Kubernetes agents without using certificates 
 
@@ -1393,7 +1452,7 @@ To configure an on-premises agent to communicate with components in the cloud:
 3. Replace the files on the on-premises agent in the same path.
 
 **On-premises console engine connection (connection between an on-premises console with a server in the cloud):**
-1. Copy the public CA root certificate from the server. Refer to the IBM Workload Automation product documentation for details about creating custom certificates for communication between the server and the console: [Customizing certificates](https://help.blueproddoc.com/workloadautomation/v1027/distr/src_ad/awsadcertman.html).
+1. Copy the public CA root certificate from the server. Refer to the IBM Workload Automation product documentation for details about creating custom certificates for communication between the server and the console: [Customizing certificates](https://www.ibm.com/docs/en/workload-automation/10.2.8?topic=communications-managing-certificates-using-certman).
 
 2. To enable the changes, restart the Console workstation.
 
@@ -1417,7 +1476,7 @@ Access the master (server or pod) and extract the CA root certificate and, to ad
 
 ### Defining a z/OS engine in the Z connector from a Dynamic Workload Console deployed on Cloud
 
-To perform this operation, see the information available at [Defining a z/OS engine in the Z connector](https://help.blueproddoc.com/workloadautomation/v1027/distr/src_ad/awsadtmpltconnfactory.html). The information at this link also applies to the cloud environment. If you want to apply the same configuration to all instances, create a configMap containing all xml files and use the `waconsole.console.libConfigName` parameter to provide the name of your  configMap.
+To perform this operation, see the information available at [Defining a z/OS engine in the Z connector](https://www.ibm.com/docs/en/workload-automation/10.2.8?topic=console-defining-zos-engine-in-z-connector). The information at this link also applies to the cloud environment. If you want to apply the same configuration to all instances, create a configMap containing all xml files and use the `waconsole.console.libConfigName` parameter to provide the name of your  configMap.
 
 ### Scaling the product 
 
@@ -1469,7 +1528,7 @@ kubectl create secret generic waserver-cert-secret --from-file=ca.crt --from-fil
     
    where, ca.crt, tls.key, and tls.crt are your customized certificates.
    
-   For details about custom certificates, see [Connection security overview](https://help.blueproddoc.com/workloadautomation/v1027/distr/src_ad/awsadcert.html).
+   For details about custom certificates, see [Connection security overview](https://www.ibm.com/docs/en/workload-automation/10.2.8?topic=guide-configuring-secure-communications).
 
 <!-- > **Note**: Passwords for "TWSServerTrustFile.jks" and "TWSServerKeyFile.jks" files must be entered in the respective "TWSServerTrustFile.jks.pwd" and "TWSServerKeyFile.jks.pwd" files. -->
  
@@ -1487,6 +1546,59 @@ If you want to use SSL connection to DB, set `db.sslConnection:true` and `useCus
         
 
 If you define custom certificates, you are in charge of keeping them up to date, therefore, ensure you check their duration and plan to rotate them as necessary. To rotate custom certificates, delete the previous secret and upload a new secret, containing new certificates. The pod restarts automatically and the new certificates are applied.
+
+### Component customization for issuers and load balancers
+
+The core application components (`waagent`, `waconsole`, `wa-server`, `wafileproxy`, and `wa-aida`) support custom certificate issuers, custom load balancer IP addresses, and custom DNS configurations.
+
+#### Custom certificate issuers
+
+You can customize the `issuerRef` parameter individually for each component in the `values.yaml` file:
+
+* `waagent`
+* `waconsole`
+* `waserver`
+* `wafileproxy`
+
+**Important:** If you omit the `issuerName` and `issuerKind` fields, the chart uses the default values.
+
+You can optionally specify an `issuerGroup` value. If you leave the `issuerGroup` field empty or omit it, the `group:` line is removed from the chart. By default, the `issuerGroup` field is empty.
+
+#### Custom load balancer IP addresses
+
+For components that are exposed through a load balancer service, you can specify a custom `loadBalancerIP` value in the chart.
+
+#### Custom DNS or SAN configurations
+
+You can inject a custom list of DNS entries or subject alternative names (SANs) into the component certificates. The following parameters control this behavior:
+
+* `addCustomDns`: Enables the injection of custom DNS entries. The default value is `false`.
+* `customDns`: The list of custom domain names or SANs to add. The default value is `[]`.
+* `customDnsOnly`: If set to `true`, the parameter removes the default built-in DNS names and applies only your custom names. The default value is `false`.
+
+
+# Example.
+The following example shows the customized issuer, load balancer IP, and DNS for the waagent component.
+ ``` 
+waagent:
+
+ agentCommonName: "waagent"
+
+ issuerName: "custom-cluster-issuer"
+
+ issuerKind: "ClusterIssuer"
+
+ issuerGroup: "cert-manager.io"
+
+ loadBalancerIP: "10.240.0.45"
+
+# DNS Configuration 
+addCustomDns: true 
+customDnsOnly: true 
+customDns: 
+- "my-custom-dns-1.company.com" 
+- "my-custom-dns-2.company.com" 
+ ``` 
 
 ### Managing your custom certificates (DEPRECATED STARTING FROM V 10)
 
@@ -1521,7 +1633,7 @@ For the Dynamic Workload Console, type the following command:
     
    where, TWSClientKeyStoreJKS.sth, TWSClientKeyStore.kdb, TWSClientKeyStore.sth, TWSClientKeyStoreJKS.jks, TWSServerTrustFile.jks and TWSServerKeyFile.jks are the Container keystore and stash file containing your customized certificates.
    
-   For details about custom certificates, see [Connection security overview](https://help.blueproddoc.com/workloadautomation/v1027/distr/src_ad/awsadcert.html).
+   For details about custom certificates, see [Connection security overview](https://www.ibm.com/docs/en/workload-automation/10.2.8?topic=guide-configuring-secure-communications).
     
 
 > **Note**: Passwords for "TWSServerTrustFile.jks" and "TWSServerKeyFile.jks" files must be entered in the respective "TWSServerTrustFile.jks.pwd" and "TWSServerKeyFile.jks.pwd" files.
@@ -1617,11 +1729,11 @@ Consider the following example:
 
 For more information, see: 
 
-[Running batch reports from the command line interface](https://help.blueproddoc.com/workloadautomation/v1027/zos/src_man/eqqr1batchrepfromcommli.html)
+[Running batch reports from the command line interface](https://www.ibm.com/docs/en/workload-automation/10.2.8?topic=reports-running-batch-from-command-line-interface)
 
 ## Metrics monitoring 
 
-IBM Workload Automation uses Grafana to display performance data related to the product. This data includes metrics related to the server and console application servers (WebSphere Application Server Liberty Base), your workload, your workstations, critical jobs, message queues, the database connection status, and more. Grafana is an open source tool for visualizing application metrics. Metrics provide insight into the state, health, and performance of your deployments and infrastructure. IBM Workload Automation cloud metric monitoring uses an opensource Cloud Native Computing Foundation (CNCF) project called Prometheus. It is particularly useful for collecting time series data that can be easily queried. Prometheus integrates with Grafana to visualize the metrics collected. For more informaiton about metrics, see [Metrics](https://help.blueproddoc.com/workloadautomation/v1027/distr/src_ref/awsrgmonprom.html).
+IBM Workload Automation uses Grafana to display performance data related to the product. This data includes metrics related to the server and console application servers (WebSphere Application Server Liberty Base), your workload, your workstations, critical jobs, message queues, the database connection status, and more. Grafana is an open source tool for visualizing application metrics. Metrics provide insight into the state, health, and performance of your deployments and infrastructure. IBM Workload Automation cloud metric monitoring uses an opensource Cloud Native Computing Foundation (CNCF) project called Prometheus. It is particularly useful for collecting time series data that can be easily queried. Prometheus integrates with Grafana to visualize the metrics collected. For more informaiton about metrics, see [Metrics](https://www.ibm.com/docs/en/workload-automation/10.2.8?topic=scheduler-exposing-metrics-monitor-your-workload).
 
 
 
@@ -1686,7 +1798,7 @@ For more information about using Grafana dashboards see [Dashboards overview](ht
 
 ## Documentation
 
-To access the complete product documentation library for IBM Workload Automation, see [IBM Documentation](https://help.blueproddoc.com/workloadautomation/v1027/index.html).
+To access the complete product documentation library for IBM Workload Automation, see [IBM Documentation](https://www.ibm.com/docs/en/workload-automation/10.2.8).
 
 
 ## Troubleshooting
@@ -1694,16 +1806,16 @@ To access the complete product documentation library for IBM Workload Automation
 
 In the event a problem should occur while using IBM Workload Automation, Customer Support might ask you to supply information about your system and environment to perform problem determination. The following utilities are available:
 
--   A general data capture utility command that extracts information about IBM Workload Automation  and related agent workstations, system-specific information, and data related to WebSphere Application Server Liberty Base; see [Data capture utility](https://help.blueproddoc.com/workloadautomation/v1027/distr/src_tr/awstrmetronome.html).
+-   A general data capture utility command that extracts information about IBM Workload Automation  and related agent workstations, system-specific information, and data related to WebSphere Application Server Liberty Base; see [Data capture utility](https://www.ibm.com/docs/en/workload-automation/10.2.8?topic=data-capture-utility).
 
--   A first failure data capture (ffdc) facility built into **batchman** and **mailman** that automatically runs the data capture utility when failures occur in **jobman**, **mailman**, or **batchman** and collects products logs, traces and configuration files; see [First failure data capture (ffdc)](https://help.blueproddoc.com/workloadautomation/v1027/distr/src_tr/awstrffdc.html).
+-   A first failure data capture (ffdc) facility built into **batchman** and **mailman** that automatically runs the data capture utility when failures occur in **jobman**, **mailman**, or **batchman** and collects products logs, traces and configuration files; see [First failure data capture (ffdc)](https://www.ibm.com/docs/en/workload-automation/10.2.8?topic=data-first-failure-capture-ffdc).
 
--   The data capture utility script, wa_pull_info, is also used to collect data related to the Dynamic Workload Console to assist in problem determination; see [Data capture utility](https://help.blueproddoc.com/workloadautomation/v1027/distr/src_tr/awstrmetronome.html).
+-   The data capture utility script, wa_pull_info, is also used to collect data related to the Dynamic Workload Console to assist in problem determination; see [Data capture utility](https://www.ibm.com/docs/en/workload-automation/10.2.8?topic=data-capture-utility).
 
--   WebSphere Application Server Liberty Base javadump command to create the heap dump for WebSphere Application Server Liberty Base that runs on the Dynamic Workload Console and the master domain manager; see [Creating application server dumps](https://help.blueproddoc.com/workloadautomation/v1027/distr/src_tr/awstrcoredumpserver.html).
+-   WebSphere Application Server Liberty Base javadump command to create the heap dump for WebSphere Application Server Liberty Base that runs on the Dynamic Workload Console and the master domain manager; see [Creating application server dumps](https://www.ibm.com/docs/en/workload-automation/10.2.8?topic=data-creating-application-server-dumps).
 
 
-In case of problems related to deploying the product with containers, see [Troubleshooting](https://help.blueproddoc.com/workloadautomation/v1027/distr/src_pi/awspitrblcontainers.html).
+In case of problems related to deploying the product with containers, see [Troubleshooting](https://www.ibm.com/docs/en/workload-automation/10.2.8?topic=containers-troubleshooting).
 
 ### Known problems
 
