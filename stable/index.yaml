@@ -31,7 +31,7 @@ entries:
       repository: ""
       version: 1.0.2
     description: Helm chart for configuring IBM Workload Automation.
-    digest: 3ff98fd90685f73b49d29cb17683ef941753cc7d15c6354eee08be66011c1c9c
+    digest: f6e06015feeace906fcde46f55af9662de5f4fd8de7dab98c103a01fd8c4db66
     keywords:
     - Commercial
     - amd64
@@ -46,7 +46,7 @@ entries:
     name: workload-automation-prod
     urls:
     - workload-automation-prod-10.2.8.tgz
-    version: 10.2.7
+    version: 10.2.8
   - apiVersion: v2
     appVersion: 10.2.7.00
     created: "2026-07-28T17:34:07.790783+02:00"
