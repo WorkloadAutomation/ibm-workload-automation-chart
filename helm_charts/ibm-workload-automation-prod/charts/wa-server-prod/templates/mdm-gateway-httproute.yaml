@@ -1,0 +1,66 @@
+{{- if and (eq (.Values.server.exposeServiceType | upper) "GATEWAYAPI") (.Values.server.gatewayApi.enabled) }}
+{{- if or (.Capabilities.APIVersions.Has "gateway.networking.k8s.io/v1/HTTPRoute") .Values.server.gatewayApi.skipLibraryCheck }}
+####################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2026. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+####################################################################
+{{- include "wa.init" (list . "waserver") }}
+{{- $fullName := include "wa.fullName" . }}
+{{- $mdmServiceName := include "waMdm.ServiceName" . }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ printf "%s-gateway-route" $mdmServiceName | quote }}
+  labels:
+{{ include "wa.server.labels" . | indent 4 }}
+  {{- with .Values.server.gatewayApi.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  parentRefs:
+    {{- if .Values.server.gatewayApi.parentRefs }}
+    {{- toYaml .Values.server.gatewayApi.parentRefs | nindent 4 }}
+    {{- else }}
+    - name: {{ .Values.server.gatewayApi.gatewayName | quote }}
+      namespace: {{ .Values.server.gatewayApi.gatewayNamespace | default .Release.Namespace | quote }}
+    {{- end }}
+  hostnames:
+    {{- if .Values.server.gatewayApi.hostnames }}
+    {{- range .Values.server.gatewayApi.hostnames }}
+    - {{ . | quote }}
+    {{- end }}
+    {{- else if .Values.server.ingress.hostname }}
+    - {{ .Values.server.ingress.hostname | quote }}
+    {{- else }}
+    - {{ printf "%s.%s.%s.mycluster.proxy" $fullName .Release.Name .Release.Namespace | quote }}
+    {{- end }}
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: {{ .Values.server.gatewayApi.pathPrefix | default "/" | quote }}
+      backendRefs:
+        - name: {{ $mdmServiceName | quote }}
+          port: 31116
+          {{- with .Values.server.gatewayApi.backendConfig }}
+          {{- toYaml . | nindent 10 }}
+          {{- end }}
+{{- if .Values.server.enableSingleInstaceNetwork }}
+{{- $root := . }}
+{{- range $i, $e := until (.Values.replicaCount | int) }}
+    - matches:
+        - path:
+            type: PathPrefix
+            value: {{ printf "%sinstance-%d" ($root.Values.server.gatewayApi.pathPrefix | default "/") $i | quote }}
+      backendRefs:
+        - name: {{ printf "%s-%d" $mdmServiceName $i | quote }}
+          port: 31113
+{{- end }}
+{{- end }}
+{{- else -}}
+  {{- fail "\nERROR: Gateway API is enabled for server, but HTTPRoute CRD is not installed on the cluster.\n" -}}
+{{- end }}
+{{- end }}

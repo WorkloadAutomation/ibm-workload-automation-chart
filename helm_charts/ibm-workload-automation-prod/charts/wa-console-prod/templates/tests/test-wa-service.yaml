@@ -32,7 +32,7 @@ spec:
   containers:
     - name: {{ $fullName }}-test
       image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-      command: ["bash", "-xc","cd /tmp && (echo > /dev/tcp/{{ $dwcServiceName }}/9443)"]      
+      command: ["bash", "-xc","cd /tmp && (echo > /dev/tcp/{{ $dwcServiceName }}/{{ .Values.servicePort | default 9443 }})"]      
       securityContext:
         privileged: false
         readOnlyRootFilesystem: false

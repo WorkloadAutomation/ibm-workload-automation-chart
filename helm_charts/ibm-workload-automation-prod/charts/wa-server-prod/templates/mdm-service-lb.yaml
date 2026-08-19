@@ -20,6 +20,9 @@ metadata:
     #service.beta.kubernetes.io/aws-load-balancer-internal: "true"
 spec:
   type: LoadBalancer
+  {{- if .Values.loadBalancerIP }}
+  loadBalancerIP: {{ .Values.loadBalancerIP | quote }}
+  {{- end }}
   ports:
   - name: server-https
     protocol: TCP
@@ -28,5 +31,5 @@ spec:
   selector:
     app.kubernetes.io/name: "{{ include "wa.appName" . }}"
     app.kubernetes.io/instance: "{{ .Release.Name }}"
-{{- end }}    
-  
+    waservertype: master
+{{- end }}

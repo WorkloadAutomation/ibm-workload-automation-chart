@@ -20,6 +20,9 @@ metadata:
 {{- end }}
 spec:
   type: LoadBalancer 
+  {{- if .Values.loadBalancerIP }}
+  loadBalancerIP: {{ .Values.loadBalancerIP | quote }}
+  {{- end }}
   ports:
   - name: fileproxy-https-lb
     protocol: TCP
