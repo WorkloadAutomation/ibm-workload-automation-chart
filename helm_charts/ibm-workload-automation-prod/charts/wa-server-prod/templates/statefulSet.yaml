@@ -332,6 +332,11 @@ spec:
               name: {{ .Release.Name }}-ssl-secret
               key: SSL_PASSWORD
               optional: true
+        - name: AGENT_SSL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-ssl-agent-secret
+              key: AGENT_SSL_PASSWORD
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         securityContext:

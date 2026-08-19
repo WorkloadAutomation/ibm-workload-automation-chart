@@ -24,6 +24,7 @@ spec:
     - app
     - service
     - release
+    - waservertype
   selector:
     matchLabels:
       prometheus: 'true'

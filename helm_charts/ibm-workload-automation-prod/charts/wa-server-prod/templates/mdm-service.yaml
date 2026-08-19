@@ -53,6 +53,9 @@ metadata:
 spec:
 {{- if eq ($root.Values.server.exposeServiceType | upper )  "LOADBALANCER" }} 
   type: LoadBalancer
+  {{- if .Values.loadBalancerIP }}
+  loadBalancerIP: {{ .Values.loadBalancerIP | quote }}
+  {{- end }}
 {{ else }}
   type: ClusterIP
 {{ end }}

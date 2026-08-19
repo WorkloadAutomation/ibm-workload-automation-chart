@@ -23,7 +23,7 @@ spec:
   ports:
   - name: https
     protocol: TCP
-    port: 9443
+    port: {{ .Values.servicePort | default 9443 }}
     targetPort: 9443
   - name: console-monitoring
     protocol: TCP

@@ -19,6 +19,9 @@ metadata:
 {{- end }}
 spec:
   type: LoadBalancer 
+  {{- if .Values.loadBalancerIP }}
+  loadBalancerIP: {{ .Values.loadBalancerIP | quote }}
+  {{- end }}
   ports:
     - port: {{ .Values.service.port }}
       targetPort: https

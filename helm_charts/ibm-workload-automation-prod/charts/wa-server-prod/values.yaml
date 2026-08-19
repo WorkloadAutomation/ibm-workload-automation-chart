@@ -18,7 +18,7 @@ global:
       value: "prod"
 replicaCount: 1
 image:
-  repository: icr.io/cp/ibm-workload-automation-server
+  repository: cp.icr.io/cp/ibm-workload-automation-server
   tag: 10.2.8.00.20260727
   pullPolicy: Always
 licenseType: "PVU"
@@ -58,14 +58,14 @@ server:
     alternatePort:
     server:
     sslConnection: false
-    tsLogName: null
-    tsLogPath: null
-    tsName: null
-    tsPath: null
-    tsPlanName: null
-    tsPlanPath: null
-    tsTempName: null
-    tssbspace: null
+    tsLogName: 
+    tsLogPath: 
+    tsName: 
+    tsPath: 
+    tsPlanName: 
+    tsPlanPath: 
+    tsTempName: 
+    tssbspace: 
     type: DB2
     usepartitioning: true
     user: db2inst1

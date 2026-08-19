@@ -32,7 +32,7 @@ spec:
 {{- if or ( .Capabilities.APIVersions.Has "cert-manager.io/v1" ) ( .Capabilities.APIVersions.Has "certmanager.k8s.io/v1" ) }}
   subject:
     organizations:
-      - {{ (index $.Values.global "certManager" | default dict).organization | default "IBM" | quote }}
+      - {{ (index $.Values.global "certManager" | default dict).organization | default "HCL-Software" | quote }}
     localities:
       - {{ (index $.Values.global "certManager" | default dict).locality | default "Rome" | quote }}
     provinces:
@@ -41,7 +41,7 @@ spec:
       - {{ (index $.Values.global "certManager" | default dict).country | default "IT" | quote }}
 {{- else if or ( .Capabilities.APIVersions.Has "certmanager.k8s.io/v1alpha1" ) ( .Capabilities.APIVersions.Has "cert-manager.io/v1alpha2" ) }}
   organization:
-    - {{ (index $.Values.global "certManager" | default dict).organization | default "IBM" | quote }}
+    - {{ (index $.Values.global "certManager" | default dict).organization | default "HCL-Software" | quote }}
 {{- end }}
   commonName: {{ .Values.consoleCommonName | default "waconsole" | quote }}
   isCA: false
@@ -56,9 +56,21 @@ spec:
     - server auth
     - client auth
   dnsNames:
+{{- $addCustomDns := .Values.addCustomDns | default false }}
+{{- $customDns := .Values.customDns | default list }}
+{{- $customDnsOnly := .Values.customDnsOnly | default false }}
+{{- $hasCustomDns := and $addCustomDns (gt (len $customDns) 0) }}
+{{- $includeDefaultDns := not $customDnsOnly }}
+{{- if $includeDefaultDns }}
   - {{ .Values.consoleCommonName | default "waconsole" | quote }}
   - waconsole
   - {{ $dwcServiceName }}
+{{- end }}
+{{- if $hasCustomDns }}
+{{- range $dns := $customDns }}
+  - {{ $dns | quote }}
+{{- end }}
+{{- end }}
 {{- if or ( .Capabilities.APIVersions.Has "cert-manager.io/v1alpha2") ( .Capabilities.APIVersions.Has "cert-manager.io/v1")  }}
   privateKey:
     rotationPolicy: Always
@@ -71,4 +83,7 @@ spec:
   issuerRef:
     name: {{ .Values.issuerName | default "wa-ca-issuer" | quote }}
     kind: {{ .Values.issuerKind | default "Issuer" | quote }}
+    {{- if .Values.issuerGroup }}
+    group: {{ .Values.issuerGroup | default "cert-manager.io" | quote }}
+    {{- end }}
 {{- end }}

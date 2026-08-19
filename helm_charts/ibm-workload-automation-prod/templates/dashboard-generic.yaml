@@ -14,7 +14,6 @@ metadata:
   labels:
      grafana_dashboard: "1"
 {{ include "wa.server.labels" . | indent 5 }}
-spec:
 data:
   k8s-{{ .Release.Name }}-dashboard.json: |-
 {{ tpl (.Files.Get "dashboards/WA_Performance_Metrics.json") . | indent 5 }}

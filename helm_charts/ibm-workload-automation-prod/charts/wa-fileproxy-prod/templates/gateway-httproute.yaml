@@ -1,0 +1,60 @@
+{{- if and (eq (.Values.fileProxy.exposeServiceType | upper) "GATEWAYAPI") (.Values.fileProxy.gatewayApi.enabled) }}
+{{- if or (.Capabilities.APIVersions.Has "gateway.networking.k8s.io/v1/HTTPRoute") .Values.fileProxy.gatewayApi.skipLibraryCheck }}
+####################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2026. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+####################################################################
+{{- $fullName := include "wa-fileproxy-prod.fullname" . }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ printf "%s-gateway-route" $fullName | quote }}
+  labels:
+    {{- include "wa-fileproxy-prod.labels" . | nindent 4 }}
+  {{- with .Values.fileProxy.gatewayApi.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- $ingressHosts := list }}
+  {{- range .Values.ingress.hosts }}
+  {{- if .host }}
+  {{- $ingressHosts = append $ingressHosts .host }}
+  {{- end }}
+  {{- end }}
+  parentRefs:
+    {{- if .Values.fileProxy.gatewayApi.parentRefs }}
+    {{- toYaml .Values.fileProxy.gatewayApi.parentRefs | nindent 4 }}
+    {{- else }}
+    - name: {{ .Values.fileProxy.gatewayApi.gatewayName | quote }}
+      namespace: {{ .Values.fileProxy.gatewayApi.gatewayNamespace | default .Release.Namespace | quote }}
+    {{- end }}
+  {{- if or .Values.fileProxy.gatewayApi.hostnames (gt (len $ingressHosts) 0) }}
+  hostnames:
+    {{- if .Values.fileProxy.gatewayApi.hostnames }}
+    {{- range .Values.fileProxy.gatewayApi.hostnames }}
+    - {{ . | quote }}
+    {{- end }}
+    {{- else }}
+    {{- range $ingressHosts }}
+    - {{ . | quote }}
+    {{- end }}
+    {{- end }}
+  {{- end }}
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: {{ .Values.fileProxy.gatewayApi.pathPrefix | default "/" | quote }}
+      backendRefs:
+        - name: {{ $fullName | quote }}
+          port: {{ .Values.fileProxy.port }}
+          {{- with .Values.fileProxy.gatewayApi.backendConfig }}
+          {{- toYaml . | nindent 10 }}
+          {{- end }}
+{{- else -}}
+  {{- fail "\nERROR: Gateway API is enabled for fileproxy, but HTTPRoute CRD is not installed on the cluster.\n" -}}
+{{- end }}
+{{- end }}

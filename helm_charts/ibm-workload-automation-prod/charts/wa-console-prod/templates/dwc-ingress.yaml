@@ -67,9 +67,9 @@ spec:
           service:
             name: {{ $dwcServiceName }}
             port:
-              number: 9443
+              number: {{ .Values.servicePort | default 9443 }}
         {{- else }} 
           serviceName: {{ $dwcServiceName }}
-          servicePort: 9443
+          servicePort: {{ .Values.servicePort | default 9443 }}
         {{- end }}
 {{- end }}             
