@@ -1801,7 +1801,7 @@ To access the complete product documentation library for IBM Workload Automation
 
 
 ## Troubleshooting
-####Resolving pod restarts during initial deployment
+**Resolving pod restarts during initial deployment**
 During the initial deployment of IBM Workload Automation, database creation and application setup can take longer than default Helm chart probe thresholds. If readiness or liveness probes time out before this initial setup completes, Kubernetes restarts the pod, interrupting deployment finalization.
 **Workaround**: Before deploying, increase the `readinessProbe.initialDelaySeconds` and `livenessProbe.initialDelaySeconds` parameters in the **values.yaml** file.
 
