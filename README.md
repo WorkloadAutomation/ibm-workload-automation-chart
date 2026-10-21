@@ -910,9 +910,6 @@ The following tables list the configurable parameters of the chart, **values.yam
 - **[Dynamic Workload Console parameters](#dynamic-workload-console-parameters)**
 - **[Server parameters](#server-parameters)** (master domain manager)  
 
-**Note**: In large-scale environments or initial deployments, database creation and application initialization may take longer than the default Helm chart probe thresholds. If the readiness or liveness probes time out before initialization completes, Kubernetes restarts the pod, which interrupts the deployment.
-**Workaround**: Before deploying, increase the `readinessProbe.initialDelaySeconds` and `livenessProbe.initialDelaySeconds` parameters in the **values.yaml** file.
-&nbsp;  
 -  #### Global parameters
 The following table lists the global configurable parameters of the chart relative to all product components and an example of their values:
 
@@ -1804,7 +1801,9 @@ To access the complete product documentation library for IBM Workload Automation
 
 
 ## Troubleshooting
-
+####Resolving pod restarts during initial deployment
+During the initial deployment of HCL Workload Automation, database creation and application setup can take longer than default Helm chart probe thresholds. If readiness or liveness probes time out before this initial setup completes, Kubernetes restarts the pod, interrupting deployment finalization.
+**Workaround**: Before deploying, increase the `readinessProbe.initialDelaySeconds` and `livenessProbe.initialDelaySeconds` parameters in the **values.yaml** file.
 
 In the event a problem should occur while using IBM Workload Automation, Customer Support might ask you to supply information about your system and environment to perform problem determination. The following utilities are available:
 
